@@ -86,8 +86,11 @@ h3 {
 }
 
 .logo {
-  width: 120px;
-  margin-bottom: 1rem;
+  display: block;
+  width: 250px !important;   /* ← bump this up until it’s the size you want */
+  max-width: 90%;
+  height: auto !important;
+  margin: 0 auto 1rem;
 }
 
 .tagline {
