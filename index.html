@@ -201,173 +201,179 @@
   <script src="script.js"></script>
 
   <!-- Vibe core -->
-  <script>
-  (function(){
-    var d=document.documentElement, b=document.body;
+<script>
+(function(){
+  var d=document.documentElement, b=document.body;
 
-    /* Reveal (replayable) */
-    var els=[].slice.call(document.querySelectorAll('[data-animate]'));
-    if('IntersectionObserver' in window){
+  /* ------- Replayable reveal ------- */
+  var els=[].slice.call(document.querySelectorAll('[data-animate]'));
+  if('IntersectionObserver' in window){
+    try{
       var io=new IntersectionObserver(function(entries){
         for(var i=0;i<entries.length;i++){
           var e=entries[i];
-          if(e.isIntersecting){ e.target.classList.add('reveal'); }
-          else { e.target.classList.remove('reveal'); }
+          if(e.isIntersecting) e.target.classList.add('reveal');
+          else e.target.classList.remove('reveal');
         }
       }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
       els.forEach(function(el){ io.observe(el); });
-    } else { els.forEach(function(el){ el.classList.add('reveal'); }); }
+    }catch(_){
+      els.forEach(function(el){ el.classList.add('reveal'); });
+    }
+  }else{
+    els.forEach(function(el){ el.classList.add('reveal'); });
+  }
 
-    /* Global drift */
-    var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
-    function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
-    function tick(){
-      var vh = window.innerHeight || 1;
-      var sc = d.scrollTop || b.scrollTop;
-      for(var i=0;i<driftNodes.length;i++){
-        var el = driftNodes[i];
-        var multY = parseFloat(el.getAttribute('data-drift'));
-        if(!multY && multY!==0) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
-        var multX = parseFloat(el.getAttribute('data-drift-x'));
-        if(!multX && multX!==0) multX = 0.5 * multY;
+  /* ------- Global micro-drift ------- */
+  var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
+  function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
+  function driftTick(){
+    var vh = window.innerHeight || 1;
+    var sc = d.scrollTop || b.scrollTop;
+    for(var i=0;i<driftNodes.length;i++){
+      var el = driftNodes[i];
+      var multY = parseFloat(el.getAttribute('data-drift')); if(!(multY||multY===0)) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
+      var multX = parseFloat(el.getAttribute('data-drift-x')); if(!(multX||multX===0)) multX = 0.5 * multY;
+      var r = el.getBoundingClientRect();
+      var center = r.top + r.height/2;
+      var norm = (center - vh/2) / vh;
+      var y = clamp(-28 * norm * multY, -38, 38);
+      var x = Math.sin((sc*0.0045) + i*0.7) * (10 * multX);
+      el.style.setProperty('--dy', y + 'px');
+      el.style.setProperty('--dx', x + 'px');
+    }
+    requestAnimationFrame(driftTick);
+  }
+  requestAnimationFrame(driftTick);
 
-        var r = el.getBoundingClientRect();
-        var center = r.top + r.height/2;
-        var norm = (center - vh/2) / vh;
+  /* ------- Scroll progress ------- */
+  var bar=document.getElementById('scroll-progress');
+  function progress(){
+    var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
+    if(bar) bar.style.width=(sc/max*100)+'%';
+  }
+  progress(); document.addEventListener('scroll', progress, {passive:true});
 
-        var y = clamp(-28 * norm * multY, -38, 38);
-        var x = Math.sin((sc*0.0045) + i*0.7) * (10 * multX);
-        el.style.setProperty('--dy', y + 'px');
-        el.style.setProperty('--dx', x + 'px');
+  /* ------- Spotlight (S) ------- */
+  var spot=false;
+  window.addEventListener('keydown',function(e){
+    if(e.key.toLowerCase()==='s'){ spot=!spot; d.classList.toggle('spotlight-on', spot); }
+  });
+  window.addEventListener('mousemove',function(e){
+    if(!spot) return;
+    d.style.setProperty('--mx', e.clientX+'px');
+    d.style.setProperty('--my', e.clientY+'px');
+  },{passive:true});
+
+  /* ------- Konami Party Mode ------- */
+  var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
+  window.addEventListener('keydown',function(e){
+    seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
+    for(var i=0,ok=true;i<konami.length;i++){ if(seq[i]!==konami[i]){ ok=false; break; } }
+    if(ok) d.classList.toggle('party');
+  });
+
+  /* ------- TRUE path morph (no cross-fade) ------- */
+  (function initMorph(){
+    var host = document.getElementById('morph-svg');
+    if(!host) return;
+
+    var SAMPLES = 140;            // 100–200 looks great
+    var STROKE_MIN = 5, STROKE_MAX = 8;
+
+    function toPathD(points){
+      if(!points.length) return '';
+      var d = 'M' + points[0].x + ',' + points[0].y;
+      for(var i=1;i<points.length;i++){ d += ' L' + points[i].x + ',' + points[i].y; }
+      return d;
+    }
+    function samplePath(pathEl, n){
+      var len = pathEl.getTotalLength();
+      var pts = new Array(n);
+      for(var i=0;i<n;i++){
+        var p = pathEl.getPointAtLength((i/(n-1))*len);
+        pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
       }
-      requestAnimationFrame(tick);
+      return pts;
     }
-    requestAnimationFrame(tick);
-
-    /* Scroll progress */
-    var bar=document.getElementById('scroll-progress');
-    function progress(){
-      var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
-      if(bar) bar.style.width=(sc/max*100)+'%';
+    function blendPoints(a,b,t){
+      var out = new Array(a.length);
+      for(var i=0;i<a.length;i++){
+        out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
+      }
+      return out;
     }
-    progress(); document.addEventListener('scroll', progress, {passive:true});
-
-    /* Spotlight toggle + follow */
-    var spot=false;
-    window.addEventListener('keydown',function(e){
-      if(e.key.toLowerCase()==='s'){ spot=!spot; d.classList.toggle('spotlight-on', spot); }
-    });
-    window.addEventListener('mousemove',function(e){
-      if(!spot) return;
-      d.style.setProperty('--mx', e.clientX+'px');
-      d.style.setProperty('--my', e.clientY+'px');
-    },{passive:true});
-
-    /* Konami Party Mode 2.0 */
-    var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
-    window.addEventListener('keydown',function(e){
-      seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
-      var ok=true; for(var i=0;i<konami.length;i++){ if(seq[i]!==konami[i]){ok=false;break;} }
-      if(ok) d.classList.toggle('party');
-    });
-
-    /* BIG morph loader + smooth crossfade across states */
-    <script>
-(function initMorph(){
-  var host = document.getElementById('morph-svg');
-  if(!host) return;
-
-  // how smooth the curve is (more points = smoother + heavier)
-  var SAMPLES = 140;      // try 100–200
-  var STROKE_MIN = 5, STROKE_MAX = 8;
-
-  // polyline builder (rounded cap/join keeps it pretty)
-  function toPathD(points){
-    if(!points.length) return '';
-    var d = 'M' + points[0].x + ',' + points[0].y;
-    for(var i=1;i<points.length;i++){
-      d += ' L' + points[i].x + ',' + points[i].y;
+    function pageT(){
+      var sc = d.scrollTop || b.scrollTop;
+      var max = (d.scrollHeight - d.clientHeight) || 1;
+      return Math.max(0, Math.min(1, sc/max));
     }
-    return d;
-  }
 
-  // sample an SVG path into N points along length
-  function samplePath(pathEl, n){
-    var len = pathEl.getTotalLength();
-    var pts = new Array(n);
-    for(var i=0;i<n;i++){
-      var p = pathEl.getPointAtLength((i/(n-1))*len);
-      pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
-    }
-    return pts;
-  }
+    fetch('assets/scroll-scrub.svg')
+      .then(function(r){ return r.text(); })
+      .then(function(txt){
+        host.innerHTML = txt;
+        var svg = host.querySelector('svg') || host.firstElementChild;
+        if(!svg) return;
 
-  // lerp two point arrays (same length)
-  function blendPoints(a,b,t){
-    var out = new Array(a.length);
-    for(var i=0;i<a.length;i++){
-      out[i] = {
-        x: a[i].x + (b[i].x - a[i].x)*t,
-        y: a[i].y + (b[i].y - a[i].y)*t
-      };
-    }
-    return out;
-  }
+        var ids = ['#p1','#p2','#p3','#p4','#p5'];
+        var paths = [];
+        for(var i=0;i<ids.length;i++){
+          var el = svg.querySelector(ids[i]);
+          if(el) paths.push(el);
+        }
+        if(paths.length<2) return;
 
-  // page progress 0..1
-  function pageT(){
-    var doc = document.documentElement;
-    var sc = doc.scrollTop || document.body.scrollTop;
-    var max = (doc.scrollHeight - doc.clientHeight) || 1;
-    return Math.max(0, Math.min(1, sc/max));
-  }
+        // sample once
+        var clouds = paths.map(function(p){ return samplePath(p, SAMPLES); });
 
-  fetch('assets/scroll-scrub.svg')
-    .then(r => r.text())
-    .then(txt => {
-      host.innerHTML = txt;
-      var svg = host.querySelector('svg') || host.firstElementChild;
-      if(!svg) return;
+        // hide originals
+        for(var j=0;j<paths.length;j++){
+          paths[j].style.opacity = 0;
+          paths[j].style.pointerEvents = 'none';
+        }
 
-      // find the five shapes by id (p1..p5)
-      var ids = ['#p1','#p2','#p3','#p4','#p5'];
-      var paths = ids.map(id => svg.querySelector(id)).filter(Boolean);
-      if(paths.length < 2) return;
+        // blended path
+        var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
+        blend.setAttribute('fill','none');
+        blend.setAttribute('stroke','url(#grad)');
+        blend.setAttribute('stroke-linecap','round');
+        blend.setAttribute('stroke-linejoin','round');
+        blend.setAttribute('stroke-width', STROKE_MIN);
+        svg.appendChild(blend);
 
-      // sample each source path once
-      var clouds = paths.map(p => samplePath(p, SAMPLES));
+        function lerp(a,b,t){ return a + (b-a)*t; }
 
-      // hide originals (keep in DOM for coordinate space)
-      paths.forEach(p => { p.style.opacity = 0; p.style.pointerEvents='none'; });
+        (function animate(){
+          var t = pageT();                     // 0..1
+          var seg = t * (clouds.length-1);     // 0..(N-1)
+          var i = Math.floor(seg);
+          var f = seg - i;
 
-      // add the blended path on top
-      var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
-      blend.setAttribute('fill','none');
-      blend.setAttribute('stroke','url(#grad)');
-      blend.setAttribute('stroke-linecap','round');
-      blend.setAttribute('stroke-linejoin','round');
-      blend.setAttribute('stroke-width', STROKE_MIN);
-      svg.appendChild(blend);
+          var a = clouds[i];
+          var b = clouds[Math.min(i+1, clouds.length-1)];
+          var mix = blendPoints(a,b,f);
 
-      function lerp(a,b,t){ return a + (b-a)*t; }
+          blend.setAttribute('d', toPathD(mix));
+          blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
 
-      (function animate(){
-        var t = pageT();                   // 0..1
-        var seg = t * (clouds.length-1);   // 0..(N-1)
-        var i = Math.floor(seg);
-        var f = seg - i;                   // 0..1 between i and i+1
+          requestAnimationFrame(animate);
+        })();
+      })
+      .catch(function(err){
+        // don’t break the site if the SVG can’t load
+        console.warn('morph svg load failed', err);
+      });
+  })();
 
-        var a = clouds[i];
-        var b = clouds[Math.min(i+1, clouds.length-1)];
-        var mix = blendPoints(a,b,f);
+  /* ------- Footer year ------- */
+  var y=document.getElementById('year'); if(y) y.textContent=(new Date).getFullYear();
 
-        blend.setAttribute('d', toPathD(mix));
-        blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
-
-        requestAnimationFrame(animate);
-      })();
-    })
-    .catch(()=>{ /* silent if asset missing */ });
+  /* ------- Minimal nav toggle (if used) ------- */
+  try{
+    var toggle=document.getElementById('nav-toggle'), nav=document.getElementById('nav');
+    if(toggle && nav){ toggle.addEventListener('click', function(){ nav.classList.toggle('open'); }); }
+  }catch(_){}
 })();
 </script>
 </body>
