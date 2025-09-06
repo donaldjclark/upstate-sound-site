@@ -271,50 +271,103 @@
     });
 
     /* BIG morph loader + smooth crossfade across states */
-    (function initMorph(){
-      var host=document.getElementById('morph-svg');
-      if(!host) return;
-      fetch('assets/scroll-scrub.svg').then(function(r){return r.text()}).then(function(txt){
-        host.innerHTML = txt;
-        var svg = host.querySelector('svg') || host.firstElementChild;
-        if(!svg) return;
-        var ids=['#p1','#p2','#p3','#p4','#p5'];
-        var paths = ids.map(function(id){ return svg.querySelector(id); }).filter(Boolean);
-        if(paths.length<2) return;
+    <script>
+(function initMorph(){
+  var host = document.getElementById('morph-svg');
+  if(!host) return;
 
-        function pageProgress(){
-          var sc = d.scrollTop || b.scrollTop;
-          var max = (d.scrollHeight - d.clientHeight) || 1;
-          return Math.max(0, Math.min(1, sc/max));
-        }
-        function lerp(a,b,t){ return a+(b-a)*t; }
+  // how smooth the curve is (more points = smoother + heavier)
+  var SAMPLES = 140;      // try 100–200
+  var STROKE_MIN = 5, STROKE_MAX = 8;
 
-        function update(){
-          var t = pageProgress();
-          var seg = t * (paths.length-1);
-          var i = Math.floor(seg);
-          var f = seg - i;
+  // polyline builder (rounded cap/join keeps it pretty)
+  function toPathD(points){
+    if(!points.length) return '';
+    var d = 'M' + points[0].x + ',' + points[0].y;
+    for(var i=1;i<points.length;i++){
+      d += ' L' + points[i].x + ',' + points[i].y;
+    }
+    return d;
+  }
 
-          for(var k=0;k<paths.length;k++){
-            var vis = (k===i ? 1-f : (k===i+1 ? f : 0));
-            paths[k].style.opacity = vis.toFixed(3);
-            paths[k].setAttribute('stroke-width', lerp(4,7,vis));
-          }
-          requestAnimationFrame(update);
-        }
-        requestAnimationFrame(update);
-      }).catch(function(){});
-    })();
+  // sample an SVG path into N points along length
+  function samplePath(pathEl, n){
+    var len = pathEl.getTotalLength();
+    var pts = new Array(n);
+    for(var i=0;i<n;i++){
+      var p = pathEl.getPointAtLength((i/(n-1))*len);
+      pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
+    }
+    return pts;
+  }
 
-    /* Footer year */
-    var y=document.getElementById('year'); if(y) y.textContent=(new Date).getFullYear();
+  // lerp two point arrays (same length)
+  function blendPoints(a,b,t){
+    var out = new Array(a.length);
+    for(var i=0;i<a.length;i++){
+      out[i] = {
+        x: a[i].x + (b[i].x - a[i].x)*t,
+        y: a[i].y + (b[i].y - a[i].y)*t
+      };
+    }
+    return out;
+  }
 
-    /* Minimal nav toggle if script.js is absent */
-    try{
-      var toggle=document.getElementById('nav-toggle'), nav=document.getElementById('nav');
-      if(toggle && nav){ toggle.addEventListener('click', function(){ nav.classList.toggle('open'); }); }
-    }catch(_){}
-  })();
-  </script>
+  // page progress 0..1
+  function pageT(){
+    var doc = document.documentElement;
+    var sc = doc.scrollTop || document.body.scrollTop;
+    var max = (doc.scrollHeight - doc.clientHeight) || 1;
+    return Math.max(0, Math.min(1, sc/max));
+  }
+
+  fetch('assets/scroll-scrub.svg')
+    .then(r => r.text())
+    .then(txt => {
+      host.innerHTML = txt;
+      var svg = host.querySelector('svg') || host.firstElementChild;
+      if(!svg) return;
+
+      // find the five shapes by id (p1..p5)
+      var ids = ['#p1','#p2','#p3','#p4','#p5'];
+      var paths = ids.map(id => svg.querySelector(id)).filter(Boolean);
+      if(paths.length < 2) return;
+
+      // sample each source path once
+      var clouds = paths.map(p => samplePath(p, SAMPLES));
+
+      // hide originals (keep in DOM for coordinate space)
+      paths.forEach(p => { p.style.opacity = 0; p.style.pointerEvents='none'; });
+
+      // add the blended path on top
+      var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
+      blend.setAttribute('fill','none');
+      blend.setAttribute('stroke','url(#grad)');
+      blend.setAttribute('stroke-linecap','round');
+      blend.setAttribute('stroke-linejoin','round');
+      blend.setAttribute('stroke-width', STROKE_MIN);
+      svg.appendChild(blend);
+
+      function lerp(a,b,t){ return a + (b-a)*t; }
+
+      (function animate(){
+        var t = pageT();                   // 0..1
+        var seg = t * (clouds.length-1);   // 0..(N-1)
+        var i = Math.floor(seg);
+        var f = seg - i;                   // 0..1 between i and i+1
+
+        var a = clouds[i];
+        var b = clouds[Math.min(i+1, clouds.length-1)];
+        var mix = blendPoints(a,b,f);
+
+        blend.setAttribute('d', toPathD(mix));
+        blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
+
+        requestAnimationFrame(animate);
+      })();
+    })
+    .catch(()=>{ /* silent if asset missing */ });
+})();
+</script>
 </body>
 </html>
