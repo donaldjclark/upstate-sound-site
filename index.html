@@ -223,8 +223,18 @@
   }
 })();
 </script>
-  <div id="__vibe_test" style="position:fixed;bottom:6px;right:10px;background:#ff2d55;color:#fff;padding:6px 10px;border-radius:6px;font:12px/1.2 system-ui;z-index:99999">
-  VIBE TEST
-</div>
+<script>
+  (function(){
+    var d=document.documentElement,b=document.body;
+    function fx(){
+      var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
+      var hue=Math.round(270+(sc/max)*120);
+      d.style.setProperty('--hue', hue);
+    }
+    // ensure the CSS var exists even if you don't have our earlier CSS
+    if(!getComputedStyle(d).getPropertyValue('--hue')) d.style.setProperty('--hue', 270);
+    fx(); document.addEventListener('scroll', fx, {passive:true});
+  })();
+</script>
 </body>
 </html>
