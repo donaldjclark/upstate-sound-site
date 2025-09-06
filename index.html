@@ -15,43 +15,49 @@
   <link rel="stylesheet" href="style.css?v=2">
 
   <!-- Vibe styles (progressive: content visible by default) -->
-  <style>
-    /* Reveal — visible by default */
-    [data-animate]{opacity:1; transform:none}
+ <style>
+  /* Progressive reveal: visible by default; only pre-hide when JS is live */
+  [data-animate]{opacity:1; transform:none}
+  .js [data-animate]{
+    opacity:0; transform:translateY(24px);
+    transition:opacity .7s cubic-bezier(.22,1,.36,1),
+               transform .7s cubic-bezier(.22,1,.36,1)
+  }
+  .reveal{opacity:1 !important; transform:translateY(0) !important}
 
-    /* Only hide-before-reveal when JS is confirmed */
-    .js [data-animate]{
-      opacity:0; transform:translateY(24px);
-      transition:opacity .8s cubic-bezier(.22,1,.36,1),
-                 transform .8s cubic-bezier(.22,1,.36,1)
-    }
-    .reveal{opacity:1 !important; transform:translateY(0) !important}
+  /* --- BACKGROUND LAYOUT --- */
+  /* Use your header background image across the whole page (sides only) */
+  html{
+    background: url('assets/hero-bg.jpg') center / cover fixed no-repeat; /* <-- change path if needed */
+  }
+  /* Content area stays dark; gutters show the image */
+  body{ background:#0a0a0a; margin:0; }
+  .content-frame{
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #0a0a0a; /* dark center */
+    color: inherit;
+    min-height: 100dvh;
+  }
 
-    /* Background driven by --hue (you already had this; consolidated here) */
-    :root{--hue:270}
-    body{
-      background:linear-gradient(
-        130deg,
-        hsl(var(--hue,270) 80% 8%),
-        hsl(calc(var(--hue,270) + 40) 70% 10%)
-      );
-      /* keep your existing body styles from style.css */
-    }
+  /* Optional: alternate section background for contrast */
+  .section.alt { background:#111; }
 
-    /* Magnetic buttons (optional, for later) */
-    .magnet{position:relative;display:inline-block;transform:translateZ(0)}
-    .magnet>span{display:inline-block;transition:transform 120ms ease;will-change:transform}
+  /* Magnetic buttons (unchanged) */
+  .magnet{position:relative;display:inline-block;transform:translateZ(0)}
+  .magnet>span{display:inline-block;transition:transform 120ms ease;will-change:transform}
 
-    /* Scroll progress bar */
-    #scroll-progress{
-      position:fixed; inset:0 auto auto 0; height:3px; width:0%;
-      background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999
-    }
-  </style>
+  /* Scroll progress bar */
+  #scroll-progress{
+    position:fixed; inset:0 auto auto 0; height:3px; width:0%;
+    background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999
+  }
+</style>
 </head>
 <body>
   <!-- Progress bar (must exist before the script runs) -->
   <div id="scroll-progress" aria-hidden="true"></div>
+  <div class="content-frame">
 
   <!-- Header / Hero section -->
   <header id="hero" data-animate>
@@ -91,7 +97,7 @@
       <h2 data-animate>Services</h2>
       <div class="services-grid">
         <!-- Service: Studio & Gear Repair -->
-        <div class="service-card" data-animate>
+        <div class="service-card" data-animate data-drift="1.6">
           <div class="service-icon">
             <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
               <rect x="8" y="10" width="4" height="20" fill="#2e5d50"/>
@@ -104,7 +110,7 @@
         </div>
 
         <!-- Service: Synth & Audio Gear Repair -->
-        <div class="service-card" data-animate>
+        <div class="service-card" data-animate data-drift="1.6">
           <div class="service-icon">
             <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
               <polygon points="20,5 35,35 5,35" fill="#457c6a"/>
@@ -116,7 +122,7 @@
         </div>
 
         <!-- Service: Music Production -->
-        <div class="service-card" data-animate>
+        <div class="service-card" data-animate data-drift="1.6">
           <div class="service-icon">
             <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
               <rect x="10" y="12" width="20" height="4" fill="#457c6a" />
@@ -129,7 +135,7 @@
         </div>
 
         <!-- Service: Podcast Production -->
-        <div class="service-card" data-animate>
+        <div class="service-card" data-animate data-drift="1.6">
           <div class="service-icon">
             <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
               <polyline points="5,20 10,12 15,28 20,15 25,25 30,10 35,20" fill="none" stroke="#2e5d50" stroke-width="2"/>
@@ -140,7 +146,7 @@
         </div>
 
         <!-- Service: Live Sound Engineering -->
-        <div class="service-card" data-animate>
+        <div class="service-card" data-animate data-drift="1.6">
           <div class="service-icon">
             <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
               <path d="M5 30 Q10 10 20 20 T35 15" fill="none" stroke="#73967e" stroke-width="2"/>
@@ -153,7 +159,7 @@
     </section>
 
     <!-- Past Work Section -->
-    <section id="work" class="section work-section" data-animate>
+    <section id="work" class="section work-section" data-animate data-drift="1.6">
       <h2 data-animate>Past Work</h2>
       <ul class="work-list">
         <li data-animate>
@@ -197,65 +203,75 @@
 
   <!-- Vibe script: reveal, parallax, hue progress (vanilla, no CDNs) -->
   <script>
-    (function(){
-      var d=document.documentElement, b=document.body;
+(function(){
+  var d=document.documentElement, b=document.body;
 
-      // 1) Reveal-on-scroll
-      var els=[].slice.call(document.querySelectorAll('[data-animate]'));
-      if('IntersectionObserver' in window){
-        var io=new IntersectionObserver(function(entries){
-          for(var i=0;i<entries.length;i++){
-            if(entries[i].isIntersecting){
-              entries[i].target.classList.add('reveal');
-              io.unobserve(entries[i].target);
-            }
-          }
-        }, { rootMargin:'0px 0px -15% 0px', threshold:0.01 });
-        els.forEach(function(el){ io.observe(el); });
-      } else {
-        els.forEach(function(el){ el.classList.add('reveal'); });
+  /* 1) Reveal-on-scroll:
+     - plays every time (adds .reveal on enter, removes on exit)
+  */
+  var els=[].slice.call(document.querySelectorAll('[data-animate]'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      for(var i=0;i<entries.length;i++){
+        var e=entries[i];
+        if(e.isIntersecting){ e.target.classList.add('reveal'); }
+        else { e.target.classList.remove('reveal'); }
       }
+    }, { rootMargin:'0px 0px -10% 0px', threshold: 0.1 });
+    els.forEach(function(el){ io.observe(el); });
+  } else {
+    // Fallback: always revealed
+    els.forEach(function(el){ el.classList.add('reveal'); });
+  }
 
-      // 2) Hue + progress bar
-      var bar=document.getElementById('scroll-progress');
-      function fx(){
-        var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
-        var hue=Math.round(270+(sc/max)*120);
-        d.style.setProperty('--hue', hue);
-        if(bar) bar.style.width=(sc/max*100)+'%';
+  /* 2) Universal drift:
+     - everything with data-parallax, data-drift, or data-animate gently drifts
+     - services (and anything) can drift more via data-drift="1.6" etc.
+  */
+  var driftNodes = [].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
+  function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
+  function tick(){
+    var vh = window.innerHeight || 1;
+    for(var i=0;i<driftNodes.length;i++){
+      var el = driftNodes[i];
+      var mult = parseFloat(el.getAttribute('data-drift'));
+      if(!mult && mult!==0){
+        // Defaults: parallax = 1.0, generic animate = 0.4
+        mult = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
       }
-      if(!getComputedStyle(d).getPropertyValue('--hue')) d.style.setProperty('--hue', 270);
-      fx(); document.addEventListener('scroll', fx, {passive:true});
+      var r = el.getBoundingClientRect();
+      var center = r.top + r.height/2;
+      var norm = (center - vh/2) / vh;            // ~ -0.5 .. 0.5 near center
+      var y = clamp(-20 * norm * mult, -24, 24);  // cap drift
+      el.style.transform = 'translateY(' + y + 'px)';
+      el.style.willChange = 'transform';
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 
-      // 3) Parallax drift for [data-parallax]
-      var ps=[].slice.call(document.querySelectorAll('[data-parallax]'));
-      function tick(){
-        var vh=window.innerHeight||1;
-        for(var i=0;i<ps.length;i++){
-          var r=ps[i].getBoundingClientRect();
-          var p=r.top/vh;                 // 0 at top, 1 at bottom
-          var y=(-10*(1-p));              // -10% .. 0%
-          ps[i].style.transform='translateY('+y+'%)';
-          ps[i].style.willChange='transform';
-        }
-        requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
+  /* 3) Optional magnetic buttons (unchanged) */
+  if (matchMedia && matchMedia('(pointer:fine)').matches) {
+    [].slice.call(document.querySelectorAll('.magnet')).forEach(function(btn){
+      var inner=btn.querySelector('span')||btn;
+      btn.addEventListener('mousemove', function(e){
+        var r=btn.getBoundingClientRect();
+        var x=(e.clientX-(r.left+r.width/2))*0.15;
+        var y=(e.clientY-(r.top+r.height/2))*0.15;
+        inner.style.transform='translate('+x+'px,'+y+'px)';
+      });
+      btn.addEventListener('mouseleave', function(){ inner.style.transform='translate(0,0)'; });
+    });
+  }
 
-      // 4) (Optional) Magnetic buttons — add class="magnet" and wrap text in <span>
-      if (matchMedia && matchMedia('(pointer:fine)').matches) {
-        [].slice.call(document.querySelectorAll('.magnet')).forEach(function(btn){
-          var inner=btn.querySelector('span')||btn;
-          btn.addEventListener('mousemove', function(e){
-            var r=btn.getBoundingClientRect();
-            var x=(e.clientX-(r.left+r.width/2))*0.15;
-            var y=(e.clientY-(r.top+r.height/2))*0.15;
-            inner.style.transform='translate('+x+'px,'+y+'px)';
-          });
-          btn.addEventListener('mouseleave', function(){ inner.style.transform='translate(0,0)'; });
-        });
-      }
-    })();
-  </script>
+  /* 4) Scroll progress bar (kept) */
+  var bar=document.getElementById('scroll-progress');
+  function progress(){
+    var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
+    if(bar) bar.style.width=(sc/max*100)+'%';
+  }
+  progress(); document.addEventListener('scroll', progress, {passive:true});
+})();
+</script>
 </body>
 </html>
