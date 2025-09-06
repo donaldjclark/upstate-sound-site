@@ -138,7 +138,118 @@
   <footer class="footer">
     <p>© <span id="year"></span> Upstate Sound &amp; Repair. Serving Greenville and the Upstate. Made with solder and soul.</p>
   </footer>
-
   <script src="script.js"></script>
+  
+  <!-- Vibe Kit -->
+  <script>
+    (function () {
+    <script>
+(function () {
+  // 1) Inject styles
+  const css = `
+  /* Reveal-on-scroll */
+  [data-animate]{opacity:0;transform:translateY(24px);will-change:transform,opacity}
+  .reveal{opacity:1!important;transform:translateY(0)!important}
+
+  /* Scroll-driven gradient (hue changes via --hue) */
+  :root{--hue:270}
+  body{
+    background:linear-gradient(130deg,
+      hsl(var(--hue) 80% 8%),
+      hsl(calc(var(--hue) + 40) 70% 10%));
+    transition:background .15s linear;
+  }
+
+  /* Magnetic buttons/links */
+  .magnet{position:relative;display:inline-block;transform:translateZ(0)}
+  .magnet > span{display:inline-block;transition:transform 120ms ease;will-change:transform}
+
+  /* Scroll progress bar */
+  #scroll-progress{position:fixed;inset:0 auto auto 0;height:3px;width:0%;
+    background:linear-gradient(90deg,#22d3ee,#a78bfa);z-index:9999}
+  `;
+  const style = document.createElement('style');
+  style.textContent = css;
+  document.head.appendChild(style);
+
+  // 2) Progress bar element
+  const bar = document.createElement('div');
+  bar.id = 'scroll-progress';
+  bar.setAttribute('aria-hidden','true');
+  document.body.appendChild(bar);
+
+  // 3) Load scripts (Lenis + GSAP + ScrollTrigger) via CDN
+  const load = (src) => new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  });
+
+  Promise.resolve()
+    .then(() => load('https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.38/bundled/lenis.min.js'))
+    .then(() => load('https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js'))
+    .then(() => load('https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js'))
+    .then(() => {
+      // 4) Smooth scroll (Lenis)
+      const lenis = new window.Lenis({ smoothWheel: true, lerp: 0.12 });
+      function raf(t){ lenis.raf(t); requestAnimationFrame(raf) }
+      requestAnimationFrame(raf);
+
+      // 5) Reveal-on-scroll
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.utils.toArray('[data-animate]').forEach((el) => {
+        gsap.fromTo(el,
+          { autoAlpha: 0, y: 24 },
+          {
+            autoAlpha: 1, y: 0, ease: 'power3.out', duration: 0.8,
+            scrollTrigger: { trigger: el, start: 'top 85%' }
+          }
+        );
+      });
+
+      // 6) Background hue shifts with scroll
+      const doc = document.documentElement;
+      function setHue(){
+        const sc = doc.scrollTop || document.body.scrollTop;
+        const max = (doc.scrollHeight - doc.clientHeight) || 1;
+        const hue = Math.round(270 + (sc / max) * 120); // tweak as desired
+        doc.style.setProperty('--hue', hue);
+      }
+      setHue();
+      document.addEventListener('scroll', setHue, { passive: true });
+
+      // 7) Gentle parallax for marked elements
+      gsap.utils.toArray('[data-parallax]').forEach((el) => {
+        gsap.to(el, {
+          yPercent: -10, ease: 'none',
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true }
+        });
+      });
+
+      // 8) Magnetic buttons/links
+      document.querySelectorAll('.magnet').forEach((btn) => {
+        const inner = btn.querySelector('span') || btn;
+        btn.addEventListener('mousemove', (e) => {
+          const r = btn.getBoundingClientRect();
+          const x = (e.clientX - (r.left + r.width/2)) * 0.15;
+          const y = (e.clientY - (r.top + r.height/2)) * 0.15;
+          inner.style.transform = \`translate(\${x}px,\${y}px)\`;
+        });
+        btn.addEventListener('mouseleave', () => { inner.style.transform = 'translate(0,0)'; });
+      });
+
+      // 9) Scroll progress bar
+      function setProgress(){
+        const sc = doc.scrollTop || document.body.scrollTop;
+        const max = (doc.scrollHeight - doc.clientHeight) || 1;
+        bar.style.width = (sc / max * 100) + '%';
+      }
+      setProgress();
+      document.addEventListener('scroll', setProgress, { passive: true });
+    })
+    .catch(() => {
+      // If CDNs fail, fail gracefully
+      document.getElementById('scroll-progress')?.remove();
+    });
+})();
+</script>
 </body>
 </html>
