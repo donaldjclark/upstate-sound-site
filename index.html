@@ -15,30 +15,35 @@
     html{ background:url('assets/background.png') center / cover fixed no-repeat; }
     body{ margin:0; color:#e6e6e6; font-family:"Space Grotesk",system-ui,sans-serif; background:transparent; }
 
-    /* Content column */
     .content-frame{
-      position:relative;
-      max-width:1100px; margin:0 auto;
-      background:#0a0a0a;
-      min-height:100dvh;
-      z-index:2;                 /* above morph, below progress bar */
-      overflow:clip;
-    }
+  position: relative;
+  max-width:1100px; margin:0 auto;
+  /* background:#0a0a0a;   <-- remove this */
+  min-height:100dvh;
+  z-index:2;                 /* column sits above page bg */
+  overflow: clip;
+}
 
-    /* ===== MORPH: fixed layer centered on viewport, sized to column ===== */
-    .morph-wrap{
-      position:fixed;            /* fixed = doesn’t scroll */
-      left:50vw; top:50vh;       /* viewport center */
-      transform:translate(-50%,-50%);
-      width:min(1100px,92vw);    /* match column width */
-      height:58vh;
-      display:grid; place-items:center;
-      z-index:1;                 /* sits behind the content column */
-      pointer-events:none;
-      opacity:.55;
-      mix-blend-mode:screen;     /* glows on dark; hidden under cards (as desired) */
-    }
-    .morph-wrap svg{ width:100%; height:100%; }
+/* NEW: black background as layer 0 */
+.content-frame::before{
+  content:"";
+  position:absolute; inset:0;
+  background:#0a0a0a;
+  z-index:0;                 /* under morph + sections */
+}
+
+    /* morph layer between ::before (z0) and sections (z2) */
+.morph-wrap{
+  position: fixed;           /* fixed to viewport */
+  left:50vw; top:50vh; transform:translate(-50%,-50%);
+  width:min(1100px,92vw); height:60vh;
+  display:grid; place-items:center;
+  z-index:1;                 /* above ::before, below content */
+  pointer-events:none;
+  opacity:.6;
+  mix-blend-mode:screen;     /* looks luminous on dark */
+}
+.morph-wrap svg{ width:100%; height:100%; }
 
     /* Sections / cards */
     .section{ position:relative; z-index:2; padding:64px 24px; }
@@ -285,87 +290,115 @@
     });
 
     /* TRUE path morph (fixed, centered) */
-    (function initMorph(){
-      var host = document.getElementById('morph-svg');
-      if(!host) return;
+    (function <script>
+(function initMorph(){
+  var docEl = document.documentElement, body = document.body;
+  var host = document.getElementById('morph-svg');
+  if(!host) return;
 
-      var SAMPLES = 140;
-      var STROKE_MIN = 6, STROKE_MAX = 10;
+  var SAMPLES = 140;
+  var STROKE_MIN = 6, STROKE_MAX = 10;
 
-      function toPathD(points){
-        if(!points.length) return '';
-        var d = 'M' + points[0].x + ',' + points[0].y;
-        for(var i=1;i<points.length;i++){ d += ' L' + points[i].x + ',' + points[i].y; }
-        return d;
-      }
-      function samplePath(pathEl, n){
-        var len = pathEl.getTotalLength();
-        var pts = new Array(n);
-        for(var i=0;i<n;i++){
-          var p = pathEl.getPointAtLength((i/(n-1))*len);
-          pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
-        }
-        return pts;
-      }
-      function blendPoints(a,b,t){
-        var out = new Array(a.length);
-        for(var i=0;i<a.length;i++){
-          out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
-        }
-        return out;
-      }
-      function pageT(){
-        var sc = d.scrollTop || b.scrollTop;
-        var max = (d.scrollHeight - d.clientHeight) || 1;
-        return Math.max(0, Math.min(1, sc/max));
-      }
+  function toPathD(points){
+    if(!points.length) return '';
+    var d = 'M' + points[0].x + ',' + points[0].y;
+    for(var i=1;i<points.length;i++) d += ' L' + points[i].x + ',' + points[i].y;
+    return d;
+  }
+  function samplePath(pathEl, n){
+    var len = pathEl.getTotalLength();
+    var pts = new Array(n);
+    for(var i=0;i<n;i++){
+      var p = pathEl.getPointAtLength((i/(n-1))*len);
+      pts[i] = { x:+p.x.toFixed(2), y:+p.y.toFixed(2) };
+    }
+    return pts;
+  }
+  function blendPoints(a,b,t){
+    var out = new Array(a.length);
+    for(var i=0;i<a.length;i++){
+      out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
+    }
+    return out;
+  }
+  function pageT(){
+    var sc = docEl.scrollTop || body.scrollTop;
+    var max = (docEl.scrollHeight - docEl.clientHeight) || 1;
+    return Math.max(0, Math.min(1, sc/max));
+  }
+  function lerp(a,b,t){ return a + (b-a)*t; }
 
-      fetch('assets/scroll-scrub.svg')
-        .then(function(r){ return r.text(); })
-        .then(function(txt){
-          host.innerHTML = txt;
-          var svg = host.querySelector('svg') || host.firstElementChild;
-          if(!svg) return;
+  function boot(svg){
+    // Prefer explicit ids p1..p5; else first 2–5 <path>s
+    var wanted = ['#p1','#p2','#p3','#p4','#p5']
+      .map(function(id){ return svg.querySelector(id); })
+      .filter(Boolean);
 
-          var ids = ['#p1','#p2','#p3','#p4','#p5'];
-          var paths = [];
-          for(var i=0;i<ids.length;i++){ var el = svg.querySelector(ids[i]); if(el) paths.push(el); }
-          if(paths.length<2) return;
+    if(wanted.length < 2){
+      var all = Array.prototype.slice.call(svg.querySelectorAll('path'));
+      wanted = all.slice(0, Math.max(2, Math.min(5, all.length)));
+    }
+    if(wanted.length < 2){
+      // Visible fallback so you see *something*
+      var fb = document.createElementNS('http://www.w3.org/2000/svg','path');
+      fb.setAttribute('fill','none');
+      fb.setAttribute('stroke','#7dd3fc');
+      fb.setAttribute('stroke-width','8');
+      fb.setAttribute('stroke-linecap','round');
+      fb.setAttribute('stroke-linejoin','round');
+      fb.setAttribute('d','M20,150 C160,80 260,220 400,150 S680,220 820,150');
+      svg.appendChild(fb);
+      console.warn('Morph fallback: not enough paths in SVG');
+      return;
+    }
 
-          var clouds = paths.map(function(p){ return samplePath(p, SAMPLES); });
+    var clouds = wanted.map(function(p){ return samplePath(p, SAMPLES); });
 
-          paths.forEach(function(p){ p.style.opacity = 0; p.style.pointerEvents='none'; });
+    // Hide originals
+    wanted.forEach(function(p){ p.style.opacity = 0; p.style.pointerEvents = 'none'; });
 
-          var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
-          blend.setAttribute('fill','none');
-          blend.setAttribute('stroke','url(#grad)');
-          blend.setAttribute('stroke-linecap','round');
-          blend.setAttribute('stroke-linejoin','round');
-          blend.setAttribute('stroke-width', STROKE_MIN);
-          svg.appendChild(blend);
+    // Blended path
+    var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
+    blend.setAttribute('fill','none');
+    blend.setAttribute('stroke','url(#grad)');
+    blend.setAttribute('stroke-linecap','round');
+    blend.setAttribute('stroke-linejoin','round');
+    blend.setAttribute('stroke-width', STROKE_MIN);
+    svg.appendChild(blend);
+    if(!svg.querySelector('#grad')) blend.setAttribute('stroke','#7dd3fc');
 
-          if(!svg.querySelector('#grad')){ blend.setAttribute('stroke', '#7dd3fc'); }
+    (function animate(){
+      var t = pageT();
+      var seg = t * (clouds.length - 1);
+      var i = Math.floor(seg);
+      var f = seg - i;
 
-          function lerp(a,b,t){ return a + (b-a)*t; }
+      var a = clouds[i];
+      var b = clouds[Math.min(i+1, clouds.length-1)];
+      var mix = blendPoints(a,b,f);
 
-          (function animate(){
-            var t = pageT();
-            var seg = t * (clouds.length-1);
-            var i = Math.floor(seg);
-            var f = seg - i;
-
-            var a = clouds[i];
-            var b = clouds[Math.min(i+1, clouds.length-1)];
-            var mix = blendPoints(a,b,f);
-
-            blend.setAttribute('d', toPathD(mix));
-            blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
-            requestAnimationFrame(animate);
-          })();
-        })
-        .catch(function(err){ console.warn('morph svg load failed', err); });
+      blend.setAttribute('d', toPathD(mix));
+      blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
+      requestAnimationFrame(animate);
     })();
+  }
 
+  fetch('assets/scroll-scrub.svg')
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      host.innerHTML = txt;
+      var svg = host.querySelector('svg') || host.firstElementChild;
+      if(svg) boot(svg); else throw new Error('No <svg> root');
+    })
+    .catch(function(err){
+      console.warn('morph svg load failed', err);
+      host.innerHTML =
+        '<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs><linearGradient id="grad" x1="0" x2="1"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>' +
+        '<path d="M20,150 C160,80 260,220 400,150 S680,220 820,150" fill="none" stroke="url(#grad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    });
+})();
+    
     /* Footer year */
     var y=document.getElementById('year'); if(y) y.textContent=(new Date).getFullYear();
   })();
