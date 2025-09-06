@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="morph" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <!-- State 1: smooth sine -->
+    <symbol id="state1" viewBox="0 0 800 200">
+      <g fill="none" stroke="url(#g1)" stroke-width="4" stroke-linecap="round">
+        <path d="M0,100
+                 C80,60 160,140 240,100
+                 C320,60 400,140 480,100
+                 C560,60 640,140 720,100
+                 C760,80 780,90 800,100"/>
+      </g>
+    </symbol>
+
+    <!-- State 2: stepped square-wave -->
+    <symbol id="state2" viewBox="0 0 800 200">
+      <g fill="none" stroke="url(#g2)" stroke-width="4" stroke-linejoin="round">
+        <path d="M0,100 h60 v-50 h120 v100 h120 v-100 h120 v100 h120 v-50 h140"/>
+      </g>
+    </symbol>
+
+    <!-- State 3: noisy triangle wave -->
+    <symbol id="state3" viewBox="0 0 800 200">
+      <g fill="none" stroke="url(#g3)" stroke-width="4" stroke-linecap="round">
+        <path d="M0,150 L100,50 L200,150 L300,50 L400,150 L500,50 L600,150 L700,50 L800,150"/>
+      </g>
+    </symbol>
+
+    <!-- State 4: noisy blob -->
+    <symbol id="state4" viewBox="0 0 800 200">
+      <g fill="none" stroke="url(#g4)" stroke-width="4">
+        <path d="M40,120
+                 C120,40 200,180 280,110
+                 C360,40 440,160 520,100
+                 C600,40 680,160 760,80"/>
+      </g>
+    </symbol>
+
+    <!-- State 5: dense FM-like curve -->
+    <symbol id="state5" viewBox="0 0 800 200">
+      <g fill="none" stroke="url(#g5)" stroke-width="3" stroke-linecap="round">
+        <path d="M0,100
+                 C60,60 120,140 180,100
+                 C240,60 300,140 360,100
+                 C420,60 480,140 540,100
+                 C600,60 660,140 720,100
+                 C740,90 760,110 800,100"/>
+        <path d="M0,110
+                 C60,70 120,150 180,110
+                 C240,70 300,150 360,110
+                 C420,70 480,150 540,110
+                 C600,70 660,150 720,110
+                 C740,100 760,120 800,110" opacity=".4"/>
+      </g>
+    </symbol>
+
+    <!-- Gradients -->
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="g5" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Default visible content: a <use> swapped by JS -->
+  <use xlink:href="#state1"/>
+</svg>
