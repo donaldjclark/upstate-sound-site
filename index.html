@@ -1,277 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- JS gate: enables animated “pre-reveal” only when JS is running -->
+  <!-- JS gate: only pre-hide elements if JS is live -->
   <script>document.documentElement.classList.add('js')</script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC</title>
 
-  <!-- Google Fonts -->
+  <!-- Fonts & your stylesheet -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-
-  <!-- Your site styles -->
   <link rel="stylesheet" href="style.css?v=2">
 
-  <!-- Vibe styles (progressive: content visible by default) -->
- <style>
-  /* Progressive reveal: visible by default; only pre-hide when JS is live */
-  [data-animate]{opacity:1; transform:none}
-  .js [data-animate]{
-    opacity:0; transform:translateY(24px);
-    transition:opacity .7s cubic-bezier(.22,1,.36,1),
-               transform .7s cubic-bezier(.22,1,.36,1)
-  }
-  .reveal{opacity:1 !important; transform:translateY(0) !important}
+  <!-- Vibe styles (progressive) -->
+  <style>
+    /* === PAGE BACKGROUND LAYOUT ===
+       html has the full-page image; body is transparent.
+       The centered .content-frame gets the dark background.
+    */
+    html{
+      background: url('assets/hero-bg.jpg') center / cover fixed no-repeat; /* <-- update path if needed */
+    }
+    body{ margin:0; background:transparent; color:inherit; }
+    .content-frame{
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #0a0a0a;          /* dark content column */
+      min-height: 100dvh;
+    }
 
-  /* --- BACKGROUND LAYOUT --- */
-  /* Use your header background image across the whole page (sides only) */
-  html{
-    background: url('assets/hero-bg.jpg') center / cover fixed no-repeat; /* <-- change path if needed */
-  }
-  /* Content area stays dark; gutters show the image */
-  body{ background:#0a0a0a; margin:0; }
-  .content-frame{
-    max-width: 1100px;
-    margin: 0 auto;
-    background: #0a0a0a; /* dark center */
-    color: inherit;
-    min-height: 100dvh;
-  }
+    /* Optional alternating section tone */
+    .section.alt { background:#111; }
 
-  /* Optional: alternate section background for contrast */
-  .section.alt { background:#111; }
+    /* === REVEAL (progressive): visible by default === */
+    [data-animate]{
+      opacity:1;
+      /* combine reveal + drift via variables so JS can set --dy without clobbering */
+      --revealY: 0px;
+      --dy: 0px;
+      transform: translate3d(0, calc(var(--revealY) + var(--dy)), 0);
+    }
+    .js [data-animate]{
+      opacity:0;
+      --revealY: 24px;
+      transition:
+        opacity .7s cubic-bezier(.22,1,.36,1),
+        transform .7s cubic-bezier(.22,1,.36,1);
+      will-change: transform, opacity;
+    }
+    .reveal{
+      opacity:1 !important;
+      --revealY: 0px;
+    }
 
-  /* Magnetic buttons (unchanged) */
-  .magnet{position:relative;display:inline-block;transform:translateZ(0)}
-  .magnet>span{display:inline-block;transition:transform 120ms ease;will-change:transform}
+    /* Magnetic buttons (optional, unchanged) */
+    .magnet{position:relative;display:inline-block;transform:translateZ(0)}
+    .magnet>span{display:inline-block;transition:transform 120ms ease;will-change:transform}
 
-  /* Scroll progress bar */
-  #scroll-progress{
-    position:fixed; inset:0 auto auto 0; height:3px; width:0%;
-    background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999
-  }
-</style>
+    /* Scroll progress bar */
+    #scroll-progress{
+      position:fixed; inset:0 auto auto 0; height:3px; width:0%;
+      background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999
+    }
+  </style>
 </head>
 <body>
-  <!-- Progress bar (must exist before the script runs) -->
+  <!-- Progress bar (present before script runs) -->
   <div id="scroll-progress" aria-hidden="true"></div>
+
+  <!-- Dark centered content column -->
   <div class="content-frame">
 
-  <!-- Header / Hero section -->
-  <header id="hero" data-animate>
-    <!-- Navigation -->
-    <nav id="nav" data-animate>
-      <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
-      <ul class="nav-links">
-        <li><a href="#about" data-animate>About</a></li>
-        <li><a href="#services" data-animate>Services</a></li>
-        <li><a href="#work" data-animate>Past Work</a></li>
-        <li><a href="#contact" data-animate>Contact</a></li>
-      </ul>
-    </nav>
+    <!-- Header / Hero -->
+    <header id="hero" data-animate>
+      <!-- Navigation -->
+      <nav id="nav" data-animate>
+        <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
+        <ul class="nav-links">
+          <li><a href="#about" data-animate>About</a></li>
+          <li><a href="#services" data-animate>Services</a></li>
+          <li><a href="#work" data-animate>Past Work</a></li>
+          <li><a href="#contact" data-animate>Contact</a></li>
+        </ul>
+      </nav>
 
-    <!-- Overlay to ensure text stands out on the patterned background -->
-    <div class="hero-overlay"></div>
+      <!-- Overlay to ensure text stands out if your CSS uses one -->
+      <div class="hero-overlay"></div>
 
-    <div class="hero-content" data-animate>
-      <!-- Logo graphic -->
-      <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
-
-      <!-- Tagline drifts with scroll -->
-      <h1 data-parallax>Where Sound Meets Vision.</h1>
-    </div>
-  </header>
-
-  <main>
-    <!-- About Section -->
-    <section id="about" class="section about-section" data-animate>
-      <h2 data-animate>About</h2>
-      <p data-animate>Hey, I’m Donald—a lifelong chaser of tone and tinkerer of broken gear. I’m an audio engineer, live-sound tech, repair whisperer, and, on rare occasions, a musician who actually finishes a song. If you’re here, you probably care about your gear as much as your music—so do I.</p>
-      <p data-animate>Upstate Sound &amp; Repair is my way of keeping our little corner of the world humming, one recalcitrant circuit at a time. I consult for venues, help artists chase good sound, and I show up when your vintage Moog throws a tantrum or your podcast needs a little love. If you want work done right (but not uptight), I’m the guy who shows up with a soldering iron, way too many opinions, and a sense of humor.</p>
-    </section>
-
-    <!-- Services Section -->
-    <section id="services" class="section services-section" data-animate>
-      <h2 data-animate>Services</h2>
-      <div class="services-grid">
-        <!-- Service: Studio & Gear Repair -->
-        <div class="service-card" data-animate data-drift="1.6">
-          <div class="service-icon">
-            <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <rect x="8" y="10" width="4" height="20" fill="#2e5d50"/>
-              <rect x="18" y="5" width="4" height="30" fill="#457c6a"/>
-              <rect x="28" y="15" width="4" height="15" fill="#73967e"/>
-            </svg>
-          </div>
-          <h3>Studio &amp; Gear Repair</h3>
-          <p>Your studio is only as good as its weakest link. I diagnose and repair mixers, preamps, tape machines, and all those vintage boxes you can’t live without. Think of me as your gear’s therapist — I listen carefully and I don’t judge.</p>
-        </div>
-
-        <!-- Service: Synth & Audio Gear Repair -->
-        <div class="service-card" data-animate data-drift="1.6">
-          <div class="service-icon">
-            <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="20,5 35,35 5,35" fill="#457c6a"/>
-              <circle cx="20" cy="20" r="6" fill="#2e5d50"/>
-            </svg>
-          </div>
-          <h3>Synth &amp; Audio Gear Repair</h3>
-          <p>Analog synths are living, breathing beasts — and they get cranky. I service and restore vintage synthesizers, drum machines, samplers and outboard gear. Whether it’s a cracked membrane or a blown capacitor, I’ll get the soul back in your circuits.</p>
-        </div>
-
-        <!-- Service: Music Production -->
-        <div class="service-card" data-animate data-drift="1.6">
-          <div class="service-icon">
-            <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <rect x="10" y="12" width="20" height="4" fill="#457c6a" />
-              <rect x="6" y="20" width="28" height="4" fill="#2e5d50" />
-              <rect x="12" y="28" width="16" height="4" fill="#73967e" />
-            </svg>
-          </div>
-          <h3>Music Production</h3>
-          <p>I partner with bands and solo artists to produce, record and shape their music. From pre-production and arrangement to mixing and mastering, I help you capture what you hear in your head and translate it to tape. No cookie-cutter templates — just honest collaboration and sonic exploration.</p>
-        </div>
-
-        <!-- Service: Podcast Production -->
-        <div class="service-card" data-animate data-drift="1.6">
-          <div class="service-icon">
-            <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="5,20 10,12 15,28 20,15 25,25 30,10 35,20" fill="none" stroke="#2e5d50" stroke-width="2"/>
-            </svg>
-          </div>
-          <h3>Podcast Production</h3>
-          <p>Have a story to tell? I provide recording, editing and mixing for podcasts and audio books. I’ll help you sound like you know what you’re doing — crisp vocals, balanced levels, and maybe the occasional tasteful synth stab.</p>
-        </div>
-
-        <!-- Service: Live Sound Engineering -->
-        <div class="service-card" data-animate data-drift="1.6">
-          <div class="service-icon">
-            <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 30 Q10 10 20 20 T35 15" fill="none" stroke="#73967e" stroke-width="2"/>
-            </svg>
-          </div>
-          <h3>Live Sound Engineering</h3>
-          <p>From tiny clubs to weird warehouse gatherings, I mix live shows that feel like they’re meant for you. Clean, loud and feedback-free. Yes, I’ll carry cases and tape cables because I’m not above grunt work.</p>
-        </div>
+      <div class="hero-content" data-animate>
+        <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
+        <!-- Tagline: gets “parallax” drift baseline; you can tune via data-drift -->
+        <h1 data-parallax data-drift="1.1">Where Sound Meets Vision.</h1>
       </div>
-    </section>
+    </header>
 
-    <!-- Past Work Section -->
-    <section id="work" class="section work-section" data-animate data-drift="1.6">
-      <h2 data-animate>Past Work</h2>
-      <ul class="work-list">
-        <li data-animate>
-          <strong>Live &amp; Session Engineer – Artis-Naples:</strong>
-          engineered recordings for the Naples Philharmonic Orchestra and various chamber ensembles at Artis-Naples (home of the Naples Philharmonic).
-        </li>
-        <li data-animate>
-          <strong>Mix Consultant – Swansons Studios:</strong>
-          partnered with Britt to fine-tune session mixes for local bands, offering fresh ears, technical fixes and workflow hacks.
-        </li>
-        <li data-animate>
-          <strong>Producer &amp; Mix Engineer – 10-Song LP (in progress):</strong>
-          currently producing, recording, mixing and mastering a full-length, 10-song album—designing every sound from scratch (custom synth patches, recorded instruments and a few talk-radio samples), with no presets or sample libraries—100% handcrafted, all original.
-        </li>
-        <li data-animate>
-          <strong>Podcast Producer – Trailside Carolina:</strong>
-          recorded, produced, mixed and mastered the Trailside Carolina podcast—ensuring crystal-clear audio and immersive storytelling for outdoor enthusiasts.
-        </li>
-        <li data-animate>
-          <strong>Gear Repair Repertoire:</strong>
-          repaired musical gear from the classics to the truly obscure: Yamaha DX7/DX7IIFD, CS01, CS50/60, SK-20, Microkorg, Lexicon 300, Korg SK1, Kawai K1, Roland JP-3000 & RE-201, Ibanez TS-9, Musitronics Mu-tron III, Fender Twin Reverb (reissue), Pro Reverb (1967), Musicman HD-150, ART PRO VLA II, A Designs MP-2A…and many more.
-        </li>
-      </ul>
-    </section>
+    <main>
+      <!-- About -->
+      <section id="about" class="section about-section" data-animate>
+        <h2 data-animate>About</h2>
+        <p data-animate>Hey, I’m Donald—a lifelong chaser of tone and tinkerer of broken gear. I’m an audio engineer, live-sound tech, repair whisperer, and, on rare occasions, a musician who actually finishes a song. If you’re here, you probably care about your gear as much as your music—so do I.</p>
+        <p data-animate>Upstate Sound &amp; Repair is my way of keeping our little corner of the world humming, one recalcitrant circuit at a time. I consult for venues, help artists chase good sound, and I show up when your vintage Moog throws a tantrum or your podcast needs a little love. If you want work done right (but not uptight), I’m the guy who shows up with a soldering iron, way too many opinions, and a sense of humor.</p>
+      </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="section contact-section" data-animate>
-      <h2 data-animate>Contact</h2>
-      <p data-animate>Ready to get that crackling amp sorted, record a new podcast or just chat about synths? Drop me a line — I’m based in Greenville, South Carolina and I love meeting fellow audio nerds.</p>
-      <p data-animate>Email me at <a href="mailto:info@upstatesound.co">info@upstatesound.co</a>.</p>
-    </section>
-  </main>
+      <!-- Services (extra drift on text) -->
+      <section id="services" class="section services-section alt" data-animate>
+        <h2 data-animate>Services</h2>
+        <div class="services-grid">
+          <!-- Studio & Gear Repair -->
+          <div class="service-card" data-animate>
+            <div class="service-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <rect x="8" y="10" width="4" height="20" fill="#2e5d50"/>
+                <rect x="18" y="5" width="4" height="30" fill="#457c6a"/>
+                <rect x="28" y="15" width="4" height="15" fill="#73967e"/>
+              </svg>
+            </div>
+            <h3 data-animate data-drift="1.3">Studio &amp; Gear Repair</h3>
+            <p data-animate data-drift="2">Your studio is only as good as its weakest link. I diagnose and repair mixers, preamps, tape machines, and all those vintage boxes you can’t live without. Think of me as your gear’s therapist — I listen carefully and I don’t judge.</p>
+          </div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <p>© <span id="year"></span> Upstate Sound &amp; Repair. Serving Greenville and the Upstate. Made with solder and soul.</p>
-  </footer>
+          <!-- Synth & Audio Gear Repair -->
+          <div class="service-card" data-animate>
+            <div class="service-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="20,5 35,35 5,35" fill="#457c6a"/>
+                <circle cx="20" cy="20" r="6" fill="#2e5d50"/>
+              </svg>
+            </div>
+            <h3 data-animate data-drift="1.3">Synth &amp; Audio Gear Repair</h3>
+            <p data-animate data-drift="2">Analog synths are living, breathing beasts — and they get cranky. I service and restore vintage synthesizers, drum machines, samplers and outboard gear. Whether it’s a cracked membrane or a blown capacitor, I’ll get the soul back in your circuits.</p>
+          </div>
+
+          <!-- Music Production -->
+          <div class="service-card" data-animate>
+            <div class="service-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="12" width="20" height="4" fill="#457c6a" />
+                <rect x="6" y="20" width="28" height="4" fill="#2e5d50" />
+                <rect x="12" y="28" width="16" height="4" fill="#73967e" />
+              </svg>
+            </div>
+            <h3 data-animate data-drift="1.3">Music Production</h3>
+            <p data-animate data-drift="2">I partner with bands and solo artists to produce, record and shape their music. From pre-production and arrangement to mixing and mastering, I help you capture what you hear in your head and translate it to tape. No cookie-cutter templates — just honest collaboration and sonic exploration.</p>
+          </div>
+
+          <!-- Podcast Production -->
+          <div class="service-card" data-animate>
+            <div class="service-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="5,20 10,12 15,28 20,15 25,25 30,10 35,20" fill="none" stroke="#2e5d50" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3 data-animate data-drift="1.3">Podcast Production</h3>
+            <p data-animate data-drift="2">Have a story to tell? I provide recording, editing and mixing for podcasts and audio books. I’ll help you sound like you know what you’re doing — crisp vocals, balanced levels, and maybe the occasional tasteful synth stab.</p>
+          </div>
+
+          <!-- Live Sound Engineering -->
+          <div class="service-card" data-animate>
+            <div class="service-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 30 Q10 10 20 20 T35 15" fill="none" stroke="#73967e" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3 data-animate data-drift="1.3">Live Sound Engineering</h3>
+            <p data-animate data-drift="2">From tiny clubs to weird warehouse gatherings, I mix live shows that feel like they’re meant for you. Clean, loud and feedback-free. Yes, I’ll carry cases and tape cables because I’m not above grunt work.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Past Work -->
+      <section id="work" class="section work-section" data-animate>
+        <h2 data-animate>Past Work</h2>
+        <ul class="work-list">
+          <li data-animate data-drift="0.8">
+            <strong>Live &amp; Session Engineer – Artis-Naples:</strong>
+            engineered recordings for the Naples Philharmonic Orchestra and various chamber ensembles at Artis-Naples (home of the Naples Philharmonic).
+          </li>
+          <li data-animate data-drift="0.8">
+            <strong>Mix Consultant – Swansons Studios:</strong>
+            partnered with Britt to fine-tune session mixes for local bands, offering fresh ears, technical fixes and workflow hacks.
+          </li>
+          <li data-animate data-drift="0.8">
+            <strong>Producer &amp; Mix Engineer – 10-Song LP (in progress):</strong>
+            currently producing, recording, mixing and mastering a full-length, 10-song album—designing every sound from scratch (custom synth patches, recorded instruments and a few talk-radio samples), with no presets or sample libraries—100% handcrafted, all original.
+          </li>
+          <li data-animate data-drift="0.8">
+            <strong>Podcast Producer – Trailside Carolina:</strong>
+            recorded, produced, mixed and mastered the Trailside Carolina podcast—ensuring crystal-clear audio and immersive storytelling for outdoor enthusiasts.
+          </li>
+          <li data-animate data-drift="0.8">
+            <strong>Gear Repair Repertoire:</strong>
+            repaired musical gear from the classics to the truly obscure: Yamaha DX7/DX7IIFD, CS01, CS50/60, SK-20, Microkorg, Lexicon 300, Korg SK1, Kawai K1, Roland JP-3000 & RE-201, Ibanez TS-9, Musitronics Mu-tron III, Fender Twin Reverb (reissue), Pro Reverb (1967), Musicman HD-150, ART PRO VLA II, A Designs MP-2A…and many more.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact" class="section contact-section" data-animate>
+        <h2 data-animate>Contact</h2>
+        <p data-animate>Ready to get that crackling amp sorted, record a new podcast or just chat about synths? Drop me a line — I’m based in Greenville, South Carolina and I love meeting fellow audio nerds.</p>
+        <p data-animate>Email me at <a href="mailto:info@upstatesound.co">info@upstatesound.co</a>.</p>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>© <span id="year"></span> Upstate Sound &amp; Repair. Serving Greenville and the Upstate. Made with solder and soul.</p>
+    </footer>
+  </div> <!-- /.content-frame -->
 
   <!-- Your existing JS (nav toggle etc.) -->
   <script src="script.js"></script>
 
-  <!-- Vibe script: reveal, parallax, hue progress (vanilla, no CDNs) -->
+  <!-- Vibe script: repeatable reveal + drift + progress (no external libs) -->
   <script>
-(function(){
-  var d=document.documentElement, b=document.body;
+    (function(){
+      var d=document.documentElement, b=document.body;
 
-  /* 1) Reveal-on-scroll:
-     - plays every time (adds .reveal on enter, removes on exit)
-  */
-  var els=[].slice.call(document.querySelectorAll('[data-animate]'));
-  if('IntersectionObserver' in window){
-    var io=new IntersectionObserver(function(entries){
-      for(var i=0;i<entries.length;i++){
-        var e=entries[i];
-        if(e.isIntersecting){ e.target.classList.add('reveal'); }
-        else { e.target.classList.remove('reveal'); }
+      /* 1) Reveal plays every time: add on enter, remove on exit */
+      var els=[].slice.call(document.querySelectorAll('[data-animate]'));
+      if('IntersectionObserver' in window){
+        var io=new IntersectionObserver(function(entries){
+          for(var i=0;i<entries.length;i++){
+            var e=entries[i];
+            if(e.isIntersecting){ e.target.classList.add('reveal'); }
+            else { e.target.classList.remove('reveal'); }
+          }
+        }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
+        els.forEach(function(el){ io.observe(el); });
+      } else {
+        els.forEach(function(el){ el.classList.add('reveal'); });
       }
-    }, { rootMargin:'0px 0px -10% 0px', threshold: 0.1 });
-    els.forEach(function(el){ io.observe(el); });
-  } else {
-    // Fallback: always revealed
-    els.forEach(function(el){ el.classList.add('reveal'); });
-  }
 
-  /* 2) Universal drift:
-     - everything with data-parallax, data-drift, or data-animate gently drifts
-     - services (and anything) can drift more via data-drift="1.6" etc.
-  */
-  var driftNodes = [].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
-  function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
-  function tick(){
-    var vh = window.innerHeight || 1;
-    for(var i=0;i<driftNodes.length;i++){
-      var el = driftNodes[i];
-      var mult = parseFloat(el.getAttribute('data-drift'));
-      if(!mult && mult!==0){
-        // Defaults: parallax = 1.0, generic animate = 0.4
-        mult = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
+      /* 2) Universal drift (uses CSS variable --dy, so it won't fight reveal) */
+      var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
+      function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
+      function tick(){
+        var vh = window.innerHeight || 1;
+        for(var i=0;i<driftNodes.length;i++){
+          var el = driftNodes[i];
+          var mult = parseFloat(el.getAttribute('data-drift'));
+          if(!mult && mult!==0){
+            mult = el.hasAttribute('data-parallax') ? 1.0 : 0.4; // default drifts
+          }
+          var r = el.getBoundingClientRect();
+          var center = r.top + r.height/2;
+          var norm = (center - vh/2) / vh;            // -0.5 .. 0.5 near center
+          var y = clamp(-24 * norm * mult, -28, 28);  // cap drift
+          el.style.setProperty('--dy', y + 'px');
+        }
+        requestAnimationFrame(tick);
       }
-      var r = el.getBoundingClientRect();
-      var center = r.top + r.height/2;
-      var norm = (center - vh/2) / vh;            // ~ -0.5 .. 0.5 near center
-      var y = clamp(-20 * norm * mult, -24, 24);  // cap drift
-      el.style.transform = 'translateY(' + y + 'px)';
-      el.style.willChange = 'transform';
-    }
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+      requestAnimationFrame(tick);
 
-  /* 3) Optional magnetic buttons (unchanged) */
-  if (matchMedia && matchMedia('(pointer:fine)').matches) {
-    [].slice.call(document.querySelectorAll('.magnet')).forEach(function(btn){
-      var inner=btn.querySelector('span')||btn;
-      btn.addEventListener('mousemove', function(e){
-        var r=btn.getBoundingClientRect();
-        var x=(e.clientX-(r.left+r.width/2))*0.15;
-        var y=(e.clientY-(r.top+r.height/2))*0.15;
-        inner.style.transform='translate('+x+'px,'+y+'px)';
-      });
-      btn.addEventListener('mouseleave', function(){ inner.style.transform='translate(0,0)'; });
-    });
-  }
+      /* 3) Magnetic (unchanged; add class="magnet" + wrap text in <span>) */
+      if (matchMedia && matchMedia('(pointer:fine)').matches) {
+        [].slice.call(document.querySelectorAll('.magnet')).forEach(function(btn){
+          var inner=btn.querySelector('span')||btn;
+          btn.addEventListener('mousemove', function(e){
+            var r=btn.getBoundingClientRect();
+            var x=(e.clientX-(r.left+r.width/2))*0.15;
+            var y=(e.clientY-(r.top+r.height/2))*0.15;
+            inner.style.transform='translate('+x+'px,'+y+'px)';
+          });
+          btn.addEventListener('mouseleave', function(){ inner.style.transform='translate(0,0)'; });
+        });
+      }
 
-  /* 4) Scroll progress bar (kept) */
-  var bar=document.getElementById('scroll-progress');
-  function progress(){
-    var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
-    if(bar) bar.style.width=(sc/max*100)+'%';
-  }
-  progress(); document.addEventListener('scroll', progress, {passive:true});
-})();
-</script>
+      /* 4) Scroll progress bar */
+      var bar=document.getElementById('scroll-progress');
+      function progress(){
+        var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
+        if(bar) bar.style.width=(sc/max*100)+'%';
+      }
+      progress(); document.addEventListener('scroll', progress, {passive:true});
+    })();
+  </script>
 </body>
 </html>
