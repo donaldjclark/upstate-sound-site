@@ -4,8 +4,8 @@
   <!-- JS gate: only pre-hide elements if JS is live -->
   <script>document.documentElement.classList.add('js')</script>
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC</title>
 
   <!-- Fonts & your stylesheet -->
@@ -14,12 +14,9 @@
 
   <!-- Vibe styles (progressive) -->
   <style>
-    /* === PAGE BACKGROUND LAYOUT ===
-       html has the full-page image; body is transparent.
-       The centered .content-frame gets the dark background.
-    */
+    /* === PAGE BACKGROUND LAYOUT === */
     html{
-      background: url('assets/hero-bg.jpg') center / cover fixed no-repeat; /* <-- update path if needed */
+      background: url('assets/background.png') center / cover fixed no-repeat; /* <-- your file */
     }
     body{ margin:0; background:transparent; color:inherit; }
     .content-frame{
@@ -28,17 +25,15 @@
       background: #0a0a0a;          /* dark content column */
       min-height: 100dvh;
     }
-
-    /* Optional alternating section tone */
     .section.alt { background:#111; }
 
-    /* === REVEAL (progressive): visible by default === */
+    /* === REVEAL + DRIFT (uses CSS vars to compose transforms cleanly) === */
     [data-animate]{
       opacity:1;
-      /* combine reveal + drift via variables so JS can set --dy without clobbering */
-      --revealY: 0px;
-      --dy: 0px;
-      transform: translate3d(0, calc(var(--revealY) + var(--dy)), 0);
+      --revealY: 0px;   /* reveal slide */
+      --dy: 0px;        /* vertical drift (JS) */
+      --dx: 0px;        /* horizontal drift (JS) */
+      transform: translate3d(var(--dx), calc(var(--revealY) + var(--dy)), 0);
     }
     .js [data-animate]{
       opacity:0;
@@ -53,7 +48,56 @@
       --revealY: 0px;
     }
 
-    /* Magnetic buttons (optional, unchanged) */
+    /* Sticky Services header */
+    .services-sticky{
+      position: sticky;
+      top: 0; z-index: 20;
+      background: linear-gradient(#0a0a0acc,#0a0a0acc);
+      backdrop-filter: blur(4px);
+      padding: 10px 0;
+    }
+
+    /* Glitch-on-hover for links */
+    a.glitch{
+      position: relative; display:inline-block; text-decoration:none;
+    }
+    a.glitch::before, a.glitch::after{
+      content: attr(data-text);
+      position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
+      opacity:0; transform: translate(0,0);
+    }
+    a.glitch::before{ color:#22d3ee; }
+    a.glitch::after { color:#a78bfa; }
+    @keyframes glitchX {
+      0%{ transform:translate(0,0) }
+      20%{ transform:translate(1px, -1px) }
+      40%{ transform:translate(-1px, 1px) }
+      60%{ transform:translate(2px, 0) }
+      80%{ transform:translate(-2px, 1px) }
+      100%{ transform:translate(0,0) }
+    }
+    a.glitch:hover::before, a.glitch:hover::after{
+      opacity:.7; animation: glitchX .18s steps(2,end) infinite;
+    }
+
+    /* Tape wobble on hero line (subtle) */
+    @keyframes tapeWobble {
+      0%   { transform: translateY(0) rotate(-0.08deg) skewX(0.05deg); filter: blur(.0px) }
+      25%  { transform: translateY(-0.6px) rotate(0.08deg) skewX(-0.05deg); filter: blur(.1px) }
+      50%  { transform: translateY(0.4px) rotate(-0.05deg) skewX(0.02deg); filter: blur(.0px) }
+      75%  { transform: translateY(-0.3px) rotate(0.05deg) skewX(-0.02deg); filter: blur(.08px) }
+      100% { transform: translateY(0) rotate(-0.08deg) skewX(0.05deg); filter: blur(.0px) }
+    }
+    .tape{
+      display:inline-block;
+      animation: tapeWobble 1.6s ease-in-out infinite;
+      transform-origin: 50% 50%;
+    }
+    @media (prefers-reduced-motion: reduce){
+      .tape{ animation: none }
+    }
+
+    /* Magnetic buttons (optional) */
     .magnet{position:relative;display:inline-block;transform:translateZ(0)}
     .magnet>span{display:inline-block;transition:transform 120ms ease;will-change:transform}
 
@@ -62,10 +106,32 @@
       position:fixed; inset:0 auto auto 0; height:3px; width:0%;
       background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999
     }
+
+    /* Spotlight (toggle with .spotlight-on on html) */
+    html.spotlight-on body{
+      --mx: 50vw; --my: 50vh;
+      -webkit-mask-image: radial-gradient(400px 400px at var(--mx) var(--my),
+                        #000 0%, rgba(0,0,0,0.4) 50%, transparent 70%);
+      mask-image: radial-gradient(400px 400px at var(--mx) var(--my),
+                        #000 0%, rgba(0,0,0,0.4) 50%, transparent 70%);
+      transition: mask-image .2s ease;
+    }
+
+    /* Party mode */
+    html.party body{ filter: saturate(1.3) contrast(1.1) hue-rotate(10deg); }
+    html.party .reveal{ text-shadow: 0 0 8px rgba(164, 73, 255, 0.35); }
+
+    /* SVG morph container */
+    .morph-wrap{
+      position: sticky; top: 10px; height: 140px; z-index: 5;
+      display:flex; align-items:center; justify-content:center;
+      opacity:.35; mix-blend-mode: screen; pointer-events:none;
+    }
+    .morph-wrap svg{ width: 70%; max-width: 760px; height:auto }
   </style>
 </head>
 <body>
-  <!-- Progress bar (present before script runs) -->
+  <!-- Progress bar -->
   <div id="scroll-progress" aria-hidden="true"></div>
 
   <!-- Dark centered content column -->
@@ -77,22 +143,26 @@
       <nav id="nav" data-animate>
         <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
         <ul class="nav-links">
-          <li><a href="#about" data-animate>About</a></li>
-          <li><a href="#services" data-animate>Services</a></li>
-          <li><a href="#work" data-animate>Past Work</a></li>
-          <li><a href="#contact" data-animate>Contact</a></li>
+          <li><a href="#about"   class="glitch" data-text="About"   data-animate>About</a></li>
+          <li><a href="#services" class="glitch" data-text="Services" data-animate>Services</a></li>
+          <li><a href="#work"    class="glitch" data-text="Past Work" data-animate>Past Work</a></li>
+          <li><a href="#contact" class="glitch" data-text="Contact" data-animate>Contact</a></li>
         </ul>
       </nav>
 
-      <!-- Overlay to ensure text stands out if your CSS uses one -->
       <div class="hero-overlay"></div>
 
       <div class="hero-content" data-animate>
         <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
-        <!-- Tagline: gets “parallax” drift baseline; you can tune via data-drift -->
-        <h1 data-parallax data-drift="1.1">Where Sound Meets Vision.</h1>
+        <!-- Tape-wobble + parallax baseline + a touch more drift -->
+        <h1 class="tape" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
       </div>
     </header>
+
+    <!-- Scroll-scrubbed SVG morph (sticky, subtle) -->
+    <div class="morph-wrap" data-animate>
+      <div id="morph-svg"></div>
+    </div>
 
     <main>
       <!-- About -->
@@ -102,9 +172,9 @@
         <p data-animate>Upstate Sound &amp; Repair is my way of keeping our little corner of the world humming, one recalcitrant circuit at a time. I consult for venues, help artists chase good sound, and I show up when your vintage Moog throws a tantrum or your podcast needs a little love. If you want work done right (but not uptight), I’m the guy who shows up with a soldering iron, way too many opinions, and a sense of humor.</p>
       </section>
 
-      <!-- Services (extra drift on text) -->
+      <!-- Services -->
       <section id="services" class="section services-section alt" data-animate>
-        <h2 data-animate>Services</h2>
+        <h2 class="services-sticky" data-animate>Services</h2>
         <div class="services-grid">
           <!-- Studio & Gear Repair -->
           <div class="service-card" data-animate>
@@ -115,8 +185,8 @@
                 <rect x="28" y="15" width="4" height="15" fill="#73967e"/>
               </svg>
             </div>
-            <h3 data-animate data-drift="1.3">Studio &amp; Gear Repair</h3>
-            <p data-animate data-drift="2">Your studio is only as good as its weakest link. I diagnose and repair mixers, preamps, tape machines, and all those vintage boxes you can’t live without. Think of me as your gear’s therapist — I listen carefully and I don’t judge.</p>
+            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Studio &amp; Gear Repair</h3>
+            <p  data-animate data-drift="1.8" data-drift-x="1.0">Your studio is only as good as its weakest link. I diagnose and repair mixers, preamps, tape machines, and all those vintage boxes you can’t live without. Think of me as your gear’s therapist — I listen carefully and I don’t judge.</p>
           </div>
 
           <!-- Synth & Audio Gear Repair -->
@@ -127,8 +197,8 @@
                 <circle cx="20" cy="20" r="6" fill="#2e5d50"/>
               </svg>
             </div>
-            <h3 data-animate data-drift="1.3">Synth &amp; Audio Gear Repair</h3>
-            <p data-animate data-drift="2">Analog synths are living, breathing beasts — and they get cranky. I service and restore vintage synthesizers, drum machines, samplers and outboard gear. Whether it’s a cracked membrane or a blown capacitor, I’ll get the soul back in your circuits.</p>
+            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Synth &amp; Audio Gear Repair</h3>
+            <p  data-animate data-drift="1.8" data-drift-x="1.0">Analog synths are living, breathing beasts — and they get cranky. I service and restore vintage synthesizers, drum machines, samplers and outboard gear. Whether it’s a cracked membrane or a blown capacitor, I’ll get the soul back in your circuits.</p>
           </div>
 
           <!-- Music Production -->
@@ -140,8 +210,8 @@
                 <rect x="12" y="28" width="16" height="4" fill="#73967e" />
               </svg>
             </div>
-            <h3 data-animate data-drift="1.3">Music Production</h3>
-            <p data-animate data-drift="2">I partner with bands and solo artists to produce, record and shape their music. From pre-production and arrangement to mixing and mastering, I help you capture what you hear in your head and translate it to tape. No cookie-cutter templates — just honest collaboration and sonic exploration.</p>
+            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Music Production</h3>
+            <p  data-animate data-drift="1.8" data-drift-x="1.0">I partner with bands and solo artists to produce, record and shape their music. From pre-production and arrangement to mixing and mastering, I help you capture what you hear in your head and translate it to tape. No cookie-cutter templates — just honest collaboration and sonic exploration.</p>
           </div>
 
           <!-- Podcast Production -->
@@ -151,8 +221,8 @@
                 <polyline points="5,20 10,12 15,28 20,15 25,25 30,10 35,20" fill="none" stroke="#2e5d50" stroke-width="2"/>
               </svg>
             </div>
-            <h3 data-animate data-drift="1.3">Podcast Production</h3>
-            <p data-animate data-drift="2">Have a story to tell? I provide recording, editing and mixing for podcasts and audio books. I’ll help you sound like you know what you’re doing — crisp vocals, balanced levels, and maybe the occasional tasteful synth stab.</p>
+            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Podcast Production</h3>
+            <p  data-animate data-drift="1.8" data-drift-x="1.0">Have a story to tell? I provide recording, editing and mixing for podcasts and audio books. I’ll help you sound like you know what you’re doing — crisp vocals, balanced levels, and maybe the occasional tasteful synth stab.</p>
           </div>
 
           <!-- Live Sound Engineering -->
@@ -162,8 +232,24 @@
                 <path d="M5 30 Q10 10 20 20 T35 15" fill="none" stroke="#73967e" stroke-width="2"/>
               </svg>
             </div>
-            <h3 data-animate data-drift="1.3">Live Sound Engineering</h3>
-            <p data-animate data-drift="2">From tiny clubs to weird warehouse gatherings, I mix live shows that feel like they’re meant for you. Clean, loud and feedback-free. Yes, I’ll carry cases and tape cables because I’m not above grunt work.</p>
+            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Live Sound Engineering</h3>
+            <p  data-animate data-drift="1.8" data-drift-x="1.0">From tiny clubs to weird warehouse gatherings, I mix live shows that feel like they’re meant for you. Clean, loud and feedback-free. Yes, I’ll carry cases and tape cables because I’m not above grunt work.</p>
+          </div>
+
+          <!-- Consulting & Education -->
+          <div class="service-card" data-animate>
+            <div class="service-icon">
+              <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 10h18a6 6 0 0 1 6 6v14H14a6 6 0 0 0-6 6V10z" fill="#457c6a"/>
+                <path d="M12 16c4 0 6 4 10 4s6-4 10-4" fill="none" stroke="#2e5d50" stroke-width="2"/>
+              </svg>
+            </div>
+            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Consulting &amp; Education</h3>
+            <p  data-animate data-drift="1.8" data-drift-x="1.0">
+              One-on-one consulting for studios, bands, and venues. Signal-flow bootcamps,
+              mix reviews, live rig sanity checks, and hands-on solder sessions. Learn the
+              why, not just the settings.
+            </p>
           </div>
         </div>
       </section>
@@ -199,7 +285,9 @@
       <section id="contact" class="section contact-section" data-animate>
         <h2 data-animate>Contact</h2>
         <p data-animate>Ready to get that crackling amp sorted, record a new podcast or just chat about synths? Drop me a line — I’m based in Greenville, South Carolina and I love meeting fellow audio nerds.</p>
-        <p data-animate>Email me at <a href="mailto:info@upstatesound.co">info@upstatesound.co</a>.</p>
+        <p data-animate>Email me at
+          <a class="glitch" href="mailto:info@upstatesound.co" data-text="info@upstatesound.co">info@upstatesound.co</a>.
+        </p>
       </section>
     </main>
 
@@ -212,12 +300,12 @@
   <!-- Your existing JS (nav toggle etc.) -->
   <script src="script.js"></script>
 
-  <!-- Vibe script: repeatable reveal + drift + progress (no external libs) -->
+  <!-- Vibe script: replayable reveal + x/y drift + spotlight + party + SVG scrub + progress -->
   <script>
     (function(){
       var d=document.documentElement, b=document.body;
 
-      /* 1) Reveal plays every time: add on enter, remove on exit */
+      /* 1) Reveal — replay: add on enter, remove on exit */
       var els=[].slice.call(document.querySelectorAll('[data-animate]'));
       if('IntersectionObserver' in window){
         var io=new IntersectionObserver(function(entries){
@@ -228,32 +316,38 @@
           }
         }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
         els.forEach(function(el){ io.observe(el); });
-      } else {
-        els.forEach(function(el){ el.classList.add('reveal'); });
-      }
+      } else { els.forEach(function(el){ el.classList.add('reveal'); }); }
 
-      /* 2) Universal drift (uses CSS variable --dy, so it won't fight reveal) */
+      /* 2) Drift — both Y and X (X is a slow sine so it “breathes”) */
       var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
       function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
       function tick(){
         var vh = window.innerHeight || 1;
+        var sc = d.scrollTop || b.scrollTop;
         for(var i=0;i<driftNodes.length;i++){
           var el = driftNodes[i];
-          var mult = parseFloat(el.getAttribute('data-drift'));
-          if(!mult && mult!==0){
-            mult = el.hasAttribute('data-parallax') ? 1.0 : 0.4; // default drifts
-          }
+
+          var multY = parseFloat(el.getAttribute('data-drift'));
+          if(!multY && multY!==0) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
+
+          var multX = parseFloat(el.getAttribute('data-drift-x'));
+          if(!multX && multX!==0) multX = 0.5 * multY;
+
           var r = el.getBoundingClientRect();
           var center = r.top + r.height/2;
-          var norm = (center - vh/2) / vh;            // -0.5 .. 0.5 near center
-          var y = clamp(-24 * norm * mult, -28, 28);  // cap drift
+          var norm = (center - vh/2) / vh;          // -0.5..0.5 near center
+
+          var y = clamp(-24 * norm * multY, -32, 32);
+          var x = Math.sin((sc*0.004) + i*0.7) * (8 * multX);
+
           el.style.setProperty('--dy', y + 'px');
+          el.style.setProperty('--dx', x + 'px');
         }
         requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
 
-      /* 3) Magnetic (unchanged; add class="magnet" + wrap text in <span>) */
+      /* 3) Magnetic (optional) */
       if (matchMedia && matchMedia('(pointer:fine)').matches) {
         [].slice.call(document.querySelectorAll('.magnet')).forEach(function(btn){
           var inner=btn.querySelector('span')||btn;
@@ -274,6 +368,65 @@
         if(bar) bar.style.width=(sc/max*100)+'%';
       }
       progress(); document.addEventListener('scroll', progress, {passive:true});
+
+      /* 5) Spotlight toggle with "S" key + follower */
+      var spot=false;
+      window.addEventListener('keydown',function(e){
+        if(e.key.toLowerCase()==='s'){ spot=!spot; d.classList.toggle('spotlight-on', spot); }
+      });
+      window.addEventListener('mousemove',function(e){
+        if(!spot) return;
+        d.style.setProperty('--mx', e.clientX+'px');
+        d.style.setProperty('--my', e.clientY+'px');
+      },{passive:true});
+
+      /* 6) Konami code → toggle party mode */
+      var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
+      window.addEventListener('keydown',function(e){
+        seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
+        if(konami.every(function(k,i){return k===seq[i]})) d.classList.toggle('party');
+      });
+
+      /* 7) Scroll-scrubbed SVG morph: swap state per active section */
+      (function initMorph(){
+        var host=document.getElementById('morph-svg');
+        if(!host) return;
+        fetch('assets/scroll-scrub.svg')
+          .then(function(r){return r.text()})
+          .then(function(txt){
+            host.innerHTML = txt;
+            var use = host.querySelector('use');
+            if(!use){
+              // fallback: build <svg><use href="#state1"></use></svg>
+              var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+              svg.setAttribute('viewBox','0 0 800 200');
+              use=document.createElementNS('http://www.w3.org/2000/svg','use');
+              use.setAttributeNS('http://www.w3.org/1999/xlink','href','#state1');
+              svg.appendChild(use); host.appendChild(svg);
+            }
+            var sections=[].slice.call(document.querySelectorAll('main .section'));
+            function which(){
+              var topIdx=0, best=1e9;
+              for(var i=0;i<sections.length;i++){
+                var r=sections[i].getBoundingClientRect();
+                var dist=Math.abs(r.top - 80); // near top of viewport
+                if(dist<best){ best=dist; topIdx=i; }
+              }
+              return topIdx;
+            }
+            function update(){
+              var idx = which(); // 0..N-1
+              var id  = '#state'+(idx+1); // map section 1..N
+              use.setAttributeNS('http://www.w3.org/1999/xlink','href', id);
+              requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+          })
+          .catch(function(){ /* ignore */ });
+      })();
+
+      /* 8) Footer year */
+      var y=document.getElementById('year'); if(y) y.textContent=(new Date).getFullYear();
     })();
   </script>
 </body>
