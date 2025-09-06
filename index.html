@@ -1,73 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>.js [data-animate]{opacity:1 !important;}</style>
   <script>document.documentElement.classList.add('js')</script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC</title>
 
-  <!-- Fonts + your stylesheet if you keep one -->
+  <!-- Fonts + your base stylesheet (keep your classes/styles) -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 
   <style>
-    /* --- Page frame & background gutters --- */
-    html{ background: url('assets/background.png') center / cover fixed no-repeat; }
-    body{ margin:0; background:transparent; color:#e6e6e6; font-family: "Space Grotesk", system-ui, sans-serif; }
-    .content-frame{ max-width:1100px; margin:0 auto; background:#0a0a0a; min-height:100dvh; position:relative; z-index:2; }
-    .section{ padding:64px 24px; }
+    /* ---------- Page frame / background gutters ---------- */
+    html{ background:url('assets/background.png') center / cover fixed no-repeat; }
+    body{ margin:0; color:#e6e6e6; font-family:"Space Grotesk", system-ui, sans-serif; background:transparent; }
+
+    /* Content column */
+    .content-frame{
+      position:relative;             /* so the morph can sit inside, behind content */
+      max-width:1100px; margin:0 auto;
+      background:#0a0a0a;            /* solid black panel */
+      min-height:100dvh;
+      z-index:2;                      /* above page background */
+      overflow:clip;                  /* keep morph inside the column */
+    }
+
+    /* Morph layer (between background and cards) */
+    .content-frame > .morph-wrap{
+      position:absolute; inset:0;     /* fill the column */
+      display:grid; place-items:center;
+      z-index:1;                      /* behind sections (which default to z-index: auto/2 below) */
+      pointer-events:none;
+      opacity:.50;
+    }
+    .morph-wrap svg{ width:min(1200px, 90%); height:60vh; }
+
+    /* Sections / cards stack above morph */
+    .section{ position:relative; z-index:2; padding:64px 24px; }
     .section.alt{ background:#111; }
-    h1,h2,h3{ color:#f4f4f5; margin:0 0 16px; font-family:"Montserrat", system-ui, sans-serif; }
+
+    h1,h2,h3{ margin:0 0 16px; font-family:"Montserrat", system-ui, sans-serif; color:#f4f4f5; }
     p{ color:#c9c9ce; line-height:1.6; }
 
-    /* --- Header / Hero --- */
+    /* ---------- Header / Hero ---------- */
     #hero{ position:relative; padding:80px 24px 48px; text-align:center; }
-    .hero-overlay{ position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,10,10,.50),rgba(10,10,10,.05) 60%, transparent); pointer-events:none; }
+    .hero-overlay{
+      position:absolute; inset:0;
+      /* flip: light -> darker, fades into black */
+      background:linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,.05) 55%, rgba(10,10,10,.60) 100%);
+      pointer-events:none;
+    }
     .logo{ display:block; margin:0 auto 24px; width:220px; height:auto; }
 
     /* Tape wobble (visible) */
     @keyframes tapeWobble {
-      0%{ transform: translateY(0) rotate(-0.18deg) skewX(.12deg); filter:blur(0) }
-      25%{ transform: translateY(-1px) rotate(.22deg) skewX(-.10deg); filter:blur(.12px) }
-      50%{ transform: translateY(.6px) rotate(-.14deg) skewX(.06deg); filter:blur(0) }
-      75%{ transform: translateY(-.8px) rotate(.18deg) skewX(-.06deg); filter:blur(.1px) }
-      100%{ transform: translateY(0) rotate(-.18deg) skewX(.12deg); filter:blur(0) }
+      0%{ transform:translateY(0) rotate(-0.18deg) skewX(.12deg); filter:blur(0) }
+      25%{ transform:translateY(-1px) rotate(.22deg) skewX(-.10deg); filter:blur(.12px) }
+      50%{ transform:translateY(.6px) rotate(-.14deg) skewX(.06deg); filter:blur(0) }
+      75%{ transform:translateY(-.8px) rotate(.18deg) skewX(-.06deg); filter:blur(.1px) }
+      100%{ transform:translateY(0) rotate(-.18deg) skewX(.12deg); filter:blur(0) }
     }
     .tape{ display:inline-block; animation:tapeWobble 1.2s ease-in-out infinite; transform-origin:50% 50%; }
-    @media (prefers-reduced-motion: reduce){ .tape{ animation:none } }
+    @media (prefers-reduced-motion:reduce){ .tape{ animation:none } }
 
     /* Nav (simple) */
     #nav{ display:flex; justify-content:flex-end; gap:24px; margin-bottom:12px; }
     #nav a{ color:#b9b9ff; text-decoration:none; font-weight:700; letter-spacing:.02em; }
     #nav-toggle{ display:none; }
 
-    /* Glitch-on-hover links */
+    /* Glitch links */
     a.glitch{ position:relative; display:inline-block; text-decoration:none; }
-    a.glitch::before, a.glitch::after{
-      content: attr(data-text); position:absolute; inset:0; mix-blend-mode:screen; opacity:0;
-    }
-    a.glitch::before{ color:#22d3ee; } a.glitch::after{ color:#a78bfa; }
+    a.glitch::before, a.glitch::after{ content:attr(data-text); position:absolute; inset:0; opacity:0; mix-blend-mode:screen; }
+    a.glitch::before{ color:#22d3ee } a.glitch::after{ color:#a78bfa }
     @keyframes glitchX{ 0%{transform:translate(0,0)} 20%{transform:translate(1px,-1px)} 40%{transform:translate(-1px,1px)} 60%{transform:translate(2px,0)} 80%{transform:translate(-2px,1px)} 100%{transform:translate(0,0)} }
     a.glitch:hover::before, a.glitch:hover::after{ opacity:.7; animation:glitchX .18s steps(2,end) infinite; }
 
-    /* Cards grid */
-    .services-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; }
+    /* Services grid */
+    .services-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:28px; }
     .service-card{ background:#f4f2eb; color:#142; border-radius:12px; padding:22px; box-shadow:0 10px 28px rgba(0,0,0,.25); }
     .service-card h3{ color:#0b2340; }
     .service-card p{ color:#213; }
 
-    /* Sticky Services header */
-    .services-sticky{ position:sticky; top:0; z-index:20; background:linear-gradient(#0a0a0acc,#0a0a0acc); backdrop-filter:blur(4px); padding:10px 24px; margin:-10px -24px 16px; }
+    /* Sticky Services title */
+    .services-sticky{
+      position:sticky; top:0; z-index:20;
+      background:linear-gradient(#0a0a0acc,#0a0a0acc);
+      backdrop-filter:blur(4px);
+      padding:10px 24px; margin:-10px -24px 16px;
+    }
 
     /* Past work list */
     .work-section ul{ padding-left:20px; }
     .work-section li{ margin:12px 0; }
 
+    /* Paper panel for About (black-on-light) */
+    .paper{
+      background:#f4f2eb; color:#111; border-radius:12px;
+      padding:24px clamp(16px,2vw,28px);
+      box-shadow:0 10px 28px rgba(0,0,0,.18);
+    }
+    .paper h2{ color:#111; }
+    .paper p{ color:#222; }
+
     /* Footer */
     .footer{ padding:32px 24px; text-align:center; color:#aaa; }
 
-    /* Reveal + drift composition */
+    /* Reveal + drift */
     [data-animate]{ opacity:1; --revealY:0px; --dy:0px; --dx:0px; transform:translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0); }
     .js [data-animate]{ opacity:0; --revealY:24px; transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); will-change:transform,opacity; }
     .reveal{ opacity:1 !important; --revealY:0px; }
@@ -75,24 +113,16 @@
     /* Progress bar */
     #scroll-progress{ position:fixed; inset:0 auto auto 0; height:3px; width:0%; background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999; }
 
-    /* BIG centered morph background layer (behind content) */
-    .morph-wrap{
-      position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
-      width:min(1200px, 90vw); height:60vh; z-index:1; pointer-events:none;
-      display:grid; place-items:center; opacity:.42; mix-blend-mode:screen;
-    }
-    .morph-wrap svg{ width:100%; height:100%; }
-
-    /* Spotlight 2.0 */
+    /* Spotlight */
     html.spotlight-on body{
-      --mx:50vw; --my:50vh; --rad: clamp(360px, 42vw, 720px); --edge: calc(var(--rad)*0.65);
-      -webkit-mask-image: radial-gradient(var(--rad) var(--rad) at var(--mx) var(--my), #000 0%, rgba(0,0,0,.6) var(--edge), transparent 100%);
-      mask-image: radial-gradient(var(--rad) var(--rad) at var(--mx) var(--my), #000 0%, rgba(0,0,0,.6) var(--edge), transparent 100%);
-      backdrop-filter: brightness(1.18) saturate(1.12);
-      transition: mask-image .12s ease;
+      --mx:50vw; --my:50vh; --rad:clamp(360px,42vw,720px); --edge:calc(var(--rad)*0.65);
+      -webkit-mask-image:radial-gradient(var(--rad) var(--rad) at var(--mx) var(--my), #000 0%, rgba(0,0,0,.6) var(--edge), transparent 100%);
+      mask-image:radial-gradient(var(--rad) var(--rad) at var(--mx) var(--my), #000 0%, rgba(0,0,0,.6) var(--edge), transparent 100%);
+      backdrop-filter:brightness(1.18) saturate(1.12);
+      transition:mask-image .12s ease;
     }
 
-    /* Party Mode 2.0 */
+    /* Party mode */
     @keyframes hueRoll{ from{filter:hue-rotate(0)} to{filter:hue-rotate(360deg)} }
     @keyframes slowTilt{ 0%{transform:rotate(.02deg)} 50%{transform:rotate(-.02deg)} 100%{transform:rotate(.02deg)} }
     @keyframes glowPulse{
@@ -103,37 +133,38 @@
     html.party body{ animation:hueRoll 14s linear infinite; }
     html.party .section{ animation:slowTilt 6s ease-in-out infinite; }
     html.party a, html.party h1, html.party h2, html.party h3, html.party .reveal{ animation:glowPulse 1.8s ease-in-out infinite; }
-    html.party .morph-wrap{ opacity:.66; }
   </style>
 </head>
 <body>
   <!-- Progress -->
   <div id="scroll-progress" aria-hidden="true"></div>
 
-  <!-- BIG morph background -->
-  <div class="morph-wrap" aria-hidden="true">
-    <div id="morph-svg"></div>
-  </div>
-
   <!-- Content column -->
   <div class="content-frame">
-    <header id="hero" data-animate>
+    <!-- Morph sits INSIDE the content column, behind sections -->
+    <div class="morph-wrap" aria-hidden="true">
+      <div id="morph-svg"></div>
+    </div>
+
+    <header id="hero" class="section" data-animate>
       <nav id="nav" data-animate>
         <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
-        <a href="#about"   class="glitch" data-text="About"   data-animate>About</a>
+        <a href="#about" class="glitch" data-text="About" data-animate>About</a>
         <a href="#services" class="glitch" data-text="Services" data-animate>Services</a>
-        <a href="#work"    class="glitch" data-text="Past Work" data-animate>Past Work</a>
+        <a href="#work" class="glitch" data-text="Past Work" data-animate>Past Work</a>
         <a href="#contact" class="glitch" data-text="Contact" data-animate>Contact</a>
       </nav>
 
       <div class="hero-overlay"></div>
       <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
-      <h1 class="tape" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
+
+      <!-- Tagline: black for readability on light hero -->
+      <h1 class="tape" style="color:#111" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
     </header>
 
     <main>
-      <!-- About -->
-      <section id="about" class="section about-section" data-animate>
+      <!-- About (paper, black-on-light) -->
+      <section id="about" class="section about-section paper" data-animate>
         <h2 data-animate>About</h2>
         <p data-animate>Hey, I’m Donald—a lifelong chaser of tone and tinkerer of broken gear. I’m an audio engineer, live-sound tech, repair whisperer, and, on rare occasions, a musician who actually finishes a song. If you’re here, you probably care about your gear as much as your music—so do I.</p>
         <p data-animate>Upstate Sound &amp; Repair is my way of keeping our little corner of the world humming, one recalcitrant circuit at a time. I consult for venues, help artists chase good sound, and I show up when your vintage Moog throws a tantrum or your podcast needs a little love. If you want work done right (but not uptight), I’m the guy who shows up with a soldering iron, way too many opinions, and a sense of humor.</p>
@@ -176,9 +207,9 @@
         <ul class="work-list">
           <li data-animate data-drift="0.8"><strong>Live &amp; Session Engineer – Artis-Naples:</strong> engineered recordings for the Naples Philharmonic Orchestra and various chamber ensembles at Artis-Naples (home of the Naples Philharmonic).</li>
           <li data-animate data-drift="0.8"><strong>Mix Consultant – Swansons Studios:</strong> partnered with Britt to fine-tune session mixes for local bands, offering fresh ears, technical fixes and workflow hacks.</li>
-          <li data-animate data-drift="0.8"><strong>Producer &amp; Mix Engineer – 10-Song LP (in progress):</strong> currently producing, recording, mixing and mastering a full-length, 10-song album—designing every sound from scratch (custom synth patches, recorded instruments and a few talk-radio samples), with no presets or sample libraries—100% handcrafted, all original.</li>
-          <li data-animate data-drift="0.8"><strong>Podcast Producer – Trailside Carolina:</strong> recorded, produced, mixed and mastered the Trailside Carolina podcast—ensuring crystal-clear audio and immersive storytelling for outdoor enthusiasts.</li>
-          <li data-animate data-drift="0.8"><strong>Gear Repair Repertoire:</strong> Yamaha DX7/DX7IIFD, CS01, CS50/60, SK-20, Microkorg, Lexicon 300, Korg SK1, Kawai K1, Roland JP-3000 &amp; RE-201, Ibanez TS-9, Mu-Tron III, Fender Twin (reissue), Pro Reverb (1967), Musicman HD-150, ART PRO VLA II, A Designs MP-2A…and many more.</li>
+          <li data-animate data-drift="0.8"><strong>Producer &amp; Mix Engineer – 10-Song LP (in progress):</strong> producing, recording, mixing and mastering a full-length album—custom synth patches, recorded instruments, a few talk-radio samples—100% handcrafted, all original.</li>
+          <li data-animate data-drift="0.8"><strong>Podcast Producer – Trailside Carolina:</strong> recorded, produced, mixed and mastered the Trailside Carolina podcast—crystal-clear audio and immersive storytelling for outdoor enthusiasts.</li>
+          <li data-animate data-drift="0.8"><strong>Gear Repair Repertoire:</strong> Yamaha DX7/DX7IIFD, CS01, CS50/60, SK-20, Microkorg, Lexicon 300, Korg SK1, Kawai K1, Roland JP-3000 &amp; RE-201, Ibanez TS-9, Mu-Tron III, Fender Twin (reissue), Pro Reverb (1967), Musicman HD-150, ART PRO VLA II, A Designs MP-2A… and many more.</li>
         </ul>
       </section>
 
@@ -197,184 +228,175 @@
     </footer>
   </div>
 
-  <!-- Optional: your existing script, if you keep nav toggle etc. -->
+  <!-- Your existing script (optional) -->
   <script src="script.js"></script>
 
   <!-- Vibe core -->
-<script>
-(function(){
-  var d=document.documentElement, b=document.body;
+  <script>
+  (function(){
+    var d=document.documentElement, b=document.body;
 
-  /* ------- Replayable reveal ------- */
-  var els=[].slice.call(document.querySelectorAll('[data-animate]'));
-  if('IntersectionObserver' in window){
-    try{
-      var io=new IntersectionObserver(function(entries){
-        for(var i=0;i<entries.length;i++){
-          var e=entries[i];
-          if(e.isIntersecting) e.target.classList.add('reveal');
-          else e.target.classList.remove('reveal');
-        }
-      }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
-      els.forEach(function(el){ io.observe(el); });
-    }catch(_){
-      els.forEach(function(el){ el.classList.add('reveal'); });
-    }
-  }else{
-    els.forEach(function(el){ el.classList.add('reveal'); });
-  }
+    /* Reveal (replayable) */
+    var els=[].slice.call(document.querySelectorAll('[data-animate]'));
+    if('IntersectionObserver' in window){
+      try{
+        var io=new IntersectionObserver(function(entries){
+          for(var i=0;i<entries.length;i++){
+            var e=entries[i];
+            if(e.isIntersecting) e.target.classList.add('reveal');
+            else e.target.classList.remove('reveal');
+          }
+        }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
+        els.forEach(function(el){ io.observe(el); });
+      }catch(_){ els.forEach(function(el){ el.classList.add('reveal'); }); }
+    }else{ els.forEach(function(el){ el.classList.add('reveal'); }); }
 
-  /* ------- Global micro-drift ------- */
-  var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
-  function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
-  function driftTick(){
-    var vh = window.innerHeight || 1;
-    var sc = d.scrollTop || b.scrollTop;
-    for(var i=0;i<driftNodes.length;i++){
-      var el = driftNodes[i];
-      var multY = parseFloat(el.getAttribute('data-drift')); if(!(multY||multY===0)) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
-      var multX = parseFloat(el.getAttribute('data-drift-x')); if(!(multX||multX===0)) multX = 0.5 * multY;
-      var r = el.getBoundingClientRect();
-      var center = r.top + r.height/2;
-      var norm = (center - vh/2) / vh;
-      var y = clamp(-28 * norm * multY, -38, 38);
-      var x = Math.sin((sc*0.0045) + i*0.7) * (10 * multX);
-      el.style.setProperty('--dy', y + 'px');
-      el.style.setProperty('--dx', x + 'px');
+    /* Global drift */
+    var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
+    function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
+    function driftTick(){
+      var vh = window.innerHeight || 1;
+      var sc = d.scrollTop || b.scrollTop;
+      for(var i=0;i<driftNodes.length;i++){
+        var el = driftNodes[i];
+        var multY = parseFloat(el.getAttribute('data-drift')); if(!(multY||multY===0)) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
+        var multX = parseFloat(el.getAttribute('data-drift-x')); if(!(multX||multX===0)) multX = 0.5 * multY;
+        var r = el.getBoundingClientRect();
+        var center = r.top + r.height/2;
+        var norm = (center - vh/2) / vh;
+        var y = clamp(-28 * norm * multY, -38, 38);
+        var x = Math.sin((sc*0.0045) + i*0.7) * (10 * multX);
+        el.style.setProperty('--dy', y + 'px');
+        el.style.setProperty('--dx', x + 'px');
+      }
+      requestAnimationFrame(driftTick);
     }
     requestAnimationFrame(driftTick);
-  }
-  requestAnimationFrame(driftTick);
 
-  /* ------- Scroll progress ------- */
-  var bar=document.getElementById('scroll-progress');
-  function progress(){
-    var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
-    if(bar) bar.style.width=(sc/max*100)+'%';
-  }
-  progress(); document.addEventListener('scroll', progress, {passive:true});
-
-  /* ------- Spotlight (S) ------- */
-  var spot=false;
-  window.addEventListener('keydown',function(e){
-    if(e.key.toLowerCase()==='s'){ spot=!spot; d.classList.toggle('spotlight-on', spot); }
-  });
-  window.addEventListener('mousemove',function(e){
-    if(!spot) return;
-    d.style.setProperty('--mx', e.clientX+'px');
-    d.style.setProperty('--my', e.clientY+'px');
-  },{passive:true});
-
-  /* ------- Konami Party Mode ------- */
-  var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
-  window.addEventListener('keydown',function(e){
-    seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
-    for(var i=0,ok=true;i<konami.length;i++){ if(seq[i]!==konami[i]){ ok=false; break; } }
-    if(ok) d.classList.toggle('party');
-  });
-
-  /* ------- TRUE path morph (no cross-fade) ------- */
-  (function initMorph(){
-    var host = document.getElementById('morph-svg');
-    if(!host) return;
-
-    var SAMPLES = 140;            // 100–200 looks great
-    var STROKE_MIN = 5, STROKE_MAX = 8;
-
-    function toPathD(points){
-      if(!points.length) return '';
-      var d = 'M' + points[0].x + ',' + points[0].y;
-      for(var i=1;i<points.length;i++){ d += ' L' + points[i].x + ',' + points[i].y; }
-      return d;
+    /* Scroll progress */
+    var bar=document.getElementById('scroll-progress');
+    function progress(){
+      var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1;
+      if(bar) bar.style.width=(sc/max*100)+'%';
     }
-    function samplePath(pathEl, n){
-      var len = pathEl.getTotalLength();
-      var pts = new Array(n);
-      for(var i=0;i<n;i++){
-        var p = pathEl.getPointAtLength((i/(n-1))*len);
-        pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
+    progress(); document.addEventListener('scroll', progress, {passive:true});
+
+    /* Spotlight (S) */
+    var spot=false;
+    window.addEventListener('keydown',function(e){
+      if(e.key.toLowerCase()==='s'){ spot=!spot; d.classList.toggle('spotlight-on', spot); }
+    });
+    window.addEventListener('mousemove',function(e){
+      if(!spot) return;
+      d.style.setProperty('--mx', e.clientX+'px');
+      d.style.setProperty('--my', e.clientY+'px');
+    },{passive:true});
+
+    /* Konami Party Mode (↑↑↓↓←→←→BA) */
+    var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
+    window.addEventListener('keydown',function(e){
+      seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
+      for(var i=0,ok=true;i<konami.length;i++){ if(seq[i]!==konami[i]){ ok=false; break; } }
+      if(ok) d.classList.toggle('party');
+    });
+
+    /* TRUE path morph inside the column (between background and cards) */
+    (function initMorph(){
+      var host = document.getElementById('morph-svg');
+      if(!host) return;
+
+      var SAMPLES = 140;
+      var STROKE_MIN = 6, STROKE_MAX = 10;
+
+      function toPathD(points){
+        if(!points.length) return '';
+        var d = 'M' + points[0].x + ',' + points[0].y;
+        for(var i=1;i<points.length;i++){ d += ' L' + points[i].x + ',' + points[i].y; }
+        return d;
       }
-      return pts;
-    }
-    function blendPoints(a,b,t){
-      var out = new Array(a.length);
-      for(var i=0;i<a.length;i++){
-        out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
+      function samplePath(pathEl, n){
+        var len = pathEl.getTotalLength();
+        var pts = new Array(n);
+        for(var i=0;i<n;i++){
+          var p = pathEl.getPointAtLength((i/(n-1))*len);
+          pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
+        }
+        return pts;
       }
-      return out;
-    }
-    function pageT(){
-      var sc = d.scrollTop || b.scrollTop;
-      var max = (d.scrollHeight - d.clientHeight) || 1;
-      return Math.max(0, Math.min(1, sc/max));
-    }
-
-    fetch('assets/scroll-scrub.svg')
-      .then(function(r){ return r.text(); })
-      .then(function(txt){
-        host.innerHTML = txt;
-        var svg = host.querySelector('svg') || host.firstElementChild;
-        if(!svg) return;
-
-        var ids = ['#p1','#p2','#p3','#p4','#p5'];
-        var paths = [];
-        for(var i=0;i<ids.length;i++){
-          var el = svg.querySelector(ids[i]);
-          if(el) paths.push(el);
+      function blendPoints(a,b,t){
+        var out = new Array(a.length);
+        for(var i=0;i<a.length;i++){
+          out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
         }
-        if(paths.length<2) return;
+        return out;
+      }
+      function pageT(){
+        var sc = d.scrollTop || b.scrollTop;
+        var max = (d.scrollHeight - d.clientHeight) || 1;
+        return Math.max(0, Math.min(1, sc/max));
+      }
 
-        // sample once
-        var clouds = paths.map(function(p){ return samplePath(p, SAMPLES); });
+      fetch('assets/scroll-scrub.svg')
+        .then(function(r){ return r.text(); })
+        .then(function(txt){
+          host.innerHTML = txt;
+          var svg = host.querySelector('svg') || host.firstElementChild;
+          if(!svg) return;
 
-        // hide originals
-        for(var j=0;j<paths.length;j++){
-          paths[j].style.opacity = 0;
-          paths[j].style.pointerEvents = 'none';
-        }
+          var ids = ['#p1','#p2','#p3','#p4','#p5'];
+          var paths = [];
+          for(var i=0;i<ids.length;i++){
+            var el = svg.querySelector(ids[i]);
+            if(el) paths.push(el);
+          }
+          if(paths.length<2) return;
 
-        // blended path
-        var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
-        blend.setAttribute('fill','none');
-        blend.setAttribute('stroke','url(#grad)');
-        blend.setAttribute('stroke-linecap','round');
-        blend.setAttribute('stroke-linejoin','round');
-        blend.setAttribute('stroke-width', STROKE_MIN);
-        svg.appendChild(blend);
+          var clouds = paths.map(function(p){ return samplePath(p, SAMPLES); });
 
-        function lerp(a,b,t){ return a + (b-a)*t; }
+          paths.forEach(function(p){ p.style.opacity = 0; p.style.pointerEvents='none'; });
 
-        (function animate(){
-          var t = pageT();                     // 0..1
-          var seg = t * (clouds.length-1);     // 0..(N-1)
-          var i = Math.floor(seg);
-          var f = seg - i;
+          var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
+          blend.setAttribute('fill','none');
+          blend.setAttribute('stroke','url(#grad)');
+          blend.setAttribute('stroke-linecap','round');
+          blend.setAttribute('stroke-linejoin','round');
+          blend.setAttribute('stroke-width', STROKE_MIN);
+          svg.appendChild(blend);
 
-          var a = clouds[i];
-          var b = clouds[Math.min(i+1, clouds.length-1)];
-          var mix = blendPoints(a,b,f);
+          /* fallback if gradient not found or blend modes unsupported */
+          try{
+            if(!svg.querySelector('#grad')){ blend.setAttribute('stroke', '#7dd3fc'); }
+          }catch(_){ blend.setAttribute('stroke', '#7dd3fc'); }
 
-          blend.setAttribute('d', toPathD(mix));
-          blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
+          function lerp(a,b,t){ return a + (b-a)*t; }
 
-          requestAnimationFrame(animate);
-        })();
-      })
-      .catch(function(err){
-        // don’t break the site if the SVG can’t load
-        console.warn('morph svg load failed', err);
-      });
+          (function animate(){
+            var t = pageT();
+            var seg = t * (clouds.length-1);
+            var i = Math.floor(seg);
+            var f = seg - i;
+
+            var a = clouds[i];
+            var b = clouds[Math.min(i+1, clouds.length-1)];
+            var mix = blendPoints(a,b,f);
+
+            blend.setAttribute('d', toPathD(mix));
+            blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
+            requestAnimationFrame(animate);
+          })();
+        })
+        .catch(function(err){ console.warn('morph svg load failed', err); });
+    })();
+
+    /* Footer year */
+    var y=document.getElementById('year'); if(y) y.textContent=(new Date).getFullYear();
+
+    /* Minimal nav toggle (if you use it) */
+    try{
+      var toggle=document.getElementById('nav-toggle'), nav=document.getElementById('nav');
+      if(toggle && nav){ toggle.addEventListener('click', function(){ nav.classList.toggle('open'); }); }
+    }catch(_){}
   })();
-
-  /* ------- Footer year ------- */
-  var y=document.getElementById('year'); if(y) y.textContent=(new Date).getFullYear();
-
-  /* ------- Minimal nav toggle (if used) ------- */
-  try{
-    var toggle=document.getElementById('nav-toggle'), nav=document.getElementById('nav');
-    if(toggle && nav){ toggle.addEventListener('click', function(){ nav.classList.toggle('open'); }); }
-  }catch(_){}
-})();
-</script>
+  </script>
 </body>
 </html>
