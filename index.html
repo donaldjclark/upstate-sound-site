@@ -27,26 +27,30 @@
 </head>
 <body>
   <!-- Header / Hero section -->
-  <header id="hero">
-    <!-- Navigation is placed at the top of the hero to keep it out of the way of the logo -->
-    <nav id="nav">
-      <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
-      <ul class="nav-links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#services">Services</a></li>
-        <li><a href="#work">Past Work</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
-    </nav>
-    <!-- Overlay to ensure text stands out on the patterned background -->
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <!-- Logo graphic -->
-      <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" />
-      <p class="tagline">Where Sound Meets Vision.</p>
-    </div>
-  </header>
+  <header id="hero" data-animate>
+  <!-- Navigation -->
+  <nav id="nav" data-animate>
+    <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
+    <ul class="nav-links">
+      <li><a href="#about" data-animate>About</a></li>
+      <li><a href="#services" data-animate>Services</a></li>
+      <li><a href="#work" data-animate>Past Work</a></li>
+      <li><a href="#contact" data-animate>Contact</a></li>
+    </ul>
+  </nav>
 
+  <!-- Overlay -->
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content" data-animate>
+    <!-- Logo graphic -->
+    <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
+
+    <!-- Tagline drifts with scroll -->
+    <h1 data-parallax>Where Sound Meets Vision.</h1>
+  </div>
+</header>
+  
   <main>
     <!-- About Section -->
     <section id="about" class="section about-section">
