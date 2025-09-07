@@ -37,14 +37,14 @@
       background:rgba(10,10,10,.92);    /* slightly translucent so gutters peek */
       z-index:0;
     }
-/* Spotlight overlay */
-/* DRAMATIC spotlight w/ trail (built by JS) */
+/* Cursor-follow spotlight: bright additive glow + soft veil */
 #spotlight{
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9998;
-
+  mix-blend-mode: screen;   /* add light instead of darkening */
+}
   /* JS will override background with multiple radial-gradients + a dark veil.
      This is a strong fallback in case JS hasn’t run yet. */
   --sx: 50vw; --sy: 50vh; --rad: 180px;
@@ -307,25 +307,82 @@
     progress(); document.addEventListener('scroll', progress, {passive:true});
 
 
-/* Spotlight follows cursor (dramatic) */
+/* Spotlight: dramatic beam with breathing radius + glowing trail (single source of truth) */
 (function(){
-  var root = document.documentElement;
-  var sx = window.innerWidth/2, sy = window.innerHeight/2;
-  var tx = sx, ty = sy;
+  const spot = document.getElementById('spotlight');
+  if (!spot) return;
 
-  window.addEventListener('mousemove', function(e){
-    tx = e.clientX;
-    ty = e.clientY;
+  // Tunables
+  const EASE = 0.25;          // follow speed (0..1)
+  const BASE_RAD = 180;       // base radius
+  const BREATH_AMPL = 40;     // extra radius pulsing
+  const BREATH_SPEED = 0.0018;
+  const TRAIL_LEN = 10;       // number of ghosts
+  const TRAIL_SPACING = 1;    // frames between ghost samples
+  const TRAIL_FADE = 0.75;    // ghost brightness falloff
+  const GLOW_INNER = 0.95;    // center brightness
+  const GLOW_HALO  = 0.55;    // halo brightness
+  const DARK_VEIL  = 0.22;    // overall dim; keep this LOW so page stays visible
+
+  let tx = innerWidth/2, ty = innerHeight/2;
+  let x = tx, y = ty;
+
+  const trail = [];
+  let frame = 0;
+
+  addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; }, {passive:true});
+  addEventListener('touchstart', e => {
+    if (e.touches && e.touches[0]) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }
+  }, {passive:true});
+  addEventListener('touchmove', e => {
+    if (e.touches && e.touches[0]) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }
   }, {passive:true});
 
-  function tick(){
-    sx += (tx - sx) * 0.25; // faster response (0.25 vs 0.15)
-    sy += (ty - sy) * 0.25;
-    root.style.setProperty('--sx', sx + 'px');
-    root.style.setProperty('--sy', sy + 'px');
+  function grad(x, y, r, aCore, aHalo){
+    const core = `rgba(255,255,255,${aCore})`;
+    const halo = `rgba(255,255,255,${aHalo})`;
+    return `radial-gradient(circle ${r}px at ${x}px ${y}px,
+              ${core} 0%,
+              ${halo} ${Math.max(80, r*0.55)}px,
+              rgba(255,255,255,0) 70%)`;
+  }
+
+  function tick(now){
+    // follow cursor
+    x += (tx - x) * EASE;
+    y += (ty - y) * EASE;
+
+    // breathing radius
+    const radius = BASE_RAD + Math.sin(now * BREATH_SPEED) * BREATH_AMPL;
+
+    // trail sampling
+    if ((frame++ % TRAIL_SPACING) === 0){
+      trail.unshift({ x, y, r: radius });
+      if (trail.length > TRAIL_LEN) trail.pop();
+    }
+
+    // build layers (main light + ghosts + soft veil)
+    const layers = [];
+
+    // main light on top
+    layers.push(grad(x, y, Math.max(60, radius), 1.0, 0.75));
+
+    // ghosts underneath
+    for (let i = 0; i < trail.length; i++){
+      const t = i / Math.max(1, TRAIL_LEN - 1);
+      const fade = Math.pow(1 - t, 2) * TRAIL_FADE;
+      const r = trail[i].r * (1 - t*0.35);
+      layers.push(grad(trail[i].x, trail[i].y, Math.max(60, r), GLOW_INNER*fade, GLOW_HALO*fade));
+    }
+
+    // subtle veil at the very bottom (do NOT set too high)
+    layers.push(`linear-gradient(rgba(0,0,0,${DARK_VEIL}), rgba(0,0,0,${DARK_VEIL}))`);
+
+    spot.style.background = layers.join(',');
+
     requestAnimationFrame(tick);
   }
-  tick();
+  requestAnimationFrame(tick);
 })();
 
   // Optional: toggle with "S" key
