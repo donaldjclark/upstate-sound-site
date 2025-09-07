@@ -37,20 +37,33 @@
       background:rgba(10,10,10,.92);    /* slightly translucent so gutters peek */
       z-index:0;
     }
-
+/* Spotlight overlay */
+#spotlight {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(
+    circle at var(--sx, 50vw) var(--sy, 50vh),
+    rgba(255,255,255,0.07) 0%,
+    rgba(255,255,255,0.03) 45%,
+    transparent 70%
+  );
+  transition: background 0.08s ease-out;
+}
     /* ===== MORPH: fixed, centered, sized to column; between bg and cards ===== */
-    .morph-wrap{
-      position:fixed;
-      left:50vw; top:50vh; transform:translate(-50%,-50%);
-      width:min(1100px,92vw);
-      height:300px;                     /* larger than before */
-      display:grid; place-items:center;
-      z-index:1;                        /* above ::before, below .section */
-      pointer-events:none;
-      opacity:.9;                       /* brighter */
-      mix-blend-mode:screen;            /* glow on the dark column */
-    }
-    .morph-wrap svg{ width:100%; height:100%; }
+   .morph-wrap{
+  position:fixed;
+  left:50vw; top:50vh; transform:translate(-50%,-50%);
+  width:min(1100px,92vw);
+  height:340px;                 /* a bit taller */
+  display:grid; place-items:center;
+  z-index:1;                    /* above column bg (::before), below content */
+  pointer-events:none;
+  opacity:1;                    /* fully visible */
+  mix-blend-mode:normal;        /* was screen; normal is bolder on dark */
+}
+.morph-wrap svg{ width:100%; height:100%; overflow:visible; }
 
     /* Sections / cards */
     .section{ position:relative; z-index:2; padding:64px 24px; }
@@ -152,7 +165,7 @@
 </head>
 <body>
   <div id="scroll-progress" aria-hidden="true"></div>
-
+  <div id="spotlight" aria-hidden="true"></div>
   <!-- Content column (bg via ::before) -->
   <div class="content-frame">
     <!-- Morph sits inside the column, between bg (::before) and your cards -->
@@ -285,10 +298,37 @@
     progress(); document.addEventListener('scroll', progress, {passive:true});
 
     /* Spotlight (S) */
-    var spot=false;
-    window.addEventListener('keydown',function(e){ if(e.key.toLowerCase()==='s'){ spot=!spot; d.classList.toggle('spotlight-on', spot); } });
-    window.addEventListener('mousemove',function(e){ if(!spot) return; d.style.setProperty('--mx', e.clientX+'px'); d.style.setProperty('--my', e.clientY+'px'); },{passive:true});
+    /* Spotlight that follows cursor */
+(function(){
+  const spot = document.getElementById('spotlight');
+  if (!spot) return;
 
+  let tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+  let x = tx, y = ty;
+
+  function loop(){
+    x += (tx - x) * 0.15;   // easing factor
+    y += (ty - y) * 0.15;
+    spot.style.setProperty('--sx', x + 'px');
+    spot.style.setProperty('--sy', y + 'px');
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  window.addEventListener('mousemove', e => {
+    tx = e.clientX; ty = e.clientY;
+  }, { passive: true });
+
+  // Optional: toggle with "S" key
+  let on = true;
+  document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 's') {
+      on = !on;
+      spot.style.display = on ? 'block' : 'none';
+    }
+  });
+})();
+    
     /* Konami Party Mode */
     var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
     window.addEventListener('keydown',function(e){
