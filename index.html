@@ -70,6 +70,19 @@
 
     /* ---------- Header / Hero ---------- */
     #hero{ position:relative; padding:80px 24px 48px; text-align:center; }
+    #hero h1.tape {
+  color: #111;  
+  text-shadow: 
+    0 0 6px rgba(34,211,238,0.8),   /* cyan inner glow */
+    0 0 14px rgba(167,139,250,0.65),/* purple halo */
+    0 0 26px rgba(34,211,238,0.45); /* cyan outer aura */
+}
+    /* Logo glow */
+.logo {
+  filter: drop-shadow(0 0 6px rgba(34,211,238,0.8))
+          drop-shadow(0 0 14px rgba(167,139,250,0.65))
+          drop-shadow(0 0 26px rgba(34,211,238,0.45));
+}
     .hero-overlay{
       position:absolute; inset:0;
       /* light -> dark, fading into the black panel */
