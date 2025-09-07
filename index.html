@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC</title>
 
-  <!-- Fonts + your stylesheet -->
+  <!-- Fonts + stylesheet -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=4" />
 
@@ -15,77 +15,64 @@
     html{ background:url('assets/background.png') center / cover fixed no-repeat; }
     body{ margin:0; color:#e6e6e6; font-family:"Space Grotesk",system-ui,sans-serif; background:transparent; }
 
-    /* Content column creates a local stacking context:
-       ::before (0) = the dark column bg
-       .morph-wrap (1) = the wave
-       .section (2) = your content/cards
-    */
+    /* Content column (dark panel) */
     .content-frame{
       position:relative;
       max-width:1100px; margin:0 auto;
-      background:transparent;          /* bg moved to ::before so morph can sit above it */
+      background:transparent;
       min-height:100dvh;
-      z-index:2;                        /* creates local stacking context */
+      z-index:2;
       overflow:clip;
     }
     .content-frame::before{
       content:"";
-      position:fixed;                   /* fixed so column bg doesn’t scroll */
+      position:fixed;             /* fixed so it doesn’t scroll */
       left:50vw; top:0; transform:translateX(-50%);
       width:min(1100px,92vw);
       height:100vh;
-      background:rgba(10,10,10,.92);    /* slightly translucent so gutters peek */
-      z-index:0;
+      background:rgba(10,10,10,.92);
+      z-index:0;                  /* bg layer */
     }
-/* Cursor-follow spotlight: bright additive glow + soft veil */
-#spotlight{
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9998;
-  mix-blend-mode: screen;   /* add light instead of darkening */
-}
-  /* JS will override background with multiple radial-gradients + a dark veil.
-     This is a strong fallback in case JS hasn’t run yet. */
-  --sx: 50vw; --sy: 50vh; --rad: 180px;
-  background:
-    radial-gradient(
-      circle var(--rad) at var(--sx) var(--sy),
-      rgba(255,255,255,0.95) 0%,
-      rgba(255,255,255,0.55) 120px,
-      rgba(255,255,255,0.00) 70%
-    ),
-    linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.68));
-  transition: background 0.05s ease-out;
-  /* Let the light “punch” through; screen looks great on dark columns */
-  mix-blend-mode: screen;
-}
-    /* ===== MORPH: fixed, centered, sized to column; between bg and cards ===== */
-   .morph-wrap{
-  position:fixed;
-  left:50vw; top:50vh; transform:translate(-50%,-50%);
-  width:min(1100px,92vw);
-  height:340px;                 /* a bit taller */
-  display:grid; place-items:center;
-  z-index:1;                    /* above column bg (::before), below content */
-  pointer-events:none;
-  opacity:1;                    /* fully visible */
-  mix-blend-mode:normal;        /* was screen; normal is bolder on dark */
-}
-.morph-wrap svg{ width:100%; height:100%; overflow:visible; }
+
+    /* Spotlight overlay — follows cursor, brightens (no dark veil) */
+    #spotlight{
+      position:fixed; inset:0;
+      pointer-events:none;
+      z-index:9998;
+      mix-blend-mode:screen;      /* additive */
+      background:radial-gradient(circle 220px at 50vw 50vh,
+        rgba(255,255,255,1) 0%,
+        rgba(255,255,255,.70) 40%,
+        rgba(255,255,255,0) 80%);
+      transition:background .05s ease-out;
+    }
+
+    /* MORPH: fixed, centered, between bg and cards */
+    .morph-wrap{
+      position:fixed;
+      left:50vw; top:50vh; transform:translate(-50%,-50%);
+      width:min(1100px,92vw);
+      height:300px;
+      display:grid; place-items:center;
+      z-index:1;                  /* above ::before, below content */
+      pointer-events:none;
+      opacity:.95;
+      mix-blend-mode:screen;      /* glows on the dark panel */
+    }
+    .morph-wrap svg{ width:100%; height:100%; overflow:visible; }
 
     /* Sections / cards */
     .section{ position:relative; z-index:2; padding:64px 24px; }
     .section.alt{ background:#111; }
 
-    h1,h2,h3{ margin:0 0 16px; font-family:"Montserrat",system-ui,sans-serif; color:#0b0b0c; }
+    h1,h2,h3{ margin:0 0 16px; font-family:"Montserrat",system-ui,sans-serif; color:#f4f4f5; }
     p{ color:#c9c9ce; line-height:1.6; }
 
     /* ---------- Header / Hero ---------- */
     #hero{ position:relative; padding:80px 24px 48px; text-align:center; }
     .hero-overlay{
       position:absolute; inset:0;
-      /* light -> dark, fading into black column */
+      /* light -> dark, fading into the black panel */
       background:linear-gradient(180deg, rgba(250,249,246,0) 0%, rgba(10,10,10,.08) 45%, rgba(10,10,10,.60) 100%);
       pointer-events:none;
     }
@@ -100,7 +87,7 @@
     }
     @media (prefers-reduced-motion:reduce){ .tape{ animation:none } }
 
-    /* Nav (simple) */
+    /* Nav */
     #nav{ display:flex; justify-content:flex-end; gap:24px; margin-bottom:12px; }
     #nav a{ color:#b9b9ff; text-decoration:none; font-weight:700; letter-spacing:.02em; }
     #nav-toggle{ display:none; }
@@ -126,10 +113,6 @@
       padding:10px 24px; margin:-10px -24px 16px;
     }
 
-    /* Past work */
-    .work-section ul{ padding-left:20px; }
-    .work-section li{ margin:12px 0; }
-
     /* Paper panel for About */
     .paper{
       background:#f4f2eb; color:#111; border-radius:12px;
@@ -138,6 +121,10 @@
     }
     .paper h2{ color:#111; }
     .paper p{ color:#222; }
+
+    /* Past work list */
+    .work-section ul{ padding-left:20px; }
+    .work-section li{ margin:12px 0; }
 
     /* Footer */
     .footer{ padding:32px 24px; text-align:center; color:#aaa; }
@@ -149,15 +136,6 @@
 
     /* Progress bar */
     #scroll-progress{ position:fixed; inset:0 auto auto 0; height:3px; width:0%; background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999; }
-
-    /* Spotlight (S) */
-    html.spotlight-on body{
-      --mx:50vw; --my:50vh; --rad:clamp(360px,42vw,720px); --edge:calc(var(--rad)*0.65);
-      -webkit-mask-image:radial-gradient(var(--rad) var(--rad) at var(--mx) var(--my), #000 0%, rgba(0,0,0,.6) var(--edge), transparent 100%);
-      mask-image:radial-gradient(var(--rad) var(--rad) at var(--mx) var(--my), #000 0%, rgba(0,0,0,.6) var(--edge), transparent 100%);
-      backdrop-filter:brightness(1.18) saturate(1.12);
-      transition:mask-image .12s ease;
-    }
 
     /* Party mode */
     @keyframes hueRoll{ from{filter:hue-rotate(0)} to{filter:hue-rotate(360deg)} }
@@ -175,13 +153,14 @@
 <body>
   <div id="scroll-progress" aria-hidden="true"></div>
   <div id="spotlight" aria-hidden="true"></div>
-  <!-- Content column (bg via ::before) -->
+
   <div class="content-frame">
-    <!-- Morph sits inside the column, between bg (::before) and your cards -->
+    <!-- Morph sits between the dark panel and your content -->
     <div class="morph-wrap" aria-hidden="true">
       <div id="morph-svg"></div>
     </div>
 
+    <!-- ===== HEADER / HERO ===== -->
     <header id="hero" class="section" data-animate>
       <nav id="nav" data-animate>
         <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
@@ -193,16 +172,19 @@
 
       <div class="hero-overlay"></div>
       <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
-      <h1 class="tape" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
+      <h1 class="tape" style="color:#111" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
     </header>
 
+    <!-- ===== MAIN ===== -->
     <main>
+      <!-- About -->
       <section id="about" class="section about-section paper" data-animate>
         <h2 data-animate>About</h2>
         <p data-animate>Hey, I’m Donald—a lifelong chaser of tone and tinkerer of broken gear. I’m an audio engineer, live-sound tech, repair whisperer, and, on rare occasions, a musician who actually finishes a song. If you’re here, you probably care about your gear as much as your music—so do I.</p>
         <p data-animate>Upstate Sound &amp; Repair is my way of keeping our little corner of the world humming, one recalcitrant circuit at a time. I consult for venues, help artists chase good sound, and I show up when your vintage Moog throws a tantrum or your podcast needs a little love. If you want work done right (but not uptight), I’m the guy who shows up with a soldering iron, way too many opinions, and a sense of humor.</p>
       </section>
 
+      <!-- Services -->
       <section id="services" class="section services-section alt" data-animate>
         <h2 class="services-sticky" data-animate>Services</h2>
         <div class="services-grid">
@@ -233,6 +215,7 @@
         </div>
       </section>
 
+      <!-- Past Work -->
       <section id="work" class="section work-section" data-animate>
         <h2 data-animate>Past Work</h2>
         <ul class="work-list">
@@ -244,6 +227,7 @@
         </ul>
       </section>
 
+      <!-- Contact -->
       <section id="contact" class="section contact-section" data-animate>
         <h2 data-animate>Contact</h2>
         <p data-animate>Ready to get that crackling amp sorted, record a new podcast or just chat about synths? Drop me a line — I’m based in Greenville, South Carolina and I love meeting fellow audio nerds.</p>
@@ -259,7 +243,6 @@
   <!-- Optional: your existing JS -->
   <script src="script.js"></script>
 
-  <!-- Vibe core -->
   <script>
   (function(){
     var d=document.documentElement, b=document.body;
@@ -267,36 +250,27 @@
     /* Reveal (replayable) */
     var els=[].slice.call(document.querySelectorAll('[data-animate]'));
     if('IntersectionObserver' in window){
-      try{
-        var io=new IntersectionObserver(function(entries){
-          for(var i=0;i<entries.length;i++){
-            var e=entries[i];
-            if(e.isIntersecting) e.target.classList.add('reveal');
-            else e.target.classList.remove('reveal');
-          }
-        }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
-        els.forEach(function(el){ io.observe(el); });
-      }catch(_){ els.forEach(function(el){ el.classList.add('reveal'); }); }
-    }else{ els.forEach(function(el){ el.classList.add('reveal'); }); }
+      var io=new IntersectionObserver(function(entries){
+        for(const e of entries){ e.target.classList.toggle('reveal', e.isIntersecting); }
+      }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
+      els.forEach(el=>io.observe(el));
+    } else { els.forEach(el=>el.classList.add('reveal')); }
 
-    /* Global drift */
+    /* Global drift (Y + micro X) */
     var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
     function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
     function driftTick(){
-      var vh = window.innerHeight || 1;
-      var sc = d.scrollTop || b.scrollTop;
-      for(var i=0;i<driftNodes.length;i++){
-        var el = driftNodes[i];
+      var vh = innerHeight||1, sc = d.scrollTop||b.scrollTop;
+      driftNodes.forEach((el,i)=>{
         var multY = parseFloat(el.getAttribute('data-drift')); if(!(multY||multY===0)) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
         var multX = parseFloat(el.getAttribute('data-drift-x')); if(!(multX||multX===0)) multX = 0.5 * multY;
-        var r = el.getBoundingClientRect();
-        var center = r.top + r.height/2;
-        var norm = (center - vh/2) / vh;
-        var y = clamp(-28 * norm * multY, -38, 38);
-        var x = Math.sin((sc*0.0045) + i*0.7) * (10 * multX);
-        el.style.setProperty('--dy', y + 'px');
-        el.style.setProperty('--dx', x + 'px');
-      }
+        var r=el.getBoundingClientRect(), center=r.top+r.height/2;
+        var norm=(center - vh/2)/vh;
+        var y=clamp(-28 * norm * multY, -38, 38);
+        var x=Math.sin((sc*0.0045)+i*0.7) * (10*multX);
+        el.style.setProperty('--dy', y+'px');
+        el.style.setProperty('--dx', x+'px');
+      });
       requestAnimationFrame(driftTick);
     }
     requestAnimationFrame(driftTick);
@@ -304,133 +278,62 @@
     /* Scroll progress */
     var bar=document.getElementById('scroll-progress');
     function progress(){ var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1; if(bar) bar.style.width=(sc/max*100)+'%'; }
-    progress(); document.addEventListener('scroll', progress, {passive:true});
+    progress(); addEventListener('scroll',progress,{passive:true});
 
+    /* Spotlight: cursor-follow (toggle with "S") */
+    (function(){
+      const spot=document.getElementById('spotlight'); if(!spot) return;
+      let tx=innerWidth/2, ty=innerHeight/2, x=tx, y=ty;
+      const EASE=0.20, RAD=220;
+      addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY;},{passive:true});
+      function tick(){
+        x+=(tx-x)*EASE; y+=(ty-y)*EASE;
+        spot.style.background=`radial-gradient(circle ${RAD}px at ${x}px ${y}px,
+          rgba(255,255,255,1) 0%,
+          rgba(255,255,255,.70) 40%,
+          rgba(255,255,255,0) 80%)`;
+        requestAnimationFrame(tick);
+      }
+      tick();
+      let on=true;
+      addEventListener('keydown',e=>{ if(e.key.toLowerCase()==='s'){ on=!on; spot.style.display=on?'block':'none'; }});
+    })();
 
-/* Spotlight: dramatic beam with breathing radius + glowing trail (single source of truth) */
-(function(){
-  const spot = document.getElementById('spotlight');
-  if (!spot) return;
-
-  let tx = innerWidth/2, ty = innerHeight/2;
-  let x = tx, y = ty;
-  const EASE = 0.25;
-  const BASE_RAD = 180;
-
-  addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; }, {passive:true});
-
-  function tick(){
-    x += (tx - x) * EASE;
-    y += (ty - y) * EASE;
-
-    const radius = BASE_RAD;
-    spot.style.background = `radial-gradient(circle ${radius}px at ${x}px ${y}px,
-      rgba(255,255,255,1) 0%,
-      rgba(255,255,255,.75) 40%,
-      rgba(255,255,255,0) 80%)`;
-
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-
-  // Optional: toggle with "S" key
-  let on = true;
-  document.addEventListener('keydown', e => {
-    if (e.key.toLowerCase() === 's') {
-      on = !on;
-      spot.style.display = on ? 'block' : 'none';
-    }
-  });
-})();
-    
     /* Konami Party Mode */
-    var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
-    window.addEventListener('keydown',function(e){
-      seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
-      for(var i=0,ok=true;i<konami.length;i++){ if(seq[i]!==konami[i]){ ok=false; break; } }
-      if(ok) d.classList.toggle('party');
+    var seq=[], code=[38,38,40,40,37,39,37,39,66,65];
+    addEventListener('keydown',e=>{
+      seq.push(e.keyCode); if(seq.length>code.length) seq.shift();
+      if(seq.every((v,i)=>v===code[i])) d.classList.toggle('party');
     });
 
-    /* TRUE path morph (fixed, centered) */
+    /* Morph: scroll-scrub between 5 shapes */
     (function initMorph(){
-      var host = document.getElementById('morph-svg');
-      if(!host) return;
-
-      var SAMPLES = 140;
-      var STROKE_MIN = 9, STROKE_MAX = 13;   // thicker for visibility
-
-      function toPathD(points){
-        if(!points.length) return '';
-        var d = 'M' + points[0].x + ',' + points[0].y;
-        for(var i=1;i<points.length;i++){ d += ' L' + points[i].x + ',' + points[i].y; }
-        return d;
-      }
-      function samplePath(pathEl, n){
-        var len = pathEl.getTotalLength();
-        var pts = new Array(n);
-        for(var i=0;i<n;i++){
-          var p = pathEl.getPointAtLength((i/(n-1))*len);
-          pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
-        }
-        return pts;
-      }
-      function blendPoints(a,b,t){
-        var out = new Array(a.length);
-        for(var i=0;i<a.length;i++){
-          out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
-        }
-        return out;
-      }
-      function pageT(){
-        var sc = d.scrollTop || b.scrollTop;
-        var max = (d.scrollHeight - d.clientHeight) || 1;
-        return Math.max(0, Math.min(1, sc/max));
-      }
-
-      fetch('assets/scroll-scrub.svg')
-        .then(function(r){ return r.text(); })
-        .then(function(txt){
-          host.innerHTML = txt;
-          var svg = host.querySelector('svg') || host.firstElementChild;
-          if(!svg) return;
-
-          var ids = ['#p1','#p2','#p3','#p4','#p5'];
-          var paths = [];
-          for(var i=0;i<ids.length;i++){ var el = svg.querySelector(ids[i]); if(el) paths.push(el); }
-          if(paths.length<2) return;
-
-          var clouds = paths.map(function(p){ return samplePath(p, SAMPLES); });
-
-          paths.forEach(function(p){ p.style.opacity = 0; p.style.pointerEvents='none'; });
-
-          var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
-          blend.setAttribute('fill','none');
-          // Prefer gradient if present; fall back to a nice cyan
-          blend.setAttribute('stroke', svg.querySelector('#grad') ? 'url(#grad)' : '#7dd3fc');
-          blend.setAttribute('stroke-linecap','round');
-          blend.setAttribute('stroke-linejoin','round');
-          blend.setAttribute('stroke-width', STROKE_MIN);
-          svg.appendChild(blend);
-
-          function lerp(a,b,t){ return a + (b-a)*t; }
-
-          (function animate(){
-            var t = pageT();
-            var seg = t * (clouds.length-1);
-            var i = Math.floor(seg);
-            var f = seg - i;
-
-            var a = clouds[i];
-            var b = clouds[Math.min(i+1, clouds.length-1)];
-            var mix = blendPoints(a,b,f);
-
-            blend.setAttribute('d', toPathD(mix));
-            blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
-            requestAnimationFrame(animate);
-          })();
-        })
-        .catch(function(err){ console.warn('morph svg load failed', err); });
+      var host=document.getElementById('morph-svg'); if(!host) return;
+      var SAMPLES=140, STROKE_MIN=9, STROKE_MAX=13;
+      function toPathD(pts){ return pts.reduce((d,p,i)=>d+(i?' L':'M')+p.x+','+p.y,''); }
+      function sample(pEl,n){ var len=pEl.getTotalLength(); return [...Array(n)].map((_,i)=>{var p=pEl.getPointAtLength((i/(n-1))*len); return {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};}); }
+      function blend(a,b,t){ return a.map((p,i)=>({x:p.x+(b[i].x-p.x)*t, y:p.y+(b[i].y-p.y)*t})); }
+      function pageT(){ var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1; return Math.max(0,Math.min(1,sc/max)); }
+      fetch('assets/scroll-scrub.svg').then(r=>r.text()).then(txt=>{
+        host.innerHTML=txt; var svg=host.querySelector('svg'); if(!svg) return;
+        var paths=['#p1','#p2','#p3','#p4','#p5'].map(id=>svg.querySelector(id)).filter(Boolean);
+        if(paths.length<2) return;
+        var clouds=paths.map(p=>sample(p,SAMPLES)); paths.forEach(p=>p.style.opacity=0);
+        var blendPath=document.createElementNS('http://www.w3.org/2000/svg','path');
+        blendPath.setAttribute('fill','none');
+        blendPath.setAttribute('stroke', svg.querySelector('#grad') ? 'url(#grad)' : '#7dd3fc');
+        blendPath.setAttribute('stroke-linecap','round'); blendPath.setAttribute('stroke-linejoin','round');
+        blendPath.setAttribute('stroke-width',STROKE_MIN);
+        svg.appendChild(blendPath);
+        function lerp(a,b,t){return a+(b-a)*t;}
+        (function anim(){
+          var t=pageT(), seg=t*(clouds.length-1), i=Math.floor(seg), f=seg-i;
+          var mix=blend(clouds[i],clouds[Math.min(i+1,clouds.length-1)],f);
+          blendPath.setAttribute('d',toPathD(mix));
+          blendPath.setAttribute('stroke-width',lerp(STROKE_MIN,STROKE_MAX,Math.sin(t*Math.PI)));
+          requestAnimationFrame(anim);
+        })();
+      });
     })();
 
     /* Footer year */
