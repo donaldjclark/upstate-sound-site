@@ -38,18 +38,27 @@
       z-index:0;
     }
 /* Spotlight overlay */
-#spotlight {
+/* DRAMATIC spotlight w/ trail (built by JS) */
+#spotlight{
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9998;
-  background: radial-gradient(
-    circle at var(--sx, 50vw) var(--sy, 50vh),
-    rgba(255,255,255,0.07) 0%,
-    rgba(255,255,255,0.03) 45%,
-    transparent 70%
-  );
-  transition: background 0.08s ease-out;
+
+  /* JS will override background with multiple radial-gradients + a dark veil.
+     This is a strong fallback in case JS hasn’t run yet. */
+  --sx: 50vw; --sy: 50vh; --rad: 180px;
+  background:
+    radial-gradient(
+      circle var(--rad) at var(--sx) var(--sy),
+      rgba(255,255,255,0.95) 0%,
+      rgba(255,255,255,0.55) 120px,
+      rgba(255,255,255,0.00) 70%
+    ),
+    linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.68));
+  transition: background 0.05s ease-out;
+  /* Let the light “punch” through; screen looks great on dark columns */
+  mix-blend-mode: screen;
 }
     /* ===== MORPH: fixed, centered, sized to column; between bg and cards ===== */
    .morph-wrap{
@@ -297,27 +306,27 @@
     function progress(){ var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1; if(bar) bar.style.width=(sc/max*100)+'%'; }
     progress(); document.addEventListener('scroll', progress, {passive:true});
 
-    /* Spotlight (S) */
-    /* Spotlight that follows cursor */
+
+/* Spotlight follows cursor (dramatic) */
 (function(){
-  const spot = document.getElementById('spotlight');
-  if (!spot) return;
+  var root = document.documentElement;
+  var sx = window.innerWidth/2, sy = window.innerHeight/2;
+  var tx = sx, ty = sy;
 
-  let tx = window.innerWidth / 2, ty = window.innerHeight / 2;
-  let x = tx, y = ty;
+  window.addEventListener('mousemove', function(e){
+    tx = e.clientX;
+    ty = e.clientY;
+  }, {passive:true});
 
-  function loop(){
-    x += (tx - x) * 0.15;   // easing factor
-    y += (ty - y) * 0.15;
-    spot.style.setProperty('--sx', x + 'px');
-    spot.style.setProperty('--sy', y + 'px');
-    requestAnimationFrame(loop);
+  function tick(){
+    sx += (tx - sx) * 0.25; // faster response (0.25 vs 0.15)
+    sy += (ty - sy) * 0.25;
+    root.style.setProperty('--sx', sx + 'px');
+    root.style.setProperty('--sy', sy + 'px');
+    requestAnimationFrame(tick);
   }
-  requestAnimationFrame(loop);
-
-  window.addEventListener('mousemove', e => {
-    tx = e.clientX; ty = e.clientY;
-  }, { passive: true });
+  tick();
+})();
 
   // Optional: toggle with "S" key
   let on = true;
