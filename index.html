@@ -15,38 +15,37 @@
     html{ background:url('assets/background.png') center / cover fixed no-repeat; }
     body{ margin:0; color:#e6e6e6; font-family:"Space Grotesk",system-ui,sans-serif; background:transparent; }
 
-    .content-frame{
-  position: relative;
+   .content-frame{
+  position:relative;
   max-width:1100px; margin:0 auto;
-  /* background:#0a0a0a;   <-- remove this */
+  background:#0a0a0a;        /* ← back to a real background */
   min-height:100dvh;
-  z-index:2;                 /* column sits above page bg */
-  overflow: clip;
+  z-index:1;                  /* above the morph */
+  overflow:clip;
 }
 
 /* NEW: black background as layer 0 */
-.content-frame::before{
   content:"";
   position:absolute; inset:0;
   background:#0a0a0a;
   z-index:0;                 /* under morph + sections */
 }
 
-    /* morph layer between ::before (z0) and sections (z2) */
+/* morph lives between the page background and the column */
 .morph-wrap{
-  position: fixed;           /* fixed to viewport */
+  position:fixed;                   /* stays centered while you scroll */
   left:50vw; top:50vh; transform:translate(-50%,-50%);
   width:min(1100px,92vw); height:60vh;
   display:grid; place-items:center;
-  z-index:1;                 /* above ::before, below content */
+  z-index:0;                        /* under the column */
   pointer-events:none;
   opacity:.6;
-  mix-blend-mode:screen;     /* looks luminous on dark */
+  mix-blend-mode:screen;
 }
 .morph-wrap svg{ width:100%; height:100%; }
 
-    /* Sections / cards */
-    .section{ position:relative; z-index:2; padding:64px 24px; }
+/* sections are naturally above because the column has z-index:1 */
+.section{ position:relative; z-index:2; }  /* keep if you already had it */
     .section.alt{ background:#111; }
 
     h1,h2,h3{ margin:0 0 16px; font-family:"Montserrat",system-ui,sans-serif; color:#f4f4f5; }
