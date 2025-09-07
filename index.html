@@ -1,406 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>document.documentElement.classList.add('js')</script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC</title>
-
-  <!-- Fonts + your stylesheet -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upstate Sound & Repair – Boutique audio service in Greenville, SC</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4" />
 
   <style>
-    /* ---------- Page frame / background gutters ---------- */
-    html{ background:url('assets/background.png') center / cover fixed no-repeat; }
-    body{ margin:0; color:#e6e6e6; font-family:"Space Grotesk",system-ui,sans-serif; background:transparent; }
+    /* Page background (gutters) */
+    body {
+      margin:0;
+      font-family: 'Space Grotesk', sans-serif;
+      background: url("assets/background.png") center/cover no-repeat fixed;
+      color:#111;
+    }
 
-   .content-frame{
-  position:relative;
-  max-width:1100px; margin:0 auto;
-  background:#0a0a0a;        /* ← back to a real background */
-  min-height:100dvh;
-  z-index:1;                  /* above the morph */
-  overflow:clip;
-}
+    /* Morph wave layer */
+    .morph-wrap{
+      position:fixed;
+      left:50vw; top:50vh;
+      transform:translate(-50%,-50%);
+      width:min(1100px,92vw); height:60vh;
+      display:grid; place-items:center;
+      z-index:0;                  /* behind content column */
+      pointer-events:none;
+      opacity:.6;
+      mix-blend-mode:screen;
+    }
+    .morph-wrap svg{ width:100%; height:100%; }
 
-/* NEW: black background as layer 0 */
-  content:"";
-  position:absolute; inset:0;
-  background:#0a0a0a;
-  z-index:0;                 /* under morph + sections */
-}
+    /* Black content column */
+    .content-frame{
+      position:relative;
+      max-width:1100px;
+      margin:0 auto;
+      background:#0a0a0a;
+      min-height:100dvh;
+      z-index:1;
+      overflow:clip;
+      padding:2rem;
+      box-sizing:border-box;
+    }
 
-/* morph lives between the page background and the column */
-.morph-wrap{
-  position:fixed;                   /* stays centered while you scroll */
-  left:50vw; top:50vh; transform:translate(-50%,-50%);
-  width:min(1100px,92vw); height:60vh;
-  display:grid; place-items:center;
-  z-index:0;                        /* under the column */
-  pointer-events:none;
-  opacity:.6;
-  mix-blend-mode:screen;
-}
-.morph-wrap svg{ width:100%; height:100%; }
+    /* Sections layered above morph + black background */
+    .section{
+      position:relative;
+      z-index:2;
+      margin-bottom:3rem;
+    }
 
-/* sections are naturally above because the column has z-index:1 */
-.section{ position:relative; z-index:2; }  /* keep if you already had it */
-    .section.alt{ background:#111; }
-
-    h1,h2,h3{ margin:0 0 16px; font-family:"Montserrat",system-ui,sans-serif; color:#f4f4f5; }
-    p{ color:#c9c9ce; line-height:1.6; }
-
-    /* ---------- Header / Hero ---------- */
-    #hero{ position:relative; padding:80px 24px 48px; text-align:center; }
+    /* Hero */
+    #hero{ text-align:center; padding:4rem 2rem; }
+    #hero h1{ font-size:2.5rem; margin-top:1rem; color:#111; }
     .hero-overlay{
       position:absolute; inset:0;
-      background:linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,.05) 55%, rgba(10,10,10,.60) 100%);
+      background:linear-gradient(
+        180deg,
+        rgba(10,10,10,0) 0%,
+        rgba(10,10,10,.05) 55%,
+        rgba(10,10,10,.60) 100%
+      );
       pointer-events:none;
     }
-    .logo{ display:block; margin:0 auto 24px; width:220px; height:auto; }
-    .tape{ display:inline-block; animation:tapeWobble 1.2s ease-in-out infinite; transform-origin:50% 50%; }
-    @keyframes tapeWobble {
-      0%{ transform:translateY(0) rotate(-.18deg) skewX(.12deg) }
-      25%{ transform:translateY(-1px) rotate(.22deg) skewX(-.1deg) }
-      50%{ transform:translateY(.6px) rotate(-.14deg) skewX(.06deg) }
-      75%{ transform:translateY(-.8px) rotate(.18deg) skewX(-.06deg) }
-      100%{ transform:translateY(0) rotate(-.18deg) skewX(.12deg) }
-    }
-    @media (prefers-reduced-motion:reduce){ .tape{ animation:none } }
 
-    /* Nav (simple) */
-    #nav{ display:flex; justify-content:flex-end; gap:24px; margin-bottom:12px; }
-    #nav a{ color:#b9b9ff; text-decoration:none; font-weight:700; letter-spacing:.02em; }
-    #nav-toggle{ display:none; }
-
-    /* Glitch links */
-    a.glitch{ position:relative; display:inline-block; text-decoration:none; }
-    a.glitch::before, a.glitch::after{ content:attr(data-text); position:absolute; inset:0; opacity:0; mix-blend-mode:screen; }
-    a.glitch::before{ color:#22d3ee } a.glitch::after{ color:#a78bfa }
-    @keyframes glitchX{ 0%{transform:translate(0,0)} 20%{transform:translate(1px,-1px)} 40%{transform:translate(-1px,1px)} 60%{transform:translate(2px,0)} 80%{transform:translate(-2px,1px)} 100%{transform:translate(0,0)} }
-    a.glitch:hover::before, a.glitch:hover::after{ opacity:.7; animation:glitchX .18s steps(2,end) infinite; }
-
-    /* Services grid */
-    .services-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:28px; }
-    .service-card{ background:#f4f2eb; color:#142; border-radius:12px; padding:22px; box-shadow:0 10px 28px rgba(0,0,0,.25); }
-    .service-card h3{ color:#0b2340; }
-    .service-card p{ color:#213; }
-
-    /* Sticky Services title */
-    .services-sticky{
-      position:sticky; top:0; z-index:20;
-      background:linear-gradient(#0a0a0acc,#0a0a0acc);
-      backdrop-filter:blur(4px);
-      padding:10px 24px; margin:-10px -24px 16px;
-    }
-
-    /* Past work */
-    .work-section ul{ padding-left:20px; }
-    .work-section li{ margin:12px 0; }
-
-    /* Paper panel for About */
+    /* About panel */
     .paper{
-      background:#f4f2eb; color:#111; border-radius:12px;
-      padding:24px clamp(16px,2vw,28px);
+      background:#f4f2eb;
+      color:#111;
+      border-radius:12px;
+      padding:24px clamp(16px, 2vw, 28px);
       box-shadow:0 10px 28px rgba(0,0,0,.18);
     }
     .paper h2{ color:#111; }
     .paper p{ color:#222; }
 
+    /* Services grid */
+    .services-grid{
+      display:grid;
+      gap:1.5rem;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    }
+    .service-card{
+      background:#111;
+      padding:1.5rem;
+      border-radius:12px;
+      box-shadow:0 6px 14px rgba(0,0,0,.25);
+      color:#eee;
+    }
+    .service-card h3{ margin-top:0; color:#fff; }
+
     /* Footer */
-    .footer{ padding:32px 24px; text-align:center; color:#aaa; }
-
-    /* Reveal + drift */
-    [data-animate]{ opacity:1; --revealY:0px; --dy:0px; --dx:0px; transform:translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0); }
-    .js [data-animate]{ opacity:0; --revealY:24px; transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); will-change:transform,opacity; }
-    .reveal{ opacity:1 !important; --revealY:0px; }
-
-    /* Progress bar */
-    #scroll-progress{ position:fixed; inset:0 auto auto 0; height:3px; width:0%; background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999; }
-
-    /* Spotlight (S) */
-    html.spotlight-on body{
-      --mx:50vw; --my:50vh; --rad:clamp(360px,42vw,720px); --edge:calc(var(--rad)*0.65);
-      -webkit-mask-image:radial-gradient(var(--rad) var(--rad) at var(--mx) var(--my), #000 0%, rgba(0,0,0,.6) var(--edge), transparent 100%);
-      mask-image:radial-gradient(var(--rad) var(--rad) at var(--mx) var(--my), #000 0%, rgba(0,0,0,.6) var(--edge), transparent 100%);
-      backdrop-filter:brightness(1.18) saturate(1.12);
-      transition:mask-image .12s ease;
+    .footer{
+      text-align:center;
+      padding:2rem;
+      color:#aaa;
+      font-size:.9rem;
     }
-
-    /* Party mode */
-    @keyframes hueRoll{ from{filter:hue-rotate(0)} to{filter:hue-rotate(360deg)} }
-    @keyframes slowTilt{ 0%{transform:rotate(.02deg)} 50%{transform:rotate(-.02deg)} 100%{transform:rotate(.02deg)} }
-    @keyframes glowPulse{
-      0%{ text-shadow:0 0 8px #a78bfa55, 0 0 24px #22d3ee33 }
-      50%{ text-shadow:0 0 16px #a78bfaaa, 0 0 32px #22d3ee66 }
-      100%{ text-shadow:0 0 8px #a78bfa55, 0 0 24px #22d3ee33 }
-    }
-    html.party body{ animation:hueRoll 14s linear infinite; }
-    html.party .section{ animation:slowTilt 6s ease-in-out infinite; }
-    html.party a, html.party h1, html.party h2, html.party h3, html.party .reveal{ animation:glowPulse 1.8s ease-in-out infinite; }
   </style>
 </head>
 <body>
-  <div id="scroll-progress" aria-hidden="true"></div>
 
-  <!-- Morph is OUTSIDE the column, fixed, centered, below it in stacking -->
+  <!-- Morph wave -->
   <div class="morph-wrap" aria-hidden="true">
     <div id="morph-svg"></div>
   </div>
 
-  <!-- Content column ABOVE the morph -->
+  <!-- Content column -->
   <div class="content-frame">
-    <header id="hero" class="section" data-animate>
-      <nav id="nav" data-animate>
-        <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
-        <a href="#about" class="glitch" data-text="About" data-animate>About</a>
-        <a href="#services" class="glitch" data-text="Services" data-animate>Services</a>
-        <a href="#work" class="glitch" data-text="Past Work" data-animate>Past Work</a>
-        <a href="#contact" class="glitch" data-text="Contact" data-animate>Contact</a>
-      </nav>
-
+    <!-- Header / Hero -->
+    <header id="hero" class="section">
       <div class="hero-overlay"></div>
-      <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
-      <h1 class="tape" style="color:#111" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
+      <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" />
+      <h1>Where Sound Meets Vision.</h1>
     </header>
 
-    <main>
-      <section id="about" class="section about-section paper" data-animate>
-        <h2 data-animate>About</h2>
-        <p data-animate>Hey, I’m Donald—a lifelong chaser of tone and tinkerer of broken gear. I’m an audio engineer, live-sound tech, repair whisperer, and, on rare occasions, a musician who actually finishes a song. If you’re here, you probably care about your gear as much as your music—so do I.</p>
-        <p data-animate>Upstate Sound &amp; Repair is my way of keeping our little corner of the world humming, one recalcitrant circuit at a time. I consult for venues, help artists chase good sound, and I show up when your vintage Moog throws a tantrum or your podcast needs a little love. If you want work done right (but not uptight), I’m the guy who shows up with a soldering iron, way too many opinions, and a sense of humor.</p>
-      </section>
+    <!-- About -->
+    <section id="about" class="section paper">
+      <h2>About</h2>
+      <p>Hey, I’m Donald—a lifelong chaser of tone and tinkerer of broken gear...</p>
+      <p>Upstate Sound &amp; Repair is my way of keeping our little corner...</p>
+    </section>
 
-      <section id="services" class="section services-section alt" data-animate>
-        <h2 class="services-sticky" data-animate>Services</h2>
-        <div class="services-grid">
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Studio &amp; Gear Repair</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">Your studio is only as good as its weakest link. I diagnose and repair mixers, preamps, tape machines, and all those vintage boxes you can’t live without. Think of me as your gear’s therapist — I listen carefully and I don’t judge.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Synth &amp; Audio Gear Repair</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">Analog synths are living, breathing beasts — and they get cranky. I service and restore vintage synthesizers, drum machines, samplers and outboard gear. Whether it’s a cracked membrane or a blown capacitor, I’ll get the soul back in your circuits.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Music Production</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">I partner with bands and solo artists to produce, record and shape their music. From pre-production and arrangement to mixing and mastering, I help you capture what you hear in your head and translate it to tape. No cookie-cutter templates — just honest collaboration and sonic exploration.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Podcast Production</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">Have a story to tell? I provide recording, editing and mixing for podcasts and audio books. I’ll help you sound like you know what you’re doing — crisp vocals, balanced levels, and maybe the occasional tasteful synth stab.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Live Sound Engineering</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">From tiny clubs to weird warehouse gatherings, I mix live shows that feel like they’re meant for you. Clean, loud and feedback-free. Yes, I’ll carry cases and tape cables because I’m not above grunt work.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Consulting &amp; Education</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">One-on-one consulting for studios, bands, and venues. Signal-flow bootcamps, mix reviews, live rig sanity checks, and hands-on solder sessions. Learn the why, not just the settings.</p>
-          </div>
+    <!-- Services -->
+    <section id="services" class="section">
+      <h2>Services</h2>
+      <div class="services-grid">
+        <div class="service-card">
+          <h3>Studio &amp; Gear Repair</h3>
+          <p>Your studio is only as good as its weakest link...</p>
         </div>
-      </section>
+        <div class="service-card">
+          <h3>Synth &amp; Audio Gear Repair</h3>
+          <p>Analog synths are living, breathing beasts...</p>
+        </div>
+        <div class="service-card">
+          <h3>Music Production</h3>
+          <p>I partner with bands and solo artists...</p>
+        </div>
+        <div class="service-card">
+          <h3>Podcast Production</h3>
+          <p>Have a story to tell? I provide recording, editing and mixing...</p>
+        </div>
+        <div class="service-card">
+          <h3>Live Sound Engineering</h3>
+          <p>From tiny clubs to weird warehouse gatherings...</p>
+        </div>
+      </div>
+    </section>
 
-      <section id="work" class="section work-section" data-animate>
-        <h2 data-animate>Past Work</h2>
-        <ul class="work-list">
-          <li data-animate data-drift="0.8"><strong>Live &amp; Session Engineer – Artis-Naples:</strong> engineered recordings for the Naples Philharmonic Orchestra and various chamber ensembles at Artis-Naples (home of the Naples Philharmonic).</li>
-          <li data-animate data-drift="0.8"><strong>Mix Consultant – Swansons Studios:</strong> partnered with Britt to fine-tune session mixes for local bands, offering fresh ears, technical fixes and workflow hacks.</li>
-          <li data-animate data-drift="0.8"><strong>Producer &amp; Mix Engineer – 10-Song LP (in progress):</strong> producing, recording, mixing and mastering a full-length album — custom synth patches, recorded instruments, a few talk-radio samples — 100% handcrafted, all original.</li>
-          <li data-animate data-drift="0.8"><strong>Podcast Producer – Trailside Carolina:</strong> recorded, produced, mixed and mastered the Trailside Carolina podcast — crystal-clear audio and immersive storytelling for outdoor enthusiasts.</li>
-          <li data-animate data-drift="0.8"><strong>Gear Repair Repertoire:</strong> Yamaha DX7/DX7IIFD, CS01, CS50/60, SK-20, Microkorg, Lexicon 300, Korg SK1, Kawai K1, Roland JP-3000 &amp; RE-201, Ibanez TS-9, Mu-Tron III, Fender Twin (reissue), Pro Reverb (1967), Musicman HD-150, ART PRO VLA II, A Designs MP-2A… and many more.</li>
-        </ul>
-      </section>
+    <!-- Past Work -->
+    <section id="work" class="section">
+      <h2>Past Work</h2>
+      <ul>
+        <li><strong>Artis-Naples:</strong> engineered recordings...</li>
+        <li><strong>Swansons Studios:</strong> mix consultant...</li>
+        <li><strong>10-Song LP:</strong> producing, recording...</li>
+        <li><strong>Trailside Carolina:</strong> podcast production...</li>
+        <li><strong>Gear Repairs:</strong> DX7, JP-3000, Fender Twin, etc...</li>
+      </ul>
+    </section>
 
-      <section id="contact" class="section contact-section" data-animate>
-        <h2 data-animate>Contact</h2>
-        <p data-animate>Ready to get that crackling amp sorted, record a new podcast or just chat about synths? Drop me a line — I’m based in Greenville, South Carolina and I love meeting fellow audio nerds.</p>
-        <p data-animate>Email me at <a class="glitch" href="mailto:info@upstatesound.co" data-text="info@upstatesound.co">info@upstatesound.co</a>.</p>
-      </section>
-    </main>
+    <!-- Contact -->
+    <section id="contact" class="section paper">
+      <h2>Contact</h2>
+      <p>Email me at <a href="mailto:info@upstatesound.co">info@upstatesound.co</a>.</p>
+    </section>
 
+    <!-- Footer -->
     <footer class="footer">
-      <p>© <span id="year"></span> Upstate Sound &amp; Repair. Serving Greenville and the Upstate. Made with solder and soul.</p>
+      <p>© <span id="year"></span> Upstate Sound &amp; Repair. Made with solder and soul.</p>
     </footer>
   </div>
 
-  <!-- Optional: your existing JS -->
-  <script src="script.js"></script>
-
-  <!-- Vibe core -->
+  <!-- Morph Script -->
   <script>
-  (function(){
-    var d=document.documentElement, b=document.body;
+  (function initMorph(){
+    var docEl = document.documentElement, body = document.body;
+    var host = document.getElementById('morph-svg');
+    if(!host) return;
 
-    /* Reveal (replayable) */
-    var els=[].slice.call(document.querySelectorAll('[data-animate]'));
-    if('IntersectionObserver' in window){
-      try{
-        var io=new IntersectionObserver(function(entries){
-          for(var i=0;i<entries.length;i++){
-            var e=entries[i];
-            if(e.isIntersecting) e.target.classList.add('reveal');
-            else e.target.classList.remove('reveal');
-          }
-        }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
-        els.forEach(function(el){ io.observe(el); });
-      }catch(_){ els.forEach(function(el){ el.classList.add('reveal'); }); }
-    }else{ els.forEach(function(el){ el.classList.add('reveal'); }); }
+    var SAMPLES = 140;
+    var STROKE_MIN = 6, STROKE_MAX = 10;
 
-    /* Global drift */
-    var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
-    function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
-    function driftTick(){
-      var vh = window.innerHeight || 1;
-      var sc = d.scrollTop || b.scrollTop;
-      for(var i=0;i<driftNodes.length;i++){
-        var el = driftNodes[i];
-        var multY = parseFloat(el.getAttribute('data-drift')); if(!(multY||multY===0)) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
-        var multX = parseFloat(el.getAttribute('data-drift-x')); if(!(multX||multX===0)) multX = 0.5 * multY;
-        var r = el.getBoundingClientRect();
-        var center = r.top + r.height/2;
-        var norm = (center - vh/2) / vh;
-        var y = clamp(-28 * norm * multY, -38, 38);
-        var x = Math.sin((sc*0.0045) + i*0.7) * (10 * multX);
-        el.style.setProperty('--dy', y + 'px');
-        el.style.setProperty('--dx', x + 'px');
+    function toPathD(points){
+      if(!points.length) return '';
+      var d = 'M' + points[0].x + ',' + points[0].y;
+      for(var i=1;i<points.length;i++) d += ' L' + points[i].x + ',' + points[i].y;
+      return d;
+    }
+    function samplePath(pathEl, n){
+      var len = pathEl.getTotalLength();
+      var pts = new Array(n);
+      for(var i=0;i<n;i++){
+        var p = pathEl.getPointAtLength((i/(n-1))*len);
+        pts[i] = { x:+p.x.toFixed(2), y:+p.y.toFixed(2) };
       }
-      requestAnimationFrame(driftTick);
+      return pts;
     }
-    requestAnimationFrame(driftTick);
-
-    /* Scroll progress */
-    var bar=document.getElementById('scroll-progress');
-    function progress(){ var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1; if(bar) bar.style.width=(sc/max*100)+'%'; }
-    progress(); document.addEventListener('scroll', progress, {passive:true});
-
-    /* Spotlight (S) */
-    var spot=false;
-    window.addEventListener('keydown',function(e){ if(e.key.toLowerCase()==='s'){ spot=!spot; d.classList.toggle('spotlight-on', spot); } });
-    window.addEventListener('mousemove',function(e){ if(!spot) return; d.style.setProperty('--mx', e.clientX+'px'); d.style.setProperty('--my', e.clientY+'px'); },{passive:true});
-
-    /* Konami Party Mode */
-    var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
-    window.addEventListener('keydown',function(e){
-      seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
-      for(var i=0,ok=true;i<konami.length;i++){ if(seq[i]!==konami[i]){ ok=false; break; } }
-      if(ok) d.classList.toggle('party');
-    });
-
-    /* TRUE path morph (fixed, centered) */
-    (function <script>
-(function initMorph(){
-  var docEl = document.documentElement, body = document.body;
-  var host = document.getElementById('morph-svg');
-  if(!host) return;
-
-  var SAMPLES = 140;
-  var STROKE_MIN = 6, STROKE_MAX = 10;
-
-  function toPathD(points){
-    if(!points.length) return '';
-    var d = 'M' + points[0].x + ',' + points[0].y;
-    for(var i=1;i<points.length;i++) d += ' L' + points[i].x + ',' + points[i].y;
-    return d;
-  }
-  function samplePath(pathEl, n){
-    var len = pathEl.getTotalLength();
-    var pts = new Array(n);
-    for(var i=0;i<n;i++){
-      var p = pathEl.getPointAtLength((i/(n-1))*len);
-      pts[i] = { x:+p.x.toFixed(2), y:+p.y.toFixed(2) };
+    function blendPoints(a,b,t){
+      var out = new Array(a.length);
+      for(var i=0;i<a.length;i++){
+        out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
+      }
+      return out;
     }
-    return pts;
-  }
-  function blendPoints(a,b,t){
-    var out = new Array(a.length);
-    for(var i=0;i<a.length;i++){
-      out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
+    function pageT(){
+      var sc = docEl.scrollTop || body.scrollTop;
+      var max = (docEl.scrollHeight - docEl.clientHeight) || 1;
+      return Math.max(0, Math.min(1, sc/max));
     }
-    return out;
-  }
-  function pageT(){
-    var sc = docEl.scrollTop || body.scrollTop;
-    var max = (docEl.scrollHeight - docEl.clientHeight) || 1;
-    return Math.max(0, Math.min(1, sc/max));
-  }
-  function lerp(a,b,t){ return a + (b-a)*t; }
+    function lerp(a,b,t){ return a + (b-a)*t; }
 
-  function boot(svg){
-    // Prefer explicit ids p1..p5; else first 2–5 <path>s
-    var wanted = ['#p1','#p2','#p3','#p4','#p5']
-      .map(function(id){ return svg.querySelector(id); })
-      .filter(Boolean);
+    function boot(svg){
+      var wanted = ['#p1','#p2','#p3','#p4','#p5']
+        .map(function(id){ return svg.querySelector(id); })
+        .filter(Boolean);
+      if(wanted.length < 2){
+        var all = Array.prototype.slice.call(svg.querySelectorAll('path'));
+        wanted = all.slice(0, Math.max(2, Math.min(5, all.length)));
+      }
+      if(wanted.length < 2){
+        var fb = document.createElementNS('http://www.w3.org/2000/svg','path');
+        fb.setAttribute('fill','none');
+        fb.setAttribute('stroke','#7dd3fc');
+        fb.setAttribute('stroke-width','8');
+        fb.setAttribute('d','M20,150 C160,80 260,220 400,150 S680,220 820,150');
+        svg.appendChild(fb);
+        return;
+      }
 
-    if(wanted.length < 2){
-      var all = Array.prototype.slice.call(svg.querySelectorAll('path'));
-      wanted = all.slice(0, Math.max(2, Math.min(5, all.length)));
-    }
-    if(wanted.length < 2){
-      // Visible fallback so you see *something*
-      var fb = document.createElementNS('http://www.w3.org/2000/svg','path');
-      fb.setAttribute('fill','none');
-      fb.setAttribute('stroke','#7dd3fc');
-      fb.setAttribute('stroke-width','8');
-      fb.setAttribute('stroke-linecap','round');
-      fb.setAttribute('stroke-linejoin','round');
-      fb.setAttribute('d','M20,150 C160,80 260,220 400,150 S680,220 820,150');
-      svg.appendChild(fb);
-      console.warn('Morph fallback: not enough paths in SVG');
-      return;
+      var clouds = wanted.map(function(p){ return samplePath(p, SAMPLES); });
+      wanted.forEach(function(p){ p.style.opacity = 0; p.style.pointerEvents = 'none'; });
+
+      var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
+      blend.setAttribute('fill','none');
+      blend.setAttribute('stroke','url(#grad)');
+      blend.setAttribute('stroke-linecap','round');
+      blend.setAttribute('stroke-linejoin','round');
+      blend.setAttribute('stroke-width', STROKE_MIN);
+      svg.appendChild(blend);
+      if(!svg.querySelector('#grad')) blend.setAttribute('stroke','#7dd3fc');
+
+      (function animate(){
+        var t = pageT();
+        var seg = t * (clouds.length - 1);
+        var i = Math.floor(seg);
+        var f = seg - i;
+        var a = clouds[i];
+        var b = clouds[Math.min(i+1, clouds.length-1)];
+        var mix = blendPoints(a,b,f);
+        blend.setAttribute('d', toPathD(mix));
+        blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
+        requestAnimationFrame(animate);
+      })();
     }
 
-    var clouds = wanted.map(function(p){ return samplePath(p, SAMPLES); });
-
-    // Hide originals
-    wanted.forEach(function(p){ p.style.opacity = 0; p.style.pointerEvents = 'none'; });
-
-    // Blended path
-    var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
-    blend.setAttribute('fill','none');
-    blend.setAttribute('stroke','url(#grad)');
-    blend.setAttribute('stroke-linecap','round');
-    blend.setAttribute('stroke-linejoin','round');
-    blend.setAttribute('stroke-width', STROKE_MIN);
-    svg.appendChild(blend);
-    if(!svg.querySelector('#grad')) blend.setAttribute('stroke','#7dd3fc');
-
-    (function animate(){
-      var t = pageT();
-      var seg = t * (clouds.length - 1);
-      var i = Math.floor(seg);
-      var f = seg - i;
-
-      var a = clouds[i];
-      var b = clouds[Math.min(i+1, clouds.length-1)];
-      var mix = blendPoints(a,b,f);
-
-      blend.setAttribute('d', toPathD(mix));
-      blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
-      requestAnimationFrame(animate);
-    })();
-  }
-
-  fetch('assets/scroll-scrub.svg')
-    .then(function(r){ return r.text(); })
-    .then(function(txt){
-      host.innerHTML = txt;
-      var svg = host.querySelector('svg') || host.firstElementChild;
-      if(svg) boot(svg); else throw new Error('No <svg> root');
-    })
-    .catch(function(err){
-      console.warn('morph svg load failed', err);
-      host.innerHTML =
-        '<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">' +
-        '<defs><linearGradient id="grad" x1="0" x2="1"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>' +
-        '<path d="M20,150 C160,80 260,220 400,150 S680,220 820,150" fill="none" stroke="url(#grad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    });
-})();
-    
-    /* Footer year */
-    var y=document.getElementById('year'); if(y) y.textContent=(new Date).getFullYear();
+    fetch('assets/scroll-scrub.svg')
+      .then(function(r){ return r.text(); })
+      .then(function(txt){
+        host.innerHTML = txt;
+        var svg = host.querySelector('svg') || host.firstElementChild;
+        if(svg) boot(svg);
+      })
+      .catch(function(err){ console.warn('morph svg load failed', err); });
   })();
+  </script>
+
+  <!-- Footer year -->
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
