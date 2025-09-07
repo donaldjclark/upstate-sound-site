@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC</title>
 
-  <!-- Fonts + stylesheet -->
+  <!-- Fonts + (optional) your external stylesheet -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=4" />
 
@@ -15,49 +15,40 @@
     html{ background:url('assets/background.png') center / cover fixed no-repeat; }
     body{ margin:0; color:#e6e6e6; font-family:"Space Grotesk",system-ui,sans-serif; background:transparent; }
 
-    /* Content column (dark panel) */
+    /* Content column creates a local stacking context:
+       ::before (0) = the dark column bg
+       .morph-wrap (1) = the wave
+       .section (2) = your content/cards
+    */
     .content-frame{
       position:relative;
       max-width:1100px; margin:0 auto;
-      background:transparent;
+      background:transparent;          /* bg moved to ::before so morph can sit above it */
       min-height:100dvh;
-      z-index:2;
+      z-index:2;                        /* creates local stacking context */
       overflow:clip;
     }
     .content-frame::before{
       content:"";
-      position:fixed;             /* fixed so it doesn’t scroll */
+      position:fixed;                   /* fixed so column bg doesn’t scroll */
       left:50vw; top:0; transform:translateX(-50%);
       width:min(1100px,92vw);
       height:100vh;
-      background:rgba(10,10,10,.92);
-      z-index:0;                  /* bg layer */
+      background:rgba(10,10,10,.92);    /* slightly translucent so gutters peek */
+      z-index:0;
     }
 
-    /* Spotlight overlay — follows cursor, brightens (no dark veil) */
-    #spotlight{
-      position:fixed; inset:0;
-      pointer-events:none;
-      z-index:9998;
-      mix-blend-mode:screen;      /* additive */
-      background:radial-gradient(circle 220px at 50vw 50vh,
-        rgba(255,255,255,1) 0%,
-        rgba(255,255,255,.70) 40%,
-        rgba(255,255,255,0) 80%);
-      transition:background .05s ease-out;
-    }
-
-    /* MORPH: fixed, centered, between bg and cards */
+    /* ===== MORPH: fixed, centered, sized to column; between bg and cards ===== */
     .morph-wrap{
-      position:fixed;
+      position:fixed;                   /* fixed = doesn’t scroll */
       left:50vw; top:50vh; transform:translate(-50%,-50%);
       width:min(1100px,92vw);
-      height:300px;
+      height:340px;
       display:grid; place-items:center;
-      z-index:1;                  /* above ::before, below content */
+      z-index:1;                        /* above column bg (::before), below content */
       pointer-events:none;
-      opacity:.95;
-      mix-blend-mode:screen;      /* glows on the dark panel */
+      opacity:1;
+      mix-blend-mode:normal;            /* clear and bold on dark */
     }
     .morph-wrap svg{ width:100%; height:100%; overflow:visible; }
 
@@ -70,63 +61,16 @@
 
     /* ---------- Header / Hero ---------- */
     #hero{ position:relative; padding:80px 24px 48px; text-align:center; }
-    #hero h1.tape {
-  color: #111;  
-  text-shadow: 
-    0 0 6px rgba(34,211,238,0.8),   /* cyan inner glow */
-    0 0 14px rgba(167,139,250,0.65),/* purple halo */
-    0 0 26px rgba(34,211,238,0.45); /* cyan outer aura */
-}
-    /* Logo glow */
-.logo {
-  filter: drop-shadow(0 0 6px rgba(34,211,238,0.8))
-          drop-shadow(0 0 14px rgba(167,139,250,0.65))
-          drop-shadow(0 0 26px rgba(34,211,238,0.45));
-}
-    /* Pulsing for tagline (reuses your glowPulse) */
-html.party #hero h1.tape{
-  animation: glowPulse 1.8s ease-in-out infinite;
-}
-
-/* Pulsing for logo (animate the drop-shadow strength) */
-@keyframes logoGlow {
-  0%{
-    filter:
-      drop-shadow(0 0 6px  rgba(34,211,238,.65))
-      drop-shadow(0 0 12px rgba(167,139,250,.50))
-      drop-shadow(0 0 22px rgba(34,211,238,.35));
-  }
-  50%{
-    filter:
-      drop-shadow(0 0 10px rgba(34,211,238,1))
-      drop-shadow(0 0 22px rgba(167,139,250,.95))
-      drop-shadow(0 0 36px rgba(34,211,238,.75));
-  }
-  100%{
-    filter:
-      drop-shadow(0 0 6px  rgba(34,211,238,.65))
-      drop-shadow(0 0 12px rgba(167,139,250,.50))
-      drop-shadow(0 0 22px rgba(34,211,238,.35));
-  }
-}
-
-html.party .logo{
-  animation: logoGlow 2.2s ease-in-out infinite;
-}
-
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce){
-  html.party #hero h1.tape,
-  html.party .logo{ animation:none !important; }
-}
     .hero-overlay{
       position:absolute; inset:0;
-      /* light -> dark, fading into the black panel */
+      /* light -> dark, fading into black column */
       background:linear-gradient(180deg, rgba(250,249,246,0) 0%, rgba(10,10,10,.08) 45%, rgba(10,10,10,.60) 100%);
       pointer-events:none;
     }
     .logo{ display:block; margin:0 auto 24px; width:220px; height:auto; }
-    .tape{ display:inline-block; animation:tapeWobble 1.2s ease-in-out infinite; transform-origin:50% 50%; color:#111; }
+
+    /* Tagline “tape wobble” + glow for contrast */
+    .tape{ display:inline-block; animation:tapeWobble 1.2s ease-in-out infinite; transform-origin:50% 50%; }
     @keyframes tapeWobble {
       0%{ transform:translateY(0) rotate(-.18deg) skewX(.12deg) }
       25%{ transform:translateY(-1px) rotate(.22deg) skewX(-.1deg) }
@@ -136,8 +80,16 @@ html.party .logo{
     }
     @media (prefers-reduced-motion:reduce){ .tape{ animation:none } }
 
-    /* Nav */
-    #nav{ display:flex; justify-content:flex-end; gap:24px; margin-bottom:12px; }
+    /* Tagline glow (soft cyan/violet) */
+    #hero h1.tape{
+      text-shadow:
+        0 0 3px rgba(34,211,238,.55),
+        0 0 8px rgba(167,139,250,.45),
+        0 0 16px rgba(34,211,238,.28);
+    }
+
+    /* Nav (desktop/tablet default) */
+    #nav{ display:flex; justify-content:flex-end; gap:24px; margin-bottom:12px; align-items:center; }
     #nav a{ color:#b9b9ff; text-decoration:none; font-weight:700; letter-spacing:.02em; }
     #nav-toggle{ display:none; }
 
@@ -148,7 +100,7 @@ html.party .logo{
     @keyframes glitchX{ 0%{transform:translate(0,0)} 20%{transform:translate(1px,-1px)} 40%{transform:translate(-1px,1px)} 60%{transform:translate(2px,0)} 80%{transform:translate(-2px,1px)} 100%{transform:translate(0,0)} }
     a.glitch:hover::before, a.glitch:hover::after{ opacity:.7; animation:glitchX .18s steps(2,end) infinite; }
 
-    /* Services grid */
+    /* Services grid (base = desktop 3 cols) */
     .services-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:28px; }
     .service-card{ background:#f4f2eb; color:#142; border-radius:12px; padding:22px; box-shadow:0 10px 28px rgba(0,0,0,.25); }
     .service-card h3{ color:#0b2340; }
@@ -162,6 +114,10 @@ html.party .logo{
       padding:10px 24px; margin:-10px -24px 16px;
     }
 
+    /* Past work */
+    .work-section ul{ padding-left:20px; }
+    .work-section li{ margin:12px 0; }
+
     /* Paper panel for About */
     .paper{
       background:#f4f2eb; color:#111; border-radius:12px;
@@ -171,14 +127,10 @@ html.party .logo{
     .paper h2{ color:#111; }
     .paper p{ color:#222; }
 
-    /* Past work list */
-    .work-section ul{ padding-left:20px; }
-    .work-section li{ margin:12px 0; }
-
     /* Footer */
     .footer{ padding:32px 24px; text-align:center; color:#aaa; }
 
-    /* Reveal + drift */
+    /* Reveal + drift (CSS vars written by JS) */
     [data-animate]{ opacity:1; --revealY:0px; --dy:0px; --dx:0px; transform:translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0); }
     .js [data-animate]{ opacity:0; --revealY:24px; transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); will-change:transform,opacity; }
     .reveal{ opacity:1 !important; --revealY:0px; }
@@ -186,30 +138,121 @@ html.party .logo{
     /* Progress bar */
     #scroll-progress{ position:fixed; inset:0 auto auto 0; height:3px; width:0%; background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999; }
 
-    /* Party mode */
-    @keyframes hueRoll{ from{filter:hue-rotate(0)} to{filter:hue-rotate(360deg)} }
-    @keyframes slowTilt{ 0%{transform:rotate(.02deg)} 50%{transform:rotate(-.02deg)} 100%{transform:rotate(.02deg)} }
-    @keyframes glowPulse{
-      0%{ text-shadow:0 0 8px #a78bfa55, 0 0 24px #22d3ee33 }
-      50%{ text-shadow:0 0 16px #a78bfaaa, 0 0 32px #22d3ee66 }
-      100%{ text-shadow:0 0 8px #a78bfa55, 0 0 24px #22d3ee33 }
+    /* Spotlight overlay (desktop-only; disabled below in responsive) */
+    #spotlight{
+      position: fixed; inset: 0; pointer-events: none;
+      z-index: 50;                 /* above content, below progress bar */
+      mix-blend-mode: screen;      /* add light instead of darkening */
+      background: radial-gradient(circle 200px at 50vw 50vh,
+                 rgba(255,255,255,1) 0%,
+                 rgba(255,255,255,.75) 40%,
+                 rgba(255,255,255,0) 80%);
+      transition: background 0.05s ease-out;
     }
-    html.party body{ animation:hueRoll 14s linear infinite; }
-    html.party .section{ animation:slowTilt 6s ease-in-out infinite; }
-    html.party a, html.party h1, html.party h2, html.party h3, html.party .reveal{ animation:glowPulse 1.8s ease-in-out infinite; }
+
+    /* =========================
+       RESPONSIVE LAYOUT LAYER
+       ========================= */
+
+    /* Tablet (821px–1099px): 2 columns */
+    @media (max-width: 1099px) {
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* =========================
+       MOBILE FIX PACK (≤ 820px)
+       ========================= */
+    @media (max-width: 820px) {
+
+      /* Column “paper”: fill more of the screen but keep gutter image visible */
+      .content-frame::before{
+        width:min(100vw, 96vw);
+        background:rgba(10,10,10,0.95);
+      }
+
+      /* Sections: tighter padding for readability */
+      .section{ padding: 40px 18px; }
+
+      /* Hero: logo + tagline scale and glow for contrast */
+      .logo{ width: clamp(140px, 38vw, 200px); }
+      #hero h1.tape{
+        font-size: clamp(22px, 7vw, 36px);
+        line-height: 1.08;
+        text-shadow:
+          0 0 4px  rgba(34,211,238,.65),
+          0 0 10px rgba(167,139,250,.5),
+          0 0 18px rgba(34,211,238,.35);
+      }
+
+      /* Nav: real mobile menu (button toggles .open) */
+      #nav{ align-items:center; justify-content:space-between; gap: 0; }
+      #nav-toggle{
+        display:inline-block; font-size:22px; background:transparent;
+        color:#b9b9ff; border:0;
+      }
+      /* collapse links by default */
+      #nav .glitch{ display:none; padding:12px 0; }
+      #nav .glitch + .glitch{ border-top:1px solid rgba(255,255,255,.06); }
+      /* show when nav is opened */
+      #nav.open .glitch{ display:block; }
+
+      /* Services: single column, bigger touch targets */
+      .services-grid{ grid-template-columns: 1fr; gap: 16px; }
+      .service-card{
+        padding: 18px 16px; border-radius: 10px;
+        box-shadow: 0 8px 18px rgba(0,0,0,.25);
+      }
+      .service-card h3{ font-size: clamp(18px, 5.2vw, 22px); }
+      .service-card p{ font-size: clamp(14px, 4.2vw, 16px); line-height:1.55; }
+
+      /* Sticky “Services” title: less jumpy */
+      .services-sticky{
+        top: 0; padding: 10px 16px; margin: -10px -16px 12px;
+        background: linear-gradient(#0a0a0acc,#0a0a0acc); backdrop-filter: blur(4px);
+      }
+
+      /* Past Work spacing */
+      .work-section li{ margin: 10px 0; }
+
+      /* Morph: a bit smaller/taller for clarity on phones */
+      .morph-wrap{
+        width:min(96vw, 760px);
+        height: 240px;
+        opacity:.95;
+        mix-blend-mode: normal;
+      }
+      .morph-wrap svg{ width:100%; height:100%; }
+
+      /* Spotlight layer: disabled on mobile via CSS (extra safety) */
+      #spotlight{ display:none !important; }
+
+      /* Footer: breathing room */
+      .footer{ padding: 28px 16px; font-size: 14px; }
+    }
+
+    /* Ultra-small devices (≤ 380px) */
+    @media (max-width: 380px){
+      .section{ padding: 32px 14px; }
+      .services-sticky{ margin: -10px -14px 10px; padding: 10px 14px; }
+    }
+
+    /* Also disable spotlight on any coarse pointer device (covers many tablets) */
+    @media (pointer: coarse) {
+      #spotlight{ display:none !important; }
+    }
   </style>
 </head>
 <body>
   <div id="scroll-progress" aria-hidden="true"></div>
   <div id="spotlight" aria-hidden="true"></div>
 
+  <!-- Content column (bg via ::before) -->
   <div class="content-frame">
-    <!-- Morph sits between the dark panel and your content -->
+    <!-- Morph sits above column bg (::before) and below your cards -->
     <div class="morph-wrap" aria-hidden="true">
       <div id="morph-svg"></div>
     </div>
 
-    <!-- ===== HEADER / HERO ===== -->
     <header id="hero" class="section" data-animate>
       <nav id="nav" data-animate>
         <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
@@ -221,10 +264,9 @@ html.party .logo{
 
       <div class="hero-overlay"></div>
       <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
-      <h1 class="tape" style="color:#111" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
+      <h1 class="tape" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
     </header>
 
-    <!-- ===== MAIN ===== -->
     <main>
       <!-- About -->
       <section id="about" class="section about-section paper" data-animate>
@@ -292,6 +334,7 @@ html.party .logo{
   <!-- Optional: your existing JS -->
   <script src="script.js"></script>
 
+  <!-- Vibe core -->
   <script>
   (function(){
     var d=document.documentElement, b=document.body;
@@ -299,27 +342,37 @@ html.party .logo{
     /* Reveal (replayable) */
     var els=[].slice.call(document.querySelectorAll('[data-animate]'));
     if('IntersectionObserver' in window){
-      var io=new IntersectionObserver(function(entries){
-        for(const e of entries){ e.target.classList.toggle('reveal', e.isIntersecting); }
-      }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
-      els.forEach(el=>io.observe(el));
-    } else { els.forEach(el=>el.classList.add('reveal')); }
+      try{
+        var io=new IntersectionObserver(function(entries){
+          for(var i=0;i<entries.length;i++){
+            var e=entries[i];
+            if(e.isIntersecting) e.target.classList.add('reveal');
+            else e.target.classList.remove('reveal');
+          }
+        }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
+        els.forEach(function(el){ io.observe(el); });
+      }catch(_){ els.forEach(function(el){ el.classList.add('reveal'); }); }
+    }else{ els.forEach(function(el){ el.classList.add('reveal'); }); }
 
-    /* Global drift (Y + micro X) */
+    /* Drift (global) */
     var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
     function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
     function driftTick(){
-      var vh = innerHeight||1, sc = d.scrollTop||b.scrollTop;
-      driftNodes.forEach((el,i)=>{
+      var vh = window.innerHeight || 1;
+      var sc = d.scrollTop || b.scrollTop;
+      var scale = parseFloat(getComputedStyle(d).getPropertyValue('--drift-scale')) || 1;
+      for(var i=0;i<driftNodes.length;i++){
+        var el = driftNodes[i];
         var multY = parseFloat(el.getAttribute('data-drift')); if(!(multY||multY===0)) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
         var multX = parseFloat(el.getAttribute('data-drift-x')); if(!(multX||multX===0)) multX = 0.5 * multY;
-        var r=el.getBoundingClientRect(), center=r.top+r.height/2;
-        var norm=(center - vh/2)/vh;
-        var y=clamp(-28 * norm * multY, -38, 38);
-        var x=Math.sin((sc*0.0045)+i*0.7) * (10*multX);
-        el.style.setProperty('--dy', y+'px');
-        el.style.setProperty('--dx', x+'px');
-      });
+        var r = el.getBoundingClientRect();
+        var center = r.top + r.height/2;
+        var norm = (center - vh/2) / vh;
+        var y = clamp(-28 * norm * multY * scale, -38, 38);
+        var x = Math.sin((sc*0.0045) + i*0.7) * (10 * multX * scale);
+        el.style.setProperty('--dy', y + 'px');
+        el.style.setProperty('--dx', x + 'px');
+      }
       requestAnimationFrame(driftTick);
     }
     requestAnimationFrame(driftTick);
@@ -327,62 +380,140 @@ html.party .logo{
     /* Scroll progress */
     var bar=document.getElementById('scroll-progress');
     function progress(){ var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1; if(bar) bar.style.width=(sc/max*100)+'%'; }
-    progress(); addEventListener('scroll',progress,{passive:true});
+    progress(); document.addEventListener('scroll', progress, {passive:true});
 
-    /* Spotlight: cursor-follow (toggle with "S") */
+    /* Mobile nav toggle */
     (function(){
-      const spot=document.getElementById('spotlight'); if(!spot) return;
-      let tx=innerWidth/2, ty=innerHeight/2, x=tx, y=ty;
-      const EASE=0.20, RAD=220;
-      addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY;},{passive:true});
+      var nav = document.getElementById('nav');
+      var btn = document.getElementById('nav-toggle');
+      if (!nav || !btn) return;
+      btn.addEventListener('click', function(){
+        nav.classList.toggle('open');
+      });
+    })();
+
+    /* Detect touch / coarse pointer for mobile behavior */
+    var IS_COARSE = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    // Soften drift and thicken morph on mobile/tablet
+    d.style.setProperty('--drift-scale', IS_COARSE ? 0.65 : 1.0);
+    d.style.setProperty('--morph-stroke-min', IS_COARSE ? 11 : 9);
+    d.style.setProperty('--morph-stroke-max', IS_COARSE ? 16 : 13);
+
+    /* Spotlight: desktop only (disabled via CSS + guard here) */
+    (function(){
+      var spot = document.getElementById('spotlight');
+      if (!spot || IS_COARSE) return;
+      var tx = innerWidth/2, ty = innerHeight/2;
+      var x = tx, y = ty;
+      var EASE = 0.25, BASE_RAD = 200;
+      addEventListener('mousemove', function(e){ tx = e.clientX; ty = e.clientY; }, {passive:true});
       function tick(){
-        x+=(tx-x)*EASE; y+=(ty-y)*EASE;
-        spot.style.background=`radial-gradient(circle ${RAD}px at ${x}px ${y}px,
-          rgba(255,255,255,1) 0%,
-          rgba(255,255,255,.70) 40%,
-          rgba(255,255,255,0) 80%)`;
+        x += (tx - x) * EASE; y += (ty - y) * EASE;
+        var r = BASE_RAD;
+        spot.style.background =
+          'radial-gradient(circle '+r+'px at '+x+'px '+y+'px,'+
+          'rgba(255,255,255,1) 0%,'+
+          'rgba(255,255,255,.75) 40%,'+
+          'rgba(255,255,255,0) 80%)';
         requestAnimationFrame(tick);
       }
-      tick();
-      let on=true;
-      addEventListener('keydown',e=>{ if(e.key.toLowerCase()==='s'){ on=!on; spot.style.display=on?'block':'none'; }});
+      requestAnimationFrame(tick);
+      // Toggle with 'S'
+      var on = true;
+      document.addEventListener('keydown', function(e){
+        if ((e.key||'').toLowerCase() === 's'){
+          on = !on; spot.style.display = on ? 'block' : 'none';
+        }
+      });
     })();
 
     /* Konami Party Mode */
-    var seq=[], code=[38,38,40,40,37,39,37,39,66,65];
-    addEventListener('keydown',e=>{
-      seq.push(e.keyCode); if(seq.length>code.length) seq.shift();
-      if(seq.every((v,i)=>v===code[i])) d.classList.toggle('party');
+    var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
+    window.addEventListener('keydown',function(e){
+      seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
+      for(var i=0,ok=true;i<konami.length;i++){ if(seq[i]!==konami[i]){ ok=false; break; } }
+      if(ok) d.classList.toggle('party');
     });
 
-    /* Morph: scroll-scrub between 5 shapes */
+    /* TRUE path morph (fixed, centered) */
     (function initMorph(){
-      var host=document.getElementById('morph-svg'); if(!host) return;
-      var SAMPLES=140, STROKE_MIN=9, STROKE_MAX=13;
-      function toPathD(pts){ return pts.reduce((d,p,i)=>d+(i?' L':'M')+p.x+','+p.y,''); }
-      function sample(pEl,n){ var len=pEl.getTotalLength(); return [...Array(n)].map((_,i)=>{var p=pEl.getPointAtLength((i/(n-1))*len); return {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};}); }
-      function blend(a,b,t){ return a.map((p,i)=>({x:p.x+(b[i].x-p.x)*t, y:p.y+(b[i].y-p.y)*t})); }
-      function pageT(){ var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1; return Math.max(0,Math.min(1,sc/max)); }
-      fetch('assets/scroll-scrub.svg').then(r=>r.text()).then(txt=>{
-        host.innerHTML=txt; var svg=host.querySelector('svg'); if(!svg) return;
-        var paths=['#p1','#p2','#p3','#p4','#p5'].map(id=>svg.querySelector(id)).filter(Boolean);
-        if(paths.length<2) return;
-        var clouds=paths.map(p=>sample(p,SAMPLES)); paths.forEach(p=>p.style.opacity=0);
-        var blendPath=document.createElementNS('http://www.w3.org/2000/svg','path');
-        blendPath.setAttribute('fill','none');
-        blendPath.setAttribute('stroke', svg.querySelector('#grad') ? 'url(#grad)' : '#7dd3fc');
-        blendPath.setAttribute('stroke-linecap','round'); blendPath.setAttribute('stroke-linejoin','round');
-        blendPath.setAttribute('stroke-width',STROKE_MIN);
-        svg.appendChild(blendPath);
-        function lerp(a,b,t){return a+(b-a)*t;}
-        (function anim(){
-          var t=pageT(), seg=t*(clouds.length-1), i=Math.floor(seg), f=seg-i;
-          var mix=blend(clouds[i],clouds[Math.min(i+1,clouds.length-1)],f);
-          blendPath.setAttribute('d',toPathD(mix));
-          blendPath.setAttribute('stroke-width',lerp(STROKE_MIN,STROKE_MAX,Math.sin(t*Math.PI)));
-          requestAnimationFrame(anim);
-        })();
-      });
+      var host = document.getElementById('morph-svg');
+      if(!host) return;
+
+      var SAMPLES = 140;
+      var STROKE_MIN = parseFloat(getComputedStyle(d).getPropertyValue('--morph-stroke-min')) || 9;
+      var STROKE_MAX = parseFloat(getComputedStyle(d).getPropertyValue('--morph-stroke-max')) || 13;
+
+      function toPathD(points){
+        if(!points.length) return '';
+        var d = 'M' + points[0].x + ',' + points[0].y;
+        for(var i=1;i<points.length;i++){ d += ' L' + points[i].x + ',' + points[i].y; }
+        return d;
+      }
+      function samplePath(pathEl, n){
+        var len = pathEl.getTotalLength();
+        var pts = new Array(n);
+        for(var i=0;i<n;i++){
+          var p = pathEl.getPointAtLength((i/(n-1))*len);
+          pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
+        }
+        return pts;
+      }
+      function blendPoints(a,b,t){
+        var out = new Array(a.length);
+        for(var i=0;i<a.length;i++){
+          out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
+        }
+        return out;
+      }
+      function pageT(){
+        var sc = d.scrollTop || b.scrollTop;
+        var max = (d.scrollHeight - d.clientHeight) || 1;
+        return Math.max(0, Math.min(1, sc/max));
+      }
+
+      fetch('assets/scroll-scrub.svg')
+        .then(function(r){ return r.text(); })
+        .then(function(txt){
+          host.innerHTML = txt;
+          var svg = host.querySelector('svg') || host.firstElementChild;
+          if(!svg) return;
+
+          var ids = ['#p1','#p2','#p3','#p4','#p5'];
+          var paths = [];
+          for(var i=0;i<ids.length;i++){ var el = svg.querySelector(ids[i]); if(el) paths.push(el); }
+          if(paths.length<2) return;
+
+          var clouds = paths.map(function(p){ return samplePath(p, SAMPLES); });
+
+          paths.forEach(function(p){ p.style.opacity = 0; p.style.pointerEvents='none'; });
+
+          var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
+          blend.setAttribute('fill','none');
+          blend.setAttribute('stroke', svg.querySelector('#grad') ? 'url(#grad)' : '#7dd3fc');
+          blend.setAttribute('stroke-linecap','round');
+          blend.setAttribute('stroke-linejoin','round');
+          blend.setAttribute('stroke-width', STROKE_MIN);
+          svg.appendChild(blend);
+
+          function lerp(a,b,t){ return a + (b-a)*t; }
+
+          (function animate(){
+            var t = pageT();
+            var seg = t * (clouds.length-1);
+            var i = Math.floor(seg);
+            var f = seg - i;
+
+            var a = clouds[i];
+            var b = clouds[Math.min(i+1, clouds.length-1)];
+            var mix = blendPoints(a,b,f);
+
+            blend.setAttribute('d', toPathD(mix));
+            blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
+            requestAnimationFrame(animate);
+          })();
+        })
+        .catch(function(err){ console.warn('morph svg load failed', err); });
     })();
 
     /* Footer year */
