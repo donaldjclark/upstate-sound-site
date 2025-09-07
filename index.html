@@ -312,77 +312,26 @@
   const spot = document.getElementById('spotlight');
   if (!spot) return;
 
-  // Tunables
-  const EASE = 0.25;          // follow speed (0..1)
-  const BASE_RAD = 180;       // base radius
-  const BREATH_AMPL = 40;     // extra radius pulsing
-  const BREATH_SPEED = 0.0018;
-  const TRAIL_LEN = 10;       // number of ghosts
-  const TRAIL_SPACING = 1;    // frames between ghost samples
-  const TRAIL_FADE = 0.75;    // ghost brightness falloff
-  const GLOW_INNER = 0.95;    // center brightness
-  const GLOW_HALO  = 0.55;    // halo brightness
-  const DARK_VEIL  = 0.22;    // overall dim; keep this LOW so page stays visible
-
   let tx = innerWidth/2, ty = innerHeight/2;
   let x = tx, y = ty;
-
-  const trail = [];
-  let frame = 0;
+  const EASE = 0.25;
+  const BASE_RAD = 180;
 
   addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; }, {passive:true});
-  addEventListener('touchstart', e => {
-    if (e.touches && e.touches[0]) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }
-  }, {passive:true});
-  addEventListener('touchmove', e => {
-    if (e.touches && e.touches[0]) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }
-  }, {passive:true});
 
-  function grad(x, y, r, aCore, aHalo){
-    const core = `rgba(255,255,255,${aCore})`;
-    const halo = `rgba(255,255,255,${aHalo})`;
-    return `radial-gradient(circle ${r}px at ${x}px ${y}px,
-              ${core} 0%,
-              ${halo} ${Math.max(80, r*0.55)}px,
-              rgba(255,255,255,0) 70%)`;
-  }
-
-  function tick(now){
-    // follow cursor
+  function tick(){
     x += (tx - x) * EASE;
     y += (ty - y) * EASE;
 
-    // breathing radius
-    const radius = BASE_RAD + Math.sin(now * BREATH_SPEED) * BREATH_AMPL;
-
-    // trail sampling
-    if ((frame++ % TRAIL_SPACING) === 0){
-      trail.unshift({ x, y, r: radius });
-      if (trail.length > TRAIL_LEN) trail.pop();
-    }
-
-    // build layers (main light + ghosts + soft veil)
-    const layers = [];
-
-    // main light on top
-    layers.push(grad(x, y, Math.max(60, radius), 1.0, 0.75));
-
-    // ghosts underneath
-    for (let i = 0; i < trail.length; i++){
-      const t = i / Math.max(1, TRAIL_LEN - 1);
-      const fade = Math.pow(1 - t, 2) * TRAIL_FADE;
-      const r = trail[i].r * (1 - t*0.35);
-      layers.push(grad(trail[i].x, trail[i].y, Math.max(60, r), GLOW_INNER*fade, GLOW_HALO*fade));
-    }
-
-    // subtle veil at the very bottom (do NOT set too high)
-    layers.push(`linear-gradient(rgba(0,0,0,${DARK_VEIL}), rgba(0,0,0,${DARK_VEIL}))`);
-
-    spot.style.background = layers.join(',');
+    const radius = BASE_RAD;
+    spot.style.background = `radial-gradient(circle ${radius}px at ${x}px ${y}px,
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,.75) 40%,
+      rgba(255,255,255,0) 80%)`;
 
     requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
+  tick();
 })();
 
   // Optional: toggle with "S" key
