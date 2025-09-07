@@ -83,6 +83,42 @@
           drop-shadow(0 0 14px rgba(167,139,250,0.65))
           drop-shadow(0 0 26px rgba(34,211,238,0.45));
 }
+    /* Pulsing for tagline (reuses your glowPulse) */
+html.party #hero h1.tape{
+  animation: glowPulse 1.8s ease-in-out infinite;
+}
+
+/* Pulsing for logo (animate the drop-shadow strength) */
+@keyframes logoGlow {
+  0%{
+    filter:
+      drop-shadow(0 0 6px  rgba(34,211,238,.65))
+      drop-shadow(0 0 12px rgba(167,139,250,.50))
+      drop-shadow(0 0 22px rgba(34,211,238,.35));
+  }
+  50%{
+    filter:
+      drop-shadow(0 0 10px rgba(34,211,238,1))
+      drop-shadow(0 0 22px rgba(167,139,250,.95))
+      drop-shadow(0 0 36px rgba(34,211,238,.75));
+  }
+  100%{
+    filter:
+      drop-shadow(0 0 6px  rgba(34,211,238,.65))
+      drop-shadow(0 0 12px rgba(167,139,250,.50))
+      drop-shadow(0 0 22px rgba(34,211,238,.35));
+  }
+}
+
+html.party .logo{
+  animation: logoGlow 2.2s ease-in-out infinite;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  html.party #hero h1.tape,
+  html.party .logo{ animation:none !important; }
+}
     .hero-overlay{
       position:absolute; inset:0;
       /* light -> dark, fading into the black panel */
