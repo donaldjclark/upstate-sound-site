@@ -1,524 +1,1846 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <script>document.documentElement.classList.add('js')</script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC</title>
+  <head>
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC
+    </title>
 
-  <!-- Fonts + (optional) your external stylesheet -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4" />
+    <!-- Fonts + (optional) your external stylesheet -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=4" />
 
-  <style>
-    /* ---------- Page frame / background gutters ---------- */
-    html{ background:url('assets/background.png') center / cover fixed no-repeat; }
-    body{ margin:0; color:#e6e6e6; font-family:"Space Grotesk",system-ui,sans-serif; background:transparent; }
-
-    /* Content column creates a local stacking context:
-       ::before (0) = the dark column bg
-       .morph-wrap (1) = the wave
-       .section (2) = your content/cards
-    */
-    .content-frame{
-      position:relative;
-      max-width:1100px; margin:0 auto;
-      background:transparent;          /* bg moved to ::before so morph can sit above it */
-      min-height:100dvh;
-      z-index:2;                        /* creates local stacking context */
-      overflow:clip;
-    }
-    .content-frame::before{
-      content:"";
-      position:fixed;                   /* fixed so column bg doesn’t scroll */
-      left:50vw; top:0; transform:translateX(-50%);
-      width:min(1100px,92vw);
-      height:100vh;
-      background:rgba(10,10,10,.92);    /* slightly translucent so gutters peek */
-      z-index:0;
-    }
-
-    /* ===== MORPH: fixed, centered, sized to column; between bg and cards ===== */
-    .morph-wrap{
-      position:fixed;                   /* fixed = doesn’t scroll */
-      left:50vw; top:50vh; transform:translate(-50%,-50%);
-      width:min(1100px,92vw);
-      height:340px;
-      display:grid; place-items:center;
-      z-index:1;                        /* above column bg (::before), below content */
-      pointer-events:none;
-      opacity:1;
-      mix-blend-mode:normal;            /* clear and bold on dark */
-    }
-    .morph-wrap svg{ width:100%; height:100%; overflow:visible; }
-
-    /* Sections / cards */
-    .section{ position:relative; z-index:2; padding:64px 24px; }
-    .section.alt{ background:#111; }
-
-    h1,h2,h3{ margin:0 0 16px; font-family:"Montserrat",system-ui,sans-serif; color:#f4f4f5; }
-    p{ color:#c9c9ce; line-height:1.6; }
-
-    /* ---------- Header / Hero ---------- */
-    #hero{ position:relative; padding:80px 24px 48px; text-align:center; }
-    .hero-overlay{
-      position:absolute; inset:0;
-      /* light -> dark, fading into black column */
-      background:linear-gradient(180deg, rgba(250,249,246,0) 0%, rgba(10,10,10,.08) 45%, rgba(10,10,10,.60) 100%);
-      pointer-events:none;
-    }
-    .logo{ display:block; margin:0 auto 24px; width:220px; height:auto; }
-
-    /* Tagline “tape wobble” + glow for contrast */
-    .tape{ display:inline-block; animation:tapeWobble 1.2s ease-in-out infinite; transform-origin:50% 50%; }
-    @keyframes tapeWobble {
-      0%{ transform:translateY(0) rotate(-.18deg) skewX(.12deg) }
-      25%{ transform:translateY(-1px) rotate(.22deg) skewX(-.1deg) }
-      50%{ transform:translateY(.6px) rotate(-.14deg) skewX(.06deg) }
-      75%{ transform:translateY(-.8px) rotate(.18deg) skewX(-.06deg) }
-      100%{ transform:translateY(0) rotate(-.18deg) skewX(.12deg) }
-    }
-    @media (prefers-reduced-motion:reduce){ .tape{ animation:none } }
-
-    /* Tagline glow (soft cyan/violet) */
-    #hero h1.tape{
-      text-shadow:
-        0 0 3px rgba(34,211,238,.55),
-        0 0 8px rgba(167,139,250,.45),
-        0 0 16px rgba(34,211,238,.28);
-    }
-
-    /* Nav (desktop/tablet default) */
-    #nav{ display:flex; justify-content:flex-end; gap:24px; margin-bottom:12px; align-items:center; }
-    #nav a{ color:#b9b9ff; text-decoration:none; font-weight:700; letter-spacing:.02em; }
-    #nav-toggle{ display:none; }
-
-    /* Glitch links */
-    a.glitch{ position:relative; display:inline-block; text-decoration:none; }
-    a.glitch::before, a.glitch::after{ content:attr(data-text); position:absolute; inset:0; opacity:0; mix-blend-mode:screen; }
-    a.glitch::before{ color:#22d3ee } a.glitch::after{ color:#a78bfa }
-    @keyframes glitchX{ 0%{transform:translate(0,0)} 20%{transform:translate(1px,-1px)} 40%{transform:translate(-1px,1px)} 60%{transform:translate(2px,0)} 80%{transform:translate(-2px,1px)} 100%{transform:translate(0,0)} }
-    a.glitch:hover::before, a.glitch:hover::after{ opacity:.7; animation:glitchX .18s steps(2,end) infinite; }
-
-    /* Services grid (base = desktop 3 cols) */
-    .services-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:28px; }
-    .service-card{ background:#f4f2eb; color:#142; border-radius:12px; padding:22px; box-shadow:0 10px 28px rgba(0,0,0,.25); }
-    .service-card h3{ color:#0b2340; }
-    .service-card p{ color:#213; }
-
-    /* Sticky Services title */
-    .services-sticky{
-      position:sticky; top:0; z-index:20;
-      background:linear-gradient(#0a0a0acc,#0a0a0acc);
-      backdrop-filter:blur(4px);
-      padding:10px 24px; margin:-10px -24px 16px;
-    }
-
-    /* Past work */
-    .work-section ul{ padding-left:20px; }
-    .work-section li{ margin:12px 0; }
-
-    /* Paper panel for About */
-    .paper{
-      background:#f4f2eb; color:#111; border-radius:12px;
-      padding:24px clamp(16px,2vw,28px);
-      box-shadow:0 10px 28px rgba(0,0,0,.18);
-    }
-    .paper h2{ color:#111; }
-    .paper p{ color:#222; }
-
-    /* Footer */
-    .footer{ padding:32px 24px; text-align:center; color:#aaa; }
-
-    /* Reveal + drift (CSS vars written by JS) */
-    [data-animate]{ opacity:1; --revealY:0px; --dy:0px; --dx:0px; transform:translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0); }
-    .js [data-animate]{ opacity:0; --revealY:24px; transition:opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); will-change:transform,opacity; }
-    .reveal{ opacity:1 !important; --revealY:0px; }
-
-    /* Progress bar */
-    #scroll-progress{ position:fixed; inset:0 auto auto 0; height:3px; width:0%; background:linear-gradient(90deg,#22d3ee,#a78bfa); z-index:9999; }
-
-    /* Spotlight overlay (desktop-only; disabled below in responsive) */
-    #spotlight{
-      position: fixed; inset: 0; pointer-events: none;
-      z-index: 50;                 /* above content, below progress bar */
-      mix-blend-mode: screen;      /* add light instead of darkening */
-      background: radial-gradient(circle 200px at 50vw 50vh,
-                 rgba(255,255,255,1) 0%,
-                 rgba(255,255,255,.75) 40%,
-                 rgba(255,255,255,0) 80%);
-      transition: background 0.05s ease-out;
-    }
-
-    /* =========================
-       RESPONSIVE LAYOUT LAYER
-       ========================= */
-
-    /* Tablet (821px–1099px): 2 columns */
-    @media (max-width: 1099px) {
-      .services-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    /* =========================
-       MOBILE FIX PACK (≤ 820px)
-       ========================= */
-    @media (max-width: 820px) {
-
-      /* Column “paper”: fill more of the screen but keep gutter image visible */
-      .content-frame::before{
-        width:min(100vw, 96vw);
-        background:rgba(10,10,10,0.95);
+    <style>
+      /* ---------- Page frame / background gutters ---------- */
+      html {
+        background: url("assets/background.png") center / cover fixed no-repeat;
+      }
+      body {
+        margin: 0;
+        color: #e6e6e6;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        background: transparent;
       }
 
-      /* Sections: tighter padding for readability */
-      .section{ padding: 40px 18px; }
+      :root {
+        /* Seafoam glow palette (matches background shapes) */
+        --glow-main: 47, 111, 100; /* #2F6F64 */
+        --glow-halo: 31, 85, 77; /* a darker teal for the halo */
 
-      /* Hero: logo + tagline scale and glow for contrast */
-      .logo{ width: clamp(140px, 38vw, 200px); }
-      #hero h1.tape{
-        font-size: clamp(22px, 7vw, 36px);
-        line-height: 1.08;
-        text-shadow:
-          0 0 4px  rgba(34,211,238,.65),
-          0 0 10px rgba(167,139,250,.5),
-          0 0 18px rgba(34,211,238,.35);
+        /* runtime‑tunable vars */
+        --drift-scale: 1;
+        --morph-stroke-color: #7dd3fc; /* default cyan */
+        --morph-stroke-min: 18;
+        --morph-stroke-max: 28;
+        --wave-speed: 0.001; /* 50% faster than 0.0006 */
+        --wave-cycles: 4; /* number of undulations across the viewport */
       }
 
-      /* Nav: real mobile menu (button toggles .open) */
-      #nav{ align-items:center; justify-content:space-between; gap: 0; }
-      #nav-toggle{
-        display:inline-block; font-size:22px; background:transparent;
-        color:#b9b9ff; border:0;
+      /* Content column creates a local stacking context:
+         ::before (0) = the dark column bg
+         .morph-wrap (1) = the wave
+         .section (2) = your content/cards
+      */
+      .content-frame {
+        position: relative;
+        max-width: 1100px;
+        margin: 0 auto;
+        background: transparent; /* bg moved to ::before so morph can sit above it */
+        min-height: 100dvh;
+        z-index: 2; /* creates local stacking context */
+        overflow: visible;
       }
-      /* collapse links by default */
-      #nav .glitch{ display:none; padding:12px 0; }
-      #nav .glitch + .glitch{ border-top:1px solid rgba(255,255,255,.06); }
-      /* show when nav is opened */
-      #nav.open .glitch{ display:block; }
-
-      /* Services: single column, bigger touch targets */
-      .services-grid{ grid-template-columns: 1fr; gap: 16px; }
-      .service-card{
-        padding: 18px 16px; border-radius: 10px;
-        box-shadow: 0 8px 18px rgba(0,0,0,.25);
-      }
-      .service-card h3{ font-size: clamp(18px, 5.2vw, 22px); }
-      .service-card p{ font-size: clamp(14px, 4.2vw, 16px); line-height:1.55; }
-
-      /* Sticky “Services” title: less jumpy */
-      .services-sticky{
-        top: 0; padding: 10px 16px; margin: -10px -16px 12px;
-        background: linear-gradient(#0a0a0acc,#0a0a0acc); backdrop-filter: blur(4px);
+      .content-frame::before {
+        content: "";
+        position: fixed; /* fixed so column bg doesn’t scroll */
+        left: 50vw;
+        top: 0;
+        transform: translateX(-50%);
+        width: min(1100px, 92vw);
+        height: 100vh;
+        background: rgba(
+          10,
+          10,
+          10,
+          0.92
+        ); /* slightly translucent so gutters peek */
+        z-index: 0;
       }
 
-      /* Past Work spacing */
-      .work-section li{ margin: 10px 0; }
-
-      /* Morph: a bit smaller/taller for clarity on phones */
-      .morph-wrap{
-        width:min(96vw, 760px);
-        height: 240px;
-        opacity:.95;
-        mix-blend-mode: normal;
+      /* ===== MORPH: fixed, full-bleed; inside .content-frame stacking context (above sections so it’s never hidden) ===== */
+      .morph-wrap {
+        position: fixed;
+        left: 0 !important;
+        right: 0 !important;
+        top: 50vh;
+        transform: translateY(-50%);
+        width: 100vw !important;
+        height: 70vh;
+        display: block;
+        z-index: 60; /* above sections so it’s never hidden */
+        pointer-events: none;
+        opacity: 0.24; /* visible but not overpowering */
+        mix-blend-mode: screen; /* additive light so it doesn’t block text */
       }
-      .morph-wrap svg{ width:100%; height:100%; }
+      .morph-wrap svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        display: block;
+      }
 
-      /* Spotlight layer: disabled on mobile via CSS (extra safety) */
-      #spotlight{ display:none !important; }
+      html.party .morph-wrap {
+        top: 50vh;
+      }
 
-      /* Footer: breathing room */
-      .footer{ padding: 28px 16px; font-size: 14px; }
-    }
+      /* Make the morph path obey the CSS var color */
+      .morph-wrap svg path[data-blend] {
+        stroke: var(--morph-stroke-color, #2f6f64) !important;
+      }
 
-    /* Ultra-small devices (≤ 380px) */
-    @media (max-width: 380px){
-      .section{ padding: 32px 14px; }
-      .services-sticky{ margin: -10px -14px 10px; padding: 10px 14px; }
-    }
+      /* Sections / cards: sections have a lower z-index than the morph now */
+      .section {
+        position: relative;
+        z-index: 20;
+        padding: 64px 24px;
+      }
+      .section.alt {
+        background: #111;
+      }
 
-    /* Also disable spotlight on any coarse pointer device (covers many tablets) */
-    @media (pointer: coarse) {
-      #spotlight{ display:none !important; }
-    }
-  </style>
-</head>
-<body>
-  <div id="scroll-progress" aria-hidden="true"></div>
-  <div id="spotlight" aria-hidden="true"></div>
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 16px;
+        font-family: "Montserrat", system-ui, sans-serif;
+        color: #f4f4f5;
+      }
+      p {
+        color: #c9c9ce;
+        line-height: 1.6;
+      }
 
-  <!-- Content column (bg via ::before) -->
-  <div class="content-frame">
-    <!-- Morph sits above column bg (::before) and below your cards -->
-    <div class="morph-wrap" aria-hidden="true">
-      <div id="morph-svg"></div>
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        width: 220px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 220px;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: #0a0a0a;
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: grayscale(1) contrast(1.15) brightness(0.9);
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+      /* Hidden LAB panel that appears with Konami — useful controls */
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed; /* overlay the viewport so cards don’t inherit page scroll */
+        inset: 0; /* full-viewport */
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500; /* above sections & morph, below Lab(9000)/grain(8000) */
+        pointer-events: none; /* cards re-enable pointer-events */
+        overflow: visible; /* allow drift outside edges */
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* =========================
+         RESPONSIVE LAYOUT LAYER
+         ========================= */
+
+      /* Tablet (821px–1099px): 2 columns */
+      @media (max-width: 1099px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* =========================
+         MOBILE FIX PACK (≤ 820px)
+         ========================= */
+      @media (max-width: 820px) {
+        :root {
+          --morph-stroke-min: 16;
+          --morph-stroke-max: 28;
+        }
+        :root {
+          --drift-scale: 0.75;
+        }
+        /* Column “paper”: fill more of the screen but keep gutter image visible */
+        .content-frame::before {
+          width: min(100vw, 96vw);
+          background: rgba(10, 10, 10, 0.95);
+        }
+
+        /* Sections: tighter padding for readability */
+        .section {
+          padding: 40px 18px;
+        }
+
+        /* Hero: logo + tagline scale and glow for contrast */
+        .logo {
+          width: clamp(140px, 38vw, 200px);
+        }
+        #hero h1.tape {
+          font-size: clamp(22px, 7vw, 36px);
+          line-height: 1.08;
+          text-shadow: 0 0 4px rgba(var(--glow-main), 0.6),
+            0 0 10px rgba(var(--glow-halo), 0.44),
+            0 0 18px rgba(var(--glow-main), 0.3);
+        }
+
+        /* Nav: real mobile menu (button toggles .open) */
+        #nav {
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+        }
+        #nav-toggle {
+          display: inline-block;
+          font-size: 22px;
+          background: transparent;
+          color: #b9b9ff;
+          border: 0;
+        }
+        /* collapse links by default */
+        #nav .glitch {
+          display: none;
+          padding: 12px 0;
+        }
+        #nav .glitch + .glitch {
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* show when nav is opened */
+        #nav.open .glitch {
+          display: block;
+        }
+
+        /* Services: single column, bigger touch targets */
+        .services-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .service-card {
+          padding: 18px 16px;
+          border-radius: 10px;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+        .service-card h3 {
+          font-size: clamp(18px, 5.2vw, 22px);
+        }
+        .service-card p {
+          font-size: clamp(14px, 4.2vw, 16px);
+          line-height: 1.55;
+        }
+
+        /* Sticky “Services” title: less jumpy */
+        .services-sticky {
+          top: 0;
+          padding: 10px 16px;
+          margin: -10px -16px 12px;
+          background: linear-gradient(#0a0a0acc, #0a0a0acc);
+          backdrop-filter: blur(4px);
+        }
+
+        /* Past Work spacing */
+        .work-section li {
+          margin: 10px 0;
+        }
+
+        /* Morph: a bit smaller/taller for clarity on phones */
+        .morph-wrap {
+          width: 100vw;
+          height: 55vh;
+          opacity: 0.24;
+          mix-blend-mode: screen;
+        }
+        .morph-wrap svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Footer: breathing room */
+        .footer {
+          padding: 28px 16px;
+          font-size: 14px;
+        }
+
+        /* Disable keyboard-only hints: Konami is long‑press / double‑tap on mobile */
+        .services-sticky {
+          position: sticky;
+        } /* keep */
+        #grain {
+          opacity: 0.22;
+        } /* slightly softer on phone */
+      }
+
+      /* Ultra-small devices (≤ 380px) */
+      @media (max-width: 380px) {
+        .section {
+          padding: 32px 14px;
+        }
+        .services-sticky {
+          margin: -10px -14px 10px;
+          padding: 10px 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="scroll-progress" aria-hidden="true"></div>
+    <canvas id="grain" aria-hidden="true"></canvas>
+    <audio id="player" preload="none" style="display: none"></audio>
+    <div id="float-layer" aria-hidden="true"></div>
+    <!-- Content column (bg via ::before) -->
+    <div class="content-frame">
+      <!-- Morph sits between column background (::before) and content cards -->
+      <div class="morph-wrap" aria-hidden="true">
+        <div id="morph-svg"></div>
+      </div>
+      <header id="hero" class="section" data-animate>
+        <nav id="nav" data-animate>
+          <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
+          <a href="#about" class="glitch" data-text="About" data-animate
+            >About</a
+          >
+          <a href="#services" class="glitch" data-text="Services" data-animate
+            >Services</a
+          >
+          <a href="#work" class="glitch" data-text="Past Work" data-animate
+            >Past Work</a
+          >
+          <a href="#contact" class="glitch" data-text="Contact" data-animate
+            >Contact</a
+          >
+        </nav>
+
+        <div class="hero-overlay"></div>
+        <div
+          class="logo"
+          id="logo-inline"
+          aria-label="Upstate Sound &amp; Repair logo"
+          data-animate
+        ></div>
+        <h1 id="tagline" class="tape" data-parallax data-drift="1.2">
+          Where Sound Meets Vision.
+        </h1>
+      </header>
+
+      <main>
+        <!-- About -->
+        <section id="about" class="section about-section paper" data-animate>
+          <h2 data-animate>About</h2>
+          <p data-animate>
+            Hey, I’m Donald—a lifelong chaser of tone and tinkerer of broken
+            gear. I’m an audio engineer, live-sound tech, repair whisperer, and,
+            on rare occasions, a musician who actually finishes a song. If
+            you’re here, you probably care about your gear as much as your
+            music—so do I.
+          </p>
+          <p data-animate>
+            Upstate Sound &amp; Repair is my way of keeping our little corner of
+            the world humming, one recalcitrant circuit at a time. I consult for
+            venues, help artists chase good sound, and I show up when your
+            vintage Moog throws a tantrum or your podcast needs a little love.
+            If you want work done right (but not uptight), I’m the guy who shows
+            up with a soldering iron, way too many opinions, and a sense of
+            humor.
+          </p>
+        </section>
+
+        <!-- Services -->
+        <section
+          id="services"
+          class="section services-section alt"
+          data-animate
+        >
+          <h2 class="services-sticky" data-animate>Services</h2>
+          <div class="services-grid">
+            <div class="service-card" data-animate>
+              <h3 data-animate data-drift="1.4" data-drift-x="0.8">
+                Studio &amp; Gear Repair
+              </h3>
+              <p data-animate data-drift="1.8" data-drift-x="1.0">
+                Your studio is only as good as its weakest link. I diagnose and
+                repair mixers, preamps, tape machines, and all those vintage
+                boxes you can’t live without. Think of me as your gear’s
+                therapist — I listen carefully and I don’t judge.
+              </p>
+            </div>
+            <div class="service-card" data-animate>
+              <h3 data-animate data-drift="1.4" data-drift-x="0.8">
+                Synth &amp; Audio Gear Repair
+              </h3>
+              <p data-animate data-drift="1.8" data-drift-x="1.0">
+                Analog synths are living, breathing beasts — and they get
+                cranky. I service and restore vintage synthesizers, drum
+                machines, samplers and outboard gear. Whether it’s a cracked
+                membrane or a blown capacitor, I’ll get the soul back in your
+                circuits.
+              </p>
+            </div>
+            <div class="service-card" data-animate>
+              <h3 data-animate data-drift="1.4" data-drift-x="0.8">
+                Music Production
+              </h3>
+              <p data-animate data-drift="1.8" data-drift-x="1.0">
+                I partner with bands and solo artists to produce, record and
+                shape their music. From pre-production and arrangement to mixing
+                and mastering, I help you capture what you hear in your head and
+                translate it to tape. No cookie-cutter templates — just honest
+                collaboration and sonic exploration.
+              </p>
+            </div>
+            <div class="service-card" data-animate>
+              <h3 data-animate data-drift="1.4" data-drift-x="0.8">
+                Podcast Production
+              </h3>
+              <p data-animate data-drift="1.8" data-drift-x="1.0">
+                Have a story to tell? I provide recording, editing and mixing
+                for podcasts and audio books. I’ll help you sound like you know
+                what you’re doing — crisp vocals, balanced levels, and maybe the
+                occasional tasteful synth stab.
+              </p>
+            </div>
+            <div class="service-card" data-animate>
+              <h3 data-animate data-drift="1.4" data-drift-x="0.8">
+                Live Sound Engineering
+              </h3>
+              <p data-animate data-drift="1.8" data-drift-x="1.0">
+                From tiny clubs to weird warehouse gatherings, I mix live shows
+                that feel like they’re meant for you. Clean, loud and
+                feedback-free. Yes, I’ll carry cases and tape cables because I’m
+                not above grunt work.
+              </p>
+            </div>
+            <div class="service-card" data-animate>
+              <h3 data-animate data-drift="1.4" data-drift-x="0.8">
+                Consulting &amp; Education
+              </h3>
+              <p data-animate data-drift="1.8" data-drift-x="1.0">
+                One-on-one consulting for studios, bands, and venues.
+                Signal-flow bootcamps, mix reviews, live rig sanity checks, and
+                hands-on solder sessions. Learn the why, not just the settings.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Past Work -->
+        <section id="work" class="section work-section" data-animate>
+          <h2 data-animate>Past Work</h2>
+          <ul class="work-list">
+            <li data-animate data-drift="0.8">
+              <strong>Live &amp; Session Engineer – Artis-Naples:</strong>
+              engineered recordings for the Naples Philharmonic Orchestra and
+              various chamber ensembles at Artis-Naples (home of the Naples
+              Philharmonic).
+            </li>
+            <li data-animate data-drift="0.8">
+              <strong>Mix Consultant – Swansons Studios:</strong> partnered with
+              Britt to fine-tune session mixes for local bands, offering fresh
+              ears, technical fixes and workflow hacks.
+            </li>
+            <li data-animate data-drift="0.8">
+              <strong
+                >Producer &amp; Mix Engineer – 10-Song LP (in progress):</strong
+              >
+              producing, recording, mixing and mastering a full-length album —
+              custom synth patches, recorded instruments, a few talk-radio
+              samples — 100% handcrafted, all original.
+            </li>
+            <li data-animate data-drift="0.8">
+              <strong>Podcast Producer – Trailside Carolina:</strong> recorded,
+              produced, mixed and mastered the Trailside Carolina podcast —
+              crystal-clear audio and immersive storytelling for outdoor
+              enthusiasts.
+            </li>
+            <li data-animate data-drift="0.8">
+              <strong>Gear Repair Repertoire:</strong> Yamaha DX7/DX7IIFD, CS01,
+              CS50/60, SK-20, Microkorg, Lexicon 300, Korg SK1, Kawai K1, Roland
+              JP-3000 &amp; RE-201, Ibanez TS-9, Mu-Tron III, Fender Twin
+              (reissue), Pro Reverb (1967), Musicman HD-150, ART PRO VLA II, A
+              Designs MP-2A… and many more.
+            </li>
+          </ul>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="section contact-section" data-animate>
+          <h2 data-animate>Contact</h2>
+          <p data-animate>
+            Ready to get that crackling amp sorted, record a new podcast or just
+            chat about synths? Drop me a line — I’m based in Greenville, South
+            Carolina and I love meeting fellow audio nerds.
+          </p>
+          <p data-animate>
+            Email me at
+            <a
+              class="glitch"
+              href="mailto:info@upstatesound.co"
+              data-text="info@upstatesound.co"
+              >info@upstatesound.co</a
+            >.
+          </p>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>
+          © <span id="year"></span> Upstate Sound &amp; Repair. Serving
+          Greenville and the Upstate. Made with solder and soul.
+        </p>
+      </footer>
     </div>
 
-    <header id="hero" class="section" data-animate>
-      <nav id="nav" data-animate>
-        <button id="nav-toggle" aria-label="Toggle navigation">☰</button>
-        <a href="#about" class="glitch" data-text="About" data-animate>About</a>
-        <a href="#services" class="glitch" data-text="Services" data-animate>Services</a>
-        <a href="#work" class="glitch" data-text="Past Work" data-animate>Past Work</a>
-        <a href="#contact" class="glitch" data-text="Contact" data-animate>Contact</a>
-      </nav>
+    <!-- Optional: your existing JS -->
+    <script src="script.js"></script>
 
-      <div class="hero-overlay"></div>
-      <img src="assets/logo.svg" alt="Upstate Sound &amp; Repair logo" class="logo" width="250" height="250" data-animate />
-      <h1 class="tape" data-parallax data-drift="1.2">Where Sound Meets Vision.</h1>
-    </header>
+    <!-- Vibe core -->
+    <script>
+      (function () {
+        var d = document.documentElement,
+          b = document.body;
 
-    <main>
-      <!-- About -->
-      <section id="about" class="section about-section paper" data-animate>
-        <h2 data-animate>About</h2>
-        <p data-animate>Hey, I’m Donald—a lifelong chaser of tone and tinkerer of broken gear. I’m an audio engineer, live-sound tech, repair whisperer, and, on rare occasions, a musician who actually finishes a song. If you’re here, you probably care about your gear as much as your music—so do I.</p>
-        <p data-animate>Upstate Sound &amp; Repair is my way of keeping our little corner of the world humming, one recalcitrant circuit at a time. I consult for venues, help artists chase good sound, and I show up when your vintage Moog throws a tantrum or your podcast needs a little love. If you want work done right (but not uptight), I’m the guy who shows up with a soldering iron, way too many opinions, and a sense of humor.</p>
-      </section>
+        /* Inline the logo.svg so CSS glow can target its paths */
+        (function () {
+          // === Waveform rendering on the active card ==========================
+          var __waveCard = null,
+            __waveCtx = null,
+            __waveCvs = null,
+            __waveRAF = 0;
 
-      <!-- Services -->
-      <section id="services" class="section services-section alt" data-animate>
-        <h2 class="services-sticky" data-animate>Services</h2>
-        <div class="services-grid">
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Studio &amp; Gear Repair</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">Your studio is only as good as its weakest link. I diagnose and repair mixers, preamps, tape machines, and all those vintage boxes you can’t live without. Think of me as your gear’s therapist — I listen carefully and I don’t judge.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Synth &amp; Audio Gear Repair</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">Analog synths are living, breathing beasts — and they get cranky. I service and restore vintage synthesizers, drum machines, samplers and outboard gear. Whether it’s a cracked membrane or a blown capacitor, I’ll get the soul back in your circuits.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Music Production</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">I partner with bands and solo artists to produce, record and shape their music. From pre-production and arrangement to mixing and mastering, I help you capture what you hear in your head and translate it to tape. No cookie-cutter templates — just honest collaboration and sonic exploration.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Podcast Production</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">Have a story to tell? I provide recording, editing and mixing for podcasts and audio books. I’ll help you sound like you know what you’re doing — crisp vocals, balanced levels, and maybe the occasional tasteful synth stab.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Live Sound Engineering</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">From tiny clubs to weird warehouse gatherings, I mix live shows that feel like they’re meant for you. Clean, loud and feedback-free. Yes, I’ll carry cases and tape cables because I’m not above grunt work.</p>
-          </div>
-          <div class="service-card" data-animate>
-            <h3 data-animate data-drift="1.4" data-drift-x="0.8">Consulting &amp; Education</h3>
-            <p  data-animate data-drift="1.8" data-drift-x="1.0">One-on-one consulting for studios, bands, and venues. Signal-flow bootcamps, mix reviews, live rig sanity checks, and hands-on solder sessions. Learn the why, not just the settings.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Past Work -->
-      <section id="work" class="section work-section" data-animate>
-        <h2 data-animate>Past Work</h2>
-        <ul class="work-list">
-          <li data-animate data-drift="0.8"><strong>Live &amp; Session Engineer – Artis-Naples:</strong> engineered recordings for the Naples Philharmonic Orchestra and various chamber ensembles at Artis-Naples (home of the Naples Philharmonic).</li>
-          <li data-animate data-drift="0.8"><strong>Mix Consultant – Swansons Studios:</strong> partnered with Britt to fine-tune session mixes for local bands, offering fresh ears, technical fixes and workflow hacks.</li>
-          <li data-animate data-drift="0.8"><strong>Producer &amp; Mix Engineer – 10-Song LP (in progress):</strong> producing, recording, mixing and mastering a full-length album — custom synth patches, recorded instruments, a few talk-radio samples — 100% handcrafted, all original.</li>
-          <li data-animate data-drift="0.8"><strong>Podcast Producer – Trailside Carolina:</strong> recorded, produced, mixed and mastered the Trailside Carolina podcast — crystal-clear audio and immersive storytelling for outdoor enthusiasts.</li>
-          <li data-animate data-drift="0.8"><strong>Gear Repair Repertoire:</strong> Yamaha DX7/DX7IIFD, CS01, CS50/60, SK-20, Microkorg, Lexicon 300, Korg SK1, Kawai K1, Roland JP-3000 &amp; RE-201, Ibanez TS-9, Mu-Tron III, Fender Twin (reissue), Pro Reverb (1967), Musicman HD-150, ART PRO VLA II, A Designs MP-2A… and many more.</li>
-        </ul>
-      </section>
-
-      <!-- Contact -->
-      <section id="contact" class="section contact-section" data-animate>
-        <h2 data-animate>Contact</h2>
-        <p data-animate>Ready to get that crackling amp sorted, record a new podcast or just chat about synths? Drop me a line — I’m based in Greenville, South Carolina and I love meeting fellow audio nerds.</p>
-        <p data-animate>Email me at <a class="glitch" href="mailto:info@upstatesound.co" data-text="info@upstatesound.co">info@upstatesound.co</a>.</p>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <p>© <span id="year"></span> Upstate Sound &amp; Repair. Serving Greenville and the Upstate. Made with solder and soul.</p>
-    </footer>
-  </div>
-
-  <!-- Optional: your existing JS -->
-  <script src="script.js"></script>
-
-  <!-- Vibe core -->
-  <script>
-  (function(){
-    var d=document.documentElement, b=document.body;
-
-    /* Reveal (replayable) */
-    var els=[].slice.call(document.querySelectorAll('[data-animate]'));
-    if('IntersectionObserver' in window){
-      try{
-        var io=new IntersectionObserver(function(entries){
-          for(var i=0;i<entries.length;i++){
-            var e=entries[i];
-            if(e.isIntersecting) e.target.classList.add('reveal');
-            else e.target.classList.remove('reveal');
+          function attachWaveToCard(card) {
+            if (!card) return;
+            var cvs = card.querySelector(".wave");
+            if (!cvs) {
+              cvs = document.createElement("canvas");
+              cvs.className = "wave";
+              card.appendChild(cvs);
+            }
+            __waveCvs = cvs;
+            __waveCtx = cvs.getContext("2d");
+            // fit to card box
+            function size() {
+              var r = card.getBoundingClientRect();
+              cvs.width = Math.max(2, Math.floor(r.width));
+              cvs.height = Math.max(2, Math.floor(r.height));
+            }
+            size();
+            // re-fit on next frame (after CSS/layout settles)
+            requestAnimationFrame(size);
+            __waveCard = card;
           }
-        }, { rootMargin:'0px 0px -10% 0px', threshold:0.1 });
-        els.forEach(function(el){ io.observe(el); });
-      }catch(_){ els.forEach(function(el){ el.classList.add('reveal'); }); }
-    }else{ els.forEach(function(el){ el.classList.add('reveal'); }); }
 
-    /* Drift (global) */
-    var driftNodes=[].slice.call(document.querySelectorAll('[data-parallax],[data-drift],[data-animate]'));
-    function clamp(n,min,max){ return Math.min(max, Math.max(min,n)); }
-    function driftTick(){
-      var vh = window.innerHeight || 1;
-      var sc = d.scrollTop || b.scrollTop;
-      var scale = parseFloat(getComputedStyle(d).getPropertyValue('--drift-scale')) || 1;
-      for(var i=0;i<driftNodes.length;i++){
-        var el = driftNodes[i];
-        var multY = parseFloat(el.getAttribute('data-drift')); if(!(multY||multY===0)) multY = el.hasAttribute('data-parallax') ? 1.0 : 0.4;
-        var multX = parseFloat(el.getAttribute('data-drift-x')); if(!(multX||multX===0)) multX = 0.5 * multY;
-        var r = el.getBoundingClientRect();
-        var center = r.top + r.height/2;
-        var norm = (center - vh/2) / vh;
-        var y = clamp(-28 * norm * multY * scale, -38, 38);
-        var x = Math.sin((sc*0.0045) + i*0.7) * (10 * multX * scale);
-        el.style.setProperty('--dy', y + 'px');
-        el.style.setProperty('--dx', x + 'px');
-      }
-      requestAnimationFrame(driftTick);
-    }
-    requestAnimationFrame(driftTick);
+          function stopWave() {
+            if (__waveRAF) cancelAnimationFrame(__waveRAF);
+            __waveRAF = 0;
+            if (__waveCard) {
+              var c = __waveCard.querySelector(".wave");
+              if (c) {
+                c.getContext("2d").clearRect(0, 0, c.width, c.height);
+              }
+              __waveCard.classList.remove("playing");
+            }
+            __waveCard = null;
+          }
 
-    /* Scroll progress */
-    var bar=document.getElementById('scroll-progress');
-    function progress(){ var sc=d.scrollTop||b.scrollTop, max=(d.scrollHeight-d.clientHeight)||1; if(bar) bar.style.width=(sc/max*100)+'%'; }
-    progress(); document.addEventListener('scroll', progress, {passive:true});
+          function startWaveOn(card) {
+            if (!window.__waveAnalyser || !card) return;
+            attachWaveToCard(card);
+            card.classList.add("playing");
 
-    /* Mobile nav toggle */
-    (function(){
-      var nav = document.getElementById('nav');
-      var btn = document.getElementById('nav-toggle');
-      if (!nav || !btn) return;
-      btn.addEventListener('click', function(){
-        nav.classList.toggle('open');
-      });
-    })();
+            var analyser = window.__waveAnalyser;
+            var buf = new Uint8Array(analyser.fftSize);
 
-    /* Detect touch / coarse pointer for mobile behavior */
-    var IS_COARSE = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    // Soften drift and thicken morph on mobile/tablet
-    d.style.setProperty('--drift-scale', IS_COARSE ? 0.65 : 1.0);
-    d.style.setProperty('--morph-stroke-min', IS_COARSE ? 11 : 9);
-    d.style.setProperty('--morph-stroke-max', IS_COARSE ? 16 : 13);
+            function draw() {
+              if (!__waveCtx || !__waveCvs) return;
+              analyser.getByteTimeDomainData(buf);
 
-    /* Spotlight: desktop only (disabled via CSS + guard here) */
-    (function(){
-      var spot = document.getElementById('spotlight');
-      if (!spot || IS_COARSE) return;
-      var tx = innerWidth/2, ty = innerHeight/2;
-      var x = tx, y = ty;
-      var EASE = 0.25, BASE_RAD = 200;
-      addEventListener('mousemove', function(e){ tx = e.clientX; ty = e.clientY; }, {passive:true});
-      function tick(){
-        x += (tx - x) * EASE; y += (ty - y) * EASE;
-        var r = BASE_RAD;
-        spot.style.background =
-          'radial-gradient(circle '+r+'px at '+x+'px '+y+'px,'+
-          'rgba(255,255,255,1) 0%,'+
-          'rgba(255,255,255,.75) 40%,'+
-          'rgba(255,255,255,0) 80%)';
-        requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-      // Toggle with 'S'
-      var on = true;
-      document.addEventListener('keydown', function(e){
-        if ((e.key||'').toLowerCase() === 's'){
-          on = !on; spot.style.display = on ? 'block' : 'none';
+              var w = __waveCvs.width,
+                h = __waveCvs.height;
+              var ctx = __waveCtx;
+              ctx.clearRect(0, 0, w, h);
+
+              // soft glow trail
+              ctx.lineWidth = 3;
+              ctx.strokeStyle = "rgba(255,255,255,0.9)";
+              ctx.shadowBlur = 14;
+              ctx.shadowColor = "rgba(255,255,255,0.9)";
+              ctx.beginPath();
+
+              for (var i = 0; i < buf.length; i++) {
+                var x = (i / (buf.length - 1)) * w;
+                var y = (buf[i] / 255) * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+              }
+              ctx.stroke();
+              __waveRAF = requestAnimationFrame(draw);
+            }
+            stopWave(); // stop previous
+            __waveRAF = requestAnimationFrame(draw);
+          }
+          // Expose waveform helpers globally
+          window.__startWaveOn = startWaveOn;
+          window.__stopWave = stopWave;
+          var holder = document.getElementById("logo-inline");
+          if (!holder) return;
+          fetch("assets/logo.svg")
+            .then(function (r) {
+              return r.text();
+            })
+            .then(function (svg) {
+              holder.innerHTML = svg;
+            })
+            .catch(function (e) {
+              console.warn("inline logo failed", e);
+            });
+        })();
+
+        // === Float Mode: send the six service cards drifting and swap copy to track titles ===
+        (function () {
+          var player = document.getElementById("player");
+
+          // Create / get the layer
+          var layer = document.getElementById("float-layer");
+          if (!layer) {
+            layer = document.createElement("div");
+            layer.id = "float-layer";
+            document.body.appendChild(layer);
+          }
+
+          var TITLES = [
+            "Resting Place",
+            "Deletions of Grandeur",
+            "God of No Man",
+            "Is There a Number to The Other Side?",
+            "Sad News",
+            "Spiritually Dead",
+          ];
+
+          var TRACKS = [
+            "assets/resting-place.mp3",
+            "assets/deletions-of-grandeur.mp3",
+            "assets/god-of-no-man.mp3",
+            "assets/is-there-a-number-to-the-other-side.mp3",
+            "assets/sad-news.mp3",
+            "assets/spiritually-dead.mp3",
+          ];
+
+          // ------- Float physics tuning (natural, scroll‑activated) -------
+          // Cards stay put until you scroll; scrolling injects impulses.
+          // After ~10s without scrolling they coast to a graceful stop.
+          var PHYS = {
+            // initial speeds ~0 so nothing moves until first scroll
+            baseMin: 0.04, // px/s
+            baseMax: 0.18, // px/s
+            gravity: 0.0, // no constant fall; motion is from impulses
+            drag: 0.08, // baseline per‑second damping (0..1)
+            extraIdleDrag: 0.28, // extra drag added when fully idle
+            idleHaltMs: 10000, // ms with no scroll until max idle drag
+
+            // scroll → velocity coupling
+            impulseScaleY: 0.16, // vertical impulse from scroll delta
+            impulseScaleX: 0.045, // horizontal impulse (slight sway)
+            impulseDecay: 0.965, // how quickly injected "wind" decays per frame
+
+            // subtle “liquid” wobble
+            wobbleAX: 2.5,
+            wobbleAY: 1.8,
+            wobbleFX: 0.0005,
+            wobbleFY: 0.00055,
+
+            // bounces at edges (all four); 1 = perfect, 0 = dead stop
+            bounceLoss: 0.66,
+          };
+
+          var ACTIVE = false;
+          var raf = 0;
+          var last = 0; // ms
+          var nodes = []; // { el, x,y, vx,vy, w,h }
+          var windY = 0; // scroll-induced impulse
+          var prevScrollY = window.scrollY || 0;
+          var lastScrollAt = performance.now();
+
+          function ensureAnalyser() {
+            try {
+              if (!window.__waveAnalyser && player) {
+                var AC = window.AudioContext || window.webkitAudioContext;
+                var ctx = new AC();
+                var srcNode = ctx.createMediaElementSource(player);
+                var analyser = ctx.createAnalyser();
+                analyser.fftSize = 1024;
+                srcNode.connect(analyser);
+                analyser.connect(ctx.destination);
+                window.__waveAnalyser = analyser;
+              }
+            } catch (_) {}
+          }
+
+          function playTrackSrc(src, card) {
+            if (!player) return;
+            var same = player.src && player.src.endsWith(src);
+            if (same && !player.paused) {
+              // toggle pause on same card
+              player.pause();
+              if (window.__stopWave) window.__stopWave();
+              // clear playing class
+              for (var i = 0; i < nodes.length; i++) {
+                nodes[i].el.classList.remove("playing");
+              }
+              return;
+            }
+            if (!same) player.src = src;
+            // set accent color on the card (matches morph color)
+            var acc =
+              getComputedStyle(document.documentElement)
+                .getPropertyValue("--morph-stroke-color")
+                .trim() || "#7dd3fc";
+            if (card) card.style.setProperty("--accent", acc);
+
+            var p = player.play();
+            ensureAnalyser();
+            // clear previous playing state
+            for (var j = 0; j < nodes.length; j++) {
+              nodes[j].el.classList.remove("playing");
+            }
+            if (card && window.__startWaveOn) window.__startWaveOn(card);
+            if (p && typeof p.catch === "function") p.catch(function () {});
+          }
+
+          function captureCards() {
+            var cards = Array.prototype.slice.call(
+              document.querySelectorAll(
+                "#services .services-grid .service-card"
+              )
+            );
+
+            nodes = [];
+
+            // 1) Snapshot ALL positions before moving anything (viewport coords)
+            var snaps = cards.map(function (card) {
+              var r = card.getBoundingClientRect();
+              return {
+                card: card,
+                x: r.left,
+                y: r.top,
+                w: r.width,
+                h: r.height,
+              };
+            });
+
+            // 2) If multiple cards resolve to the same coordinates (rare, but happens
+            //    when the browser reports fractional positions as the same number),
+            //    gently fan them out so they never spawn stacked.
+            var seen = new Map();
+            snaps.forEach(function (s) {
+              var key = Math.round(s.x) + "x" + Math.round(s.y);
+              var n = seen.get(key) || 0;
+              if (n > 0) {
+                // offset each subsequent card a little bit in a spiral
+                var ang = n * 0.9; // radians
+                var rad = 18 + n * 6; // px
+                s.x += Math.cos(ang) * rad;
+                s.y += Math.sin(ang) * rad;
+              }
+              seen.set(key, n + 1);
+            });
+
+            // 3) Move every card into the fixed overlay layer using the snapshots
+            layer.style.display = "block";
+            layer.style.width = "100vw";
+            layer.style.height = "100vh";
+
+            snaps.forEach(function (snap, idx) {
+              var card = snap.card;
+
+              // Move to overlay and preserve size
+              layer.appendChild(card);
+              card.classList.add("flying-card");
+              card.style.position = "absolute";
+              card.style.width = snap.w + "px";
+              card.style.height = snap.h + "px";
+              card.style.left = "0px";
+              card.style.top = "0px";
+
+              // Place exactly where it was on screen (using transform for GPU smoothness)
+              card.style.transform =
+                "translate3d(" +
+                snap.x.toFixed(2) +
+                "px," +
+                snap.y.toFixed(2) +
+                "px,0)";
+
+              // Title swap content (track names)
+              var t;
+              if (!card.querySelector(".title-swap")) {
+                t = document.createElement("div");
+                t.className = "title-swap";
+                t.textContent = TITLES[idx % TITLES.length];
+                card.appendChild(t);
+              } else {
+                t = card.querySelector(".title-swap");
+                t.textContent = TITLES[idx % TITLES.length];
+              }
+              // Copy h3 font size and line height to swap title
+              var h3 = card.querySelector("h3");
+              if (h3) {
+                var fs = getComputedStyle(h3).fontSize;
+                var lh = getComputedStyle(h3).lineHeight;
+                t.style.fontSize = fs;
+                if (lh && lh !== "normal") t.style.lineHeight = lh;
+              }
+              // Ensure swapped title is centered
+              t.style.textAlign = "center";
+
+              // Click → play track
+              (function (trackSrc, theCard) {
+                theCard.style.cursor = "pointer";
+                theCard.addEventListener("click", function (ev) {
+                  ev.stopPropagation();
+                  playTrackSrc(trackSrc, theCard);
+                });
+              })(TRACKS[idx % TRACKS.length], card);
+
+              // Hide normal copy immediately in float mode and show the track title
+              card.classList.add("swap-on");
+
+              // Near-zero initial velocity; motion comes from scroll impulses
+              var speed =
+                PHYS.baseMin + Math.random() * (PHYS.baseMax - PHYS.baseMin);
+              var ang = Math.random() * Math.PI * 2;
+              var vx = Math.cos(ang) * speed * 0.05;
+              var vy = Math.sin(ang) * speed * 0.05;
+
+              nodes.push({
+                el: card,
+                x: snap.x,
+                y: snap.y,
+                vx: vx,
+                vy: vy,
+                w: snap.w,
+                h: snap.h,
+              });
+            });
+          }
+
+          // Scroll injects impulses; remember last scroll time
+          window.addEventListener(
+            "scroll",
+            function () {
+              var sy = window.scrollY || 0;
+              var dy = sy - prevScrollY; // + when scrolling down
+              prevScrollY = sy;
+              lastScrollAt = performance.now();
+
+              // vertical push proportional to dy, small horizontal sway
+              for (var i = 0; i < nodes.length; i++) {
+                var n = nodes[i];
+                var sway =
+                  (Math.random() * 2 - 1) * Math.abs(dy) * PHYS.impulseScaleX;
+                n.vx += sway;
+                n.vy += dy * PHYS.impulseScaleY;
+              }
+            },
+            { passive: true }
+          );
+
+          function tick(now) {
+            now = now || performance.now();
+            var dt = Math.min(48, now - (last || now)) / 1000; // seconds, clamp 48ms
+            last = now;
+
+            var W =
+              window.innerWidth || document.documentElement.clientWidth || 1;
+            var H =
+              window.innerHeight || document.documentElement.clientHeight || 1;
+
+            // idle‑based extra drag ramps from 0 → extraIdleDrag over idleHaltMs
+            var idleT = Math.min(1, (now - lastScrollAt) / PHYS.idleHaltMs);
+            var totalDrag = PHYS.drag + PHYS.extraIdleDrag * idleT;
+
+            // frame‑rate independent damping
+            var damp = Math.max(0, Math.min(1, 1 - totalDrag * dt));
+
+            for (var i = 0; i < nodes.length; i++) {
+              var n = nodes[i];
+
+              // integrate velocities
+              n.vy += PHYS.gravity * dt;
+
+              n.vx *= damp;
+              n.vy *= damp;
+
+              n.x += n.vx * dt;
+              n.y += n.vy * dt;
+
+              // soft “liquid” wobble (reduced blending for more liquid motion)
+              var wobX =
+                Math.sin(now * PHYS.wobbleFX + i) * (PHYS.wobbleAX * 0.6);
+              var wobY =
+                Math.cos(now * PHYS.wobbleFY + i) * (PHYS.wobbleAY * 0.6);
+
+              // bounce off all four edges with energy loss
+              if (n.x < 0) {
+                n.x = 0;
+                n.vx = Math.abs(n.vx) * PHYS.bounceLoss;
+              }
+              if (n.x + n.w > W) {
+                n.x = W - n.w;
+                n.vx = -Math.abs(n.vx) * PHYS.bounceLoss;
+              }
+              if (n.y < 0) {
+                n.y = 0;
+                n.vy = Math.abs(n.vy) * PHYS.bounceLoss;
+              }
+              if (n.y + n.h > H) {
+                n.y = H - n.h;
+                n.vy = -Math.abs(n.vy) * PHYS.bounceLoss;
+              }
+
+              n.el.style.transform = `translate3d(${(n.x + wobX).toFixed(
+                2
+              )}px, ${(n.y + wobY).toFixed(2)}px, 0)`;
+            }
+
+            raf = requestAnimationFrame(tick);
+          }
+
+          function start() {
+            if (window.__stopWave) window.__stopWave();
+            if (ACTIVE) return;
+            ACTIVE = true;
+            document.documentElement.classList.add("float-on"); // enable colorization in Float Mode
+            cancelAnimationFrame(raf);
+            last = 0;
+            captureCards();
+            lastScrollAt = performance.now();
+            raf = requestAnimationFrame(tick);
+            // Ensure float-layer is visible and full-viewport
+            layer.style.display = "block";
+            layer.style.width = "100vw";
+            layer.style.height = "100vh";
+          }
+          window.__startFloatMode = start;
+        })();
+
+        /* Reveal (replayable) */
+        var els = [].slice.call(document.querySelectorAll("[data-animate]"));
+        if ("IntersectionObserver" in window) {
+          try {
+            var io = new IntersectionObserver(
+              function (entries) {
+                for (var i = 0; i < entries.length; i++) {
+                  var e = entries[i];
+                  if (e.isIntersecting) e.target.classList.add("reveal");
+                  else e.target.classList.remove("reveal");
+                }
+              },
+              { rootMargin: "0px 0px -10% 0px", threshold: 0.1 }
+            );
+            els.forEach(function (el) {
+              io.observe(el);
+            });
+          } catch (_) {
+            els.forEach(function (el) {
+              el.classList.add("reveal");
+            });
+          }
+        } else {
+          els.forEach(function (el) {
+            el.classList.add("reveal");
+          });
         }
-      });
-    })();
 
-    /* Konami Party Mode */
-    var seq=[], konami=[38,38,40,40,37,39,37,39,66,65];
-    window.addEventListener('keydown',function(e){
-      seq.push(e.keyCode); if(seq.length>konami.length) seq.shift();
-      for(var i=0,ok=true;i<konami.length;i++){ if(seq[i]!==konami[i]){ ok=false; break; } }
-      if(ok) d.classList.toggle('party');
-    });
-
-    /* TRUE path morph (fixed, centered) */
-    (function initMorph(){
-      var host = document.getElementById('morph-svg');
-      if(!host) return;
-
-      var SAMPLES = 140;
-      var STROKE_MIN = parseFloat(getComputedStyle(d).getPropertyValue('--morph-stroke-min')) || 9;
-      var STROKE_MAX = parseFloat(getComputedStyle(d).getPropertyValue('--morph-stroke-max')) || 13;
-
-      function toPathD(points){
-        if(!points.length) return '';
-        var d = 'M' + points[0].x + ',' + points[0].y;
-        for(var i=1;i<points.length;i++){ d += ' L' + points[i].x + ',' + points[i].y; }
-        return d;
-      }
-      function samplePath(pathEl, n){
-        var len = pathEl.getTotalLength();
-        var pts = new Array(n);
-        for(var i=0;i<n;i++){
-          var p = pathEl.getPointAtLength((i/(n-1))*len);
-          pts[i] = {x:+p.x.toFixed(2), y:+p.y.toFixed(2)};
+        /* Drift (global) */
+        var driftNodes = [].slice.call(
+          document.querySelectorAll("[data-parallax],[data-drift]")
+        );
+        function clamp(n, min, max) {
+          return Math.min(max, Math.max(min, n));
         }
-        return pts;
-      }
-      function blendPoints(a,b,t){
-        var out = new Array(a.length);
-        for(var i=0;i<a.length;i++){
-          out[i] = { x: a[i].x + (b[i].x-a[i].x)*t, y: a[i].y + (b[i].y-a[i].y)*t };
+        function driftTick() {
+          var vh = window.innerHeight || 1;
+          var sc = d.scrollTop || b.scrollTop;
+          var rawScale = getComputedStyle(d)
+            .getPropertyValue("--drift-scale")
+            .trim();
+          var scale = parseFloat(rawScale);
+          if (isNaN(scale)) scale = 1;
+
+          for (var i = 0; i < driftNodes.length; i++) {
+            var el = driftNodes[i];
+            var multY = parseFloat(el.getAttribute("data-drift"));
+            if (!(multY || multY === 0))
+              multY = el.hasAttribute("data-parallax") ? 1.2 : 0.7;
+            var multX = parseFloat(el.getAttribute("data-drift-x"));
+            if (!(multX || multX === 0)) multX = 0.55 * multY;
+
+            var r = el.getBoundingClientRect();
+            var center = r.top + r.height / 2;
+            var norm = (center - vh / 2) / vh;
+
+            // Stronger, more obvious drift (tunable via --drift-scale and Lab)
+            var y = clamp(-60 * norm * multY * scale, -90, 90);
+            var x = Math.sin(sc * 0.006 + i * 0.9) * (22 * multX * scale);
+
+            el.style.setProperty("--dy", y + "px");
+            el.style.setProperty("--dx", x + "px");
+          }
+          requestAnimationFrame(driftTick);
         }
-        return out;
-      }
-      function pageT(){
-        var sc = d.scrollTop || b.scrollTop;
-        var max = (d.scrollHeight - d.clientHeight) || 1;
-        return Math.max(0, Math.min(1, sc/max));
-      }
+        requestAnimationFrame(driftTick);
 
-      fetch('assets/scroll-scrub.svg')
-        .then(function(r){ return r.text(); })
-        .then(function(txt){
-          host.innerHTML = txt;
-          var svg = host.querySelector('svg') || host.firstElementChild;
-          if(!svg) return;
+        /* Scroll progress */
+        var bar = document.getElementById("scroll-progress");
+        function progress() {
+          var sc = d.scrollTop || b.scrollTop,
+            max = d.scrollHeight - d.clientHeight || 1;
+          if (bar) bar.style.width = (sc / max) * 100 + "%";
+        }
+        progress();
+        document.addEventListener("scroll", progress, { passive: true });
 
-          var ids = ['#p1','#p2','#p3','#p4','#p5'];
-          var paths = [];
-          for(var i=0;i<ids.length;i++){ var el = svg.querySelector(ids[i]); if(el) paths.push(el); }
-          if(paths.length<2) return;
+        /* Mobile nav toggle */
+        (function () {
+          var nav = document.getElementById("nav");
+          var btn = document.getElementById("nav-toggle");
+          if (!nav || !btn) return;
+          btn.addEventListener("click", function () {
+            nav.classList.toggle("open");
+          });
+        })();
 
-          var clouds = paths.map(function(p){ return samplePath(p, SAMPLES); });
+        /* Detect touch / coarse pointer for mobile behavior */
+        var IS_COARSE =
+          window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+        // Soften drift and thicken morph on mobile/tablet
+        d.style.setProperty("--drift-scale", IS_COARSE ? 0.75 : 1.0);
+        d.style.setProperty("--morph-stroke-min", IS_COARSE ? 16 : 22);
+        d.style.setProperty("--morph-stroke-max", IS_COARSE ? 28 : 36);
+        // ensure a default color exists so Lab can read/override
+        if (
+          !getComputedStyle(d).getPropertyValue("--morph-stroke-color").trim()
+        ) {
+          d.style.setProperty("--morph-stroke-color", "#7dd3fc");
+        }
 
-          paths.forEach(function(p){ p.style.opacity = 0; p.style.pointerEvents='none'; });
+        /* Konami Party Mode ++ (revived + personal lab) */
+        (function () {
+          var root = document.documentElement;
 
-          var blend = document.createElementNS('http://www.w3.org/2000/svg','path');
-          blend.setAttribute('fill','none');
-          blend.setAttribute('stroke', svg.querySelector('#grad') ? 'url(#grad)' : '#7dd3fc');
-          blend.setAttribute('stroke-linecap','round');
-          blend.setAttribute('stroke-linejoin','round');
-          blend.setAttribute('stroke-width', STROKE_MIN);
-          svg.appendChild(blend);
+          function toggleParty() {
+            var root = document.documentElement;
+            var wrap = document.querySelector(".morph-wrap");
+            var frame = document.querySelector(".content-frame");
 
-          function lerp(a,b,t){ return a + (b-a)*t; }
+            root.classList.toggle("party");
+            if (root.classList.contains("party")) {
+              if (window.__startFloatMode) window.__startFloatMode();
+            }
 
-          (function animate(){
-            var t = pageT();
-            var seg = t * (clouds.length-1);
-            var i = Math.floor(seg);
-            var f = seg - i;
+            if (!wrap || !frame) return;
 
-            var a = clouds[i];
-            var b = clouds[Math.min(i+1, clouds.length-1)];
-            var mix = blendPoints(a,b,f);
+            if (root.classList.contains("party")) {
+              // Move morph out of the filtered/animated .content-frame so it
+              // stays truly viewport-fixed and doesn’t jump to the top.
+              document.body.appendChild(wrap);
+              // Ensure stacking & centering
+              wrap.style.position = "fixed";
+              wrap.style.left = "0";
+              wrap.style.right = "0";
+              wrap.style.top = "50vh";
+              wrap.style.transform = "translateY(-50%)";
+              wrap.style.zIndex = "7000"; // below grain (8000) and lab (9000)
+            } else {
+              // Put it back as the first child of the content column
+              frame.insertBefore(wrap, frame.firstChild);
+              // Let CSS rules take over again
+              wrap.style.position = "";
+              wrap.style.left = "";
+              wrap.style.right = "";
+              wrap.style.top = "";
+              wrap.style.transform = "";
+              wrap.style.zIndex = "";
+            }
+          }
 
-            blend.setAttribute('d', toPathD(mix));
-            blend.setAttribute('stroke-width', lerp(STROKE_MIN, STROKE_MAX, Math.sin(t*Math.PI)));
-            requestAnimationFrame(animate);
+          // ===== Secret Triggers: Triple‑Tap and Shake Only =====
+          (function () {
+            var lastTaps = []; // store recent touchend timestamps (ms)
+            var TAP_WINDOW = 600; // 3 taps within 600ms
+            var lastTouchX = 0,
+              lastTouchY = 0,
+              moved = false;
+
+            // Helper: only count taps that didn't move much (avoid scroll flings)
+            function onTouchStart(e) {
+              moved = false;
+              if (e.touches && e.touches[0]) {
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+              }
+            }
+            function onTouchMove(e) {
+              if (!e.touches || !e.touches[0]) return;
+              var dx = Math.abs(e.touches[0].clientX - lastTouchX);
+              var dy = Math.abs(e.touches[0].clientY - lastTouchY);
+              if (dx + dy > 12) moved = true;
+            }
+            function onTouchEnd(e) {
+              if (moved) return; // not a tap
+              var now = Date.now();
+              lastTaps.push(now);
+              // keep only taps in the window
+              while (lastTaps.length && now - lastTaps[0] > TAP_WINDOW)
+                lastTaps.shift();
+              if (lastTaps.length >= 3) {
+                lastTaps.length = 0; // reset
+                toggleParty();
+              }
+            }
+
+            document.addEventListener("touchstart", onTouchStart, {
+              passive: true,
+            });
+            document.addEventListener("touchmove", onTouchMove, {
+              passive: true,
+            });
+            document.addEventListener("touchend", onTouchEnd, {
+              passive: true,
+            });
+
+            // ===== Shake to toggle (with iOS permission gate) =====
+            function enableShake() {
+              var shaking = false;
+              window.addEventListener("devicemotion", function (e) {
+                var a = e.accelerationIncludingGravity || e.acceleration;
+                if (!a) return;
+                // tune threshold: ~ heavy jolt
+                var mag =
+                  Math.abs(a.x || 0) + Math.abs(a.y || 0) + Math.abs(a.z || 0);
+                if (mag > 55) {
+                  if (!shaking) {
+                    shaking = true;
+                    toggleParty();
+                    setTimeout(function () {
+                      shaking = false;
+                    }, 1600);
+                  }
+                }
+              });
+            }
+
+            // Request permission on iOS 13+; otherwise just enable
+            if (
+              typeof DeviceMotionEvent !== "undefined" &&
+              typeof DeviceMotionEvent.requestPermission === "function"
+            ) {
+              // try once after a user gesture (first tap)
+              var asked = false;
+              function ask() {
+                if (asked) return;
+                asked = true;
+                DeviceMotionEvent.requestPermission()
+                  .then(function (res) {
+                    if (res === "granted") enableShake();
+                  })
+                  .catch(function () {});
+                document.removeEventListener("touchend", ask, {
+                  passive: true,
+                });
+              }
+              document.addEventListener("touchend", ask, { passive: true });
+            } else if (window.DeviceMotionEvent) {
+              enableShake();
+            }
           })();
-        })
-        .catch(function(err){ console.warn('morph svg load failed', err); });
-    })();
 
-    /* Footer year */
-    var y=document.getElementById('year'); if(y) y.textContent=(new Date).getFullYear();
-  })();
-  </script>
-</body>
+          // Expose for other scripts (optional)
+          window.__toggleParty = toggleParty;
+        })();
+
+        /* Film grain (only runs when html.party is active) */
+        (function () {
+          var cvs = document.getElementById("grain");
+          if (!cvs) return;
+          var ctx = cvs.getContext("2d");
+          var COARSE =
+            (window.matchMedia &&
+              window.matchMedia("(pointer: coarse)").matches) ||
+            "ontouchstart" in window;
+          var grainAlpha = COARSE ? 28 : 45; // lighter grain on mobile/tablet
+          var skipEvery = COARSE ? 2 : 1; // render every other frame on mobile
+          var frameCount = 0;
+          function size() {
+            cvs.width = innerWidth;
+            cvs.height = innerHeight;
+          }
+          size();
+          addEventListener("resize", size);
+          var id;
+          function frame() {
+            // Only animate when party class present
+            if (!document.documentElement.classList.contains("party")) {
+              id = requestAnimationFrame(frame);
+              return;
+            }
+            var w = cvs.width,
+              h = cvs.height;
+            // throttle grain on mobile/tablet for perf
+            frameCount++;
+            if (frameCount % skipEvery !== 0) {
+              id = requestAnimationFrame(frame);
+              return;
+            }
+
+            var img = ctx.createImageData(w, h);
+            var data = img.data;
+            for (var i = 0; i < data.length; i += 4) {
+              var n = (Math.random() * 255) | 0; // white noise
+              data[i] = data[i + 1] = data[i + 2] = n;
+              data[i + 3] = grainAlpha;
+            }
+            ctx.putImageData(img, 0, 0);
+            id = requestAnimationFrame(frame);
+          }
+          frame();
+        })();
+
+        /* CONTINUOUS WAVE MORPH (centered, section-aware, audio-capable) */
+        (function initWave() {
+          var host = document.getElementById("morph-svg");
+          if (!host) return;
+
+          function vw() {
+            return Math.max(
+              1,
+              window.innerWidth || document.documentElement.clientWidth || 1
+            );
+          }
+          var W = vw(); // full viewport width
+          var H = Math.max(360, innerHeight); // generous height
+          // Hard-apply 100vw width on the host wrapper as an extra override
+          var wrap = document.querySelector(".morph-wrap");
+          if (wrap) {
+            wrap.style.width = "100vw";
+            wrap.style.left = "0";
+            wrap.style.right = "0";
+          }
+          var midY = H / 2;
+          var xStart = 0;
+          var xEnd = W;
+
+          var svgNS = "http://www.w3.org/2000/svg";
+          var svg = document.createElementNS(svgNS, "svg");
+          svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+          svg.setAttribute("width", "100%");
+          svg.setAttribute("height", "100%");
+          svg.setAttribute("preserveAspectRatio", "none");
+
+          var outline = document.createElementNS(svgNS, "path");
+          outline.setAttribute("fill", "none");
+          outline.setAttribute("stroke", "rgba(0,0,0,0.28)");
+          outline.setAttribute("stroke-linecap", "round");
+          outline.setAttribute("stroke-linejoin", "round");
+          svg.appendChild(outline);
+
+          var path = document.createElementNS(svgNS, "path");
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", "currentColor");
+          path.setAttribute("stroke-linecap", "round");
+          path.setAttribute("stroke-linejoin", "round");
+          path.setAttribute("data-blend", ""); // lets CSS var color win
+          svg.appendChild(path);
+          host.innerHTML = "";
+          host.appendChild(svg);
+
+          var root = document.documentElement;
+          function readNumVar(name, fallback) {
+            var v = parseFloat(getComputedStyle(root).getPropertyValue(name));
+            return isNaN(v) ? fallback : v;
+          }
+          function strokeMin() {
+            return readNumVar("--morph-stroke-min", 9);
+          }
+          function strokeMax() {
+            return readNumVar("--morph-stroke-max", 13);
+          }
+          function strokeColor() {
+            var c = getComputedStyle(root)
+              .getPropertyValue("--morph-stroke-color")
+              .trim();
+            return c || "#7dd3fc";
+          }
+          path.style.stroke = strokeColor();
+          path.style.mixBlendMode = "screen";
+          path.style.strokeOpacity = "1";
+          outline.setAttribute("stroke-opacity", "0.18");
+          path.style.opacity = "0.70";
+          path.setAttribute("stroke-width", strokeMin());
+
+          // === Wave parameters (full-bleed across viewport) ===
+          var cycles = Math.max(1, Math.round(readNumVar("--wave-cycles", 4))); // target 4 undulations
+          var k = (Math.PI * 2 * cycles) / (xEnd - xStart); // frequency across the whole width
+          var phase = 0;
+          var speed = readNumVar("--wave-speed", 0.0018); // +50% speed for snappier motion
+          var amp = Math.min(H * 0.42, 340); // slightly lower amplitude; bigger, slower waves
+          // sample density: about one point per pixel, with a floor for small screens
+          var N = Math.max(1200, Math.floor((xEnd - xStart) * 1.0));
+
+          // Section → waveform map
+          var targetShape = "sine";
+          var sectionMap = [
+            ["hero", "sine"],
+            ["about", "square"],
+            ["services", "triangle"],
+            ["work", "saw"],
+            ["contact", "static"],
+          ];
+          if ("IntersectionObserver" in window) {
+            var io = new IntersectionObserver(
+              function (entries) {
+                entries.forEach(function (e) {
+                  if (e.isIntersecting) {
+                    for (var i = 0; i < sectionMap.length; i++) {
+                      if (e.target.id === sectionMap[i][0]) {
+                        targetShape = sectionMap[i][1];
+                        break;
+                      }
+                    }
+                  }
+                });
+              },
+              { threshold: 0.55 }
+            );
+            sectionMap.forEach(function (pair) {
+              var el = document.getElementById(pair[0]);
+              if (el) io.observe(el);
+            });
+          }
+
+          // Optional audio analyser (enabled when you play the track)
+          var analyser = window.__waveAnalyser || null;
+          var buf = analyser ? new Uint8Array(analyser.fftSize) : null;
+
+          function lerp(a, b, t) {
+            return a + (b - a) * t;
+          }
+          function sign(x) {
+            return x < 0 ? -1 : 1;
+          }
+          function toPathD(xs, ys) {
+            var d = "M" + xs[0] + "," + ys[0];
+            for (var i = 1; i < xs.length; i++) {
+              d += " L" + xs[i] + "," + ys[i];
+            }
+            return d;
+          }
+          function shapeY(nx, ph, kind) {
+            var x = xStart + nx * (xEnd - xStart);
+            var t = k * x + ph;
+            switch (kind) {
+              case "sine":
+                return Math.sin(t);
+              case "square":
+                return sign(Math.sin(t));
+              case "triangle":
+                return (2 / Math.PI) * Math.asin(Math.sin(t));
+              case "saw": {
+                var u = (t / (2 * Math.PI)) % 1;
+                return 2 * u - 1;
+              }
+              case "static":
+                return (Math.random() * 2 - 1) * 0.15;
+              default:
+                return Math.sin(t);
+            }
+          }
+
+          var currentShape = "sine";
+          var morphT = 1; // 1 = at current shape, 0 = finished morph to target
+
+          function frame() {
+            // keep color + width in sync with CSS vars
+            path.style.stroke = strokeColor();
+            phase += speed;
+            var sw = lerp(
+              strokeMin(),
+              strokeMax(),
+              (Math.sin(phase * 0.5) + 1) / 2
+            );
+            path.setAttribute("stroke-width", sw.toFixed(2));
+            outline.setAttribute("stroke-width", (sw + 2).toFixed(2));
+            outline.style.mixBlendMode = "screen";
+
+            // smooth morph when section changes
+            if (currentShape !== targetShape) {
+              morphT -= 0.06;
+              if (morphT <= 0) {
+                currentShape = targetShape;
+                morphT = 0;
+              }
+            } else {
+              morphT = Math.min(1, morphT + 0.06);
+            }
+
+            // optionally use audio (if analyser is present and playing)
+            if (window.__waveAnalyser && !analyser) {
+              analyser = window.__waveAnalyser;
+              buf = new Uint8Array(analyser.fftSize);
+            }
+            if (analyser) {
+              analyser.getByteTimeDomainData(buf);
+            }
+
+            var xs = new Array(N),
+              ys = new Array(N);
+            for (var i = 0; i < N; i++) {
+              var nx = i / (N - 1);
+              xs[i] = xStart + nx * (xEnd - xStart);
+
+              var base;
+              if (analyser) {
+                var idx = Math.floor(nx * (buf.length - 1));
+                base = (buf[idx] - 128) / 128; // -1..1
+              } else {
+                base = shapeY(nx, phase, currentShape); // keep exact cycle count
+              }
+
+              if (morphT < 1) {
+                var toY = shapeY(nx, phase, targetShape);
+                base = lerp(toY, base, morphT);
+              }
+
+              ys[i] = midY + base * amp;
+            }
+
+            outline.setAttribute("d", toPathD(xs, ys));
+            path.setAttribute("d", toPathD(xs, ys));
+            requestAnimationFrame(frame);
+          }
+          requestAnimationFrame(frame);
+
+          // Keep centered sizing on resize
+          function resync() {
+            W = vw();
+            H = Math.max(360, innerHeight);
+            midY = H / 2;
+            xStart = 0;
+            xEnd = W;
+            cycles = Math.max(1, Math.round(readNumVar("--wave-cycles", 4)));
+            k = (Math.PI * 2 * cycles) / (xEnd - xStart);
+            N = Math.max(1200, Math.floor((xEnd - xStart) * 1.0));
+            amp = Math.min(H * 0.42, 340);
+            svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+          }
+          addEventListener("resize", resync);
+        })();
+
+        /* Footer year */
+        var y = document.getElementById("year");
+        if (y) y.textContent = new Date().getFullYear();
+      })();
+    </script>
+  </body>
 </html>
