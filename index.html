@@ -1573,18 +1573,27 @@
                 toggleParty();
               }
             });
+          })();
 
-            // Optional: classic Konami code (↑↑↓↓←→←→BA) — local only
+          // Global Konami code (works on production and local)
+          (function () {
             var seq = [],
               code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
             addEventListener("keydown", function (e) {
+              // Ignore when typing in form fields or contenteditable
+              var t = e.target;
+              if (
+                t &&
+                (t.isContentEditable ||
+                  /input|textarea|select|button/i.test(t.tagName))
+              )
+                return;
               seq.push(e.keyCode);
               if (seq.length > code.length) seq.shift();
               for (var i = 0; i < code.length; i++) {
                 if (seq[i] !== code[i]) return;
               }
-              // matched
-              toggleParty();
+              if (window.__toggleParty) window.__toggleParty();
               seq.length = 0;
             });
           })();
