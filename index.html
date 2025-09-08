@@ -1558,6 +1558,36 @@
 
           // Expose for other scripts (optional)
           window.__toggleParty = toggleParty;
+
+          /* DEV ONLY: local keyboard toggles for Party Mode */
+          (function () {
+            var isLocal =
+              location.hostname === "localhost" ||
+              location.hostname === "127.0.0.1";
+            if (!isLocal) return;
+
+            // Press "K" to toggle Party Mode locally
+            addEventListener("keydown", function (e) {
+              var key = (e.key || "").toLowerCase();
+              if (key === "k") {
+                toggleParty();
+              }
+            });
+
+            // Optional: classic Konami code (↑↑↓↓←→←→BA) — local only
+            var seq = [],
+              code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+            addEventListener("keydown", function (e) {
+              seq.push(e.keyCode);
+              if (seq.length > code.length) seq.shift();
+              for (var i = 0; i < code.length; i++) {
+                if (seq[i] !== code[i]) return;
+              }
+              // matched
+              toggleParty();
+              seq.length = 0;
+            });
+          })();
         })();
 
         /* Film grain (only runs when html.party is active) */
