@@ -671,6 +671,28 @@
         #grain {
           opacity: 0.22;
         } /* slightly softer on phone */
+
+        /* Thumb-sized floating song cards (mobile only) */
+        html.float-on .flying-card,
+        html.party .flying-card {
+          width: clamp(88px, 22vw, 120px) !important;
+          height: clamp(88px, 22vw, 120px) !important;
+          padding: 10px !important;
+          border-radius: 12px !important;
+        }
+
+        html.float-on .flying-card .title-swap,
+        html.party .flying-card .title-swap {
+          font-size: clamp(10px, 3.4vw, 13px) !important;
+          line-height: 1.15 !important;
+          left: 6px;
+          right: 6px;
+        }
+
+        html.float-on .flying-card .wave,
+        html.party .flying-card .wave {
+          opacity: 0.9;
+        }
       }
 
       /* Ultra-small devices (≤ 380px) */
@@ -1154,22 +1176,54 @@
             snaps.forEach(function (snap, idx) {
               var card = snap.card;
 
-              // Move to overlay and preserve size
+              // Move to overlay and preserve size/position (desktop) or adjust (mobile)
               layer.appendChild(card);
               card.classList.add("flying-card");
               card.style.position = "absolute";
-              card.style.width = snap.w + "px";
-              card.style.height = snap.h + "px";
               card.style.left = "0px";
               card.style.top = "0px";
 
-              // Place exactly where it was on screen (using transform for GPU smoothness)
-              card.style.transform =
-                "translate3d(" +
-                snap.x.toFixed(2) +
-                "px," +
-                snap.y.toFixed(2) +
-                "px,0)";
+              /* Desktop/tablet: preserve original size; Mobile: thumb-sized square centered on previous position */
+              var IS_COARSE =
+                (window.matchMedia &&
+                  window.matchMedia("(pointer: coarse)").matches) ||
+                "ontouchstart" in window;
+
+              if (!IS_COARSE) {
+                // Desktop/tablet = preserve size & position
+                card.style.width = snap.w + "px";
+                card.style.height = snap.h + "px";
+                card.style.transform =
+                  "translate3d(" +
+                  snap.x.toFixed(2) +
+                  "px," +
+                  snap.y.toFixed(2) +
+                  "px,0)";
+              } else {
+                // Mobile = thumb-sized and re-center on same visual point
+                var TW = Math.max(
+                  88,
+                  Math.min(120, Math.round(innerWidth * 0.22))
+                ); // 88–120px
+                var TH = TW;
+
+                // center of the old rect
+                var cx = snap.x + snap.w / 2;
+                var cy = snap.y + snap.h / 2;
+
+                // new top-left so the new square is centered at the same place
+                var nx = cx - TW / 2;
+                var ny = cy - TH / 2;
+
+                card.style.width = TW + "px";
+                card.style.height = TH + "px";
+                card.style.transform =
+                  "translate3d(" +
+                  nx.toFixed(2) +
+                  "px," +
+                  ny.toFixed(2) +
+                  "px,0)";
+              }
 
               // Title swap content (track names)
               var t;
@@ -1575,27 +1629,65 @@
             });
           })();
 
-          // Global Konami code (works on production and local)
+          // Global Konami code (desktop & mobile keyboards)
           (function () {
-            var seq = [],
-              code = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
-            addEventListener("keydown", function (e) {
-              // Ignore when typing in form fields or contenteditable
-              var t = e.target;
-              if (
-                t &&
-                (t.isContentEditable ||
-                  /input|textarea|select|button/i.test(t.tagName))
-              )
-                return;
-              seq.push(e.keyCode);
-              if (seq.length > code.length) seq.shift();
-              for (var i = 0; i < code.length; i++) {
-                if (seq[i] !== code[i]) return;
+            // Normalize keys to strings so Safari/Firefox/Chromium all agree
+            var buf = [];
+            var KONAMI = [
+              "ArrowUp",
+              "ArrowUp",
+              "ArrowDown",
+              "ArrowDown",
+              "ArrowLeft",
+              "ArrowRight",
+              "ArrowLeft",
+              "ArrowRight",
+              "b",
+              "a",
+            ];
+            function pushKey(k) {
+              buf.push(k);
+              if (buf.length > KONAMI.length) buf.shift();
+              for (var i = 0; i < KONAMI.length; i++) {
+                if (buf[i] !== KONAMI[i]) return false;
               }
-              if (window.__toggleParty) window.__toggleParty();
-              seq.length = 0;
-            });
+              return true;
+            }
+            // listen on document to ensure we get keys even when body is scrolled
+            document.addEventListener(
+              "keydown",
+              function (e) {
+                // ignore when typing in form fields or contenteditable
+                var t = e.target;
+                if (
+                  t &&
+                  (t.isContentEditable ||
+                    /input|textarea|select|button/i.test(t.tagName))
+                )
+                  return;
+
+                var k = (e.key || "").toString();
+                // legacy fallback if a browser fails to provide e.key
+                if (!k && typeof e.keyCode === "number") {
+                  var map = {
+                    37: "ArrowLeft",
+                    38: "ArrowUp",
+                    39: "ArrowRight",
+                    40: "ArrowDown",
+                    65: "a",
+                    66: "b",
+                  };
+                  k = map[e.keyCode] || "";
+                }
+                if (!k) return;
+
+                if (pushKey(k)) {
+                  if (window.__toggleParty) window.__toggleParty();
+                  buf.length = 0; // reset after success
+                }
+              },
+              false
+            );
           })();
         })();
 
