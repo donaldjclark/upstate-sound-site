@@ -41,6 +41,7 @@
         --morph-stroke-max: 28;
         --wave-speed: 0.001; /* 50% faster than 0.0006 */
         --wave-cycles: 4; /* number of undulations across the viewport */
+        --morph-opacity: 0.24; /* try 0.18 ~ 0.35 */
       }
 
       /* Content column creates a local stacking context:
@@ -84,9 +85,9 @@
         width: 100vw !important;
         height: 70vh;
         display: block;
-        z-index: 60; /* above sections so it’s never hidden */
+        z-index: 6000; /* above sections so it’s never hidden */
         pointer-events: none;
-        opacity: 0.24; /* visible but not overpowering */
+        opacity: var(--morph-opacity, 0.24); /* now controlled via :root */
         mix-blend-mode: screen; /* additive light so it doesn’t block text */
       }
       .morph-wrap svg {
@@ -285,6 +286,13 @@
         padding: 22px;
         box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
       }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
       .service-card h3 {
         color: #0b2340;
       }
@@ -414,7 +422,7 @@
       /* Float/Party color model: all cards go black; only the playing one glows */
       html.party .flying-card,
       html.float-on .flying-card {
-        background: #0a0a0a;
+        background: var(--base, #0a0a0a);
         color: #fff;
         filter: none;
         animation: none;
@@ -426,7 +434,7 @@
       }
       html.party .flying-card:not(.playing),
       html.float-on .flying-card:not(.playing) {
-        filter: grayscale(1) contrast(1.15) brightness(0.9);
+        filter: none; /* keep their individual dark base colors visible */
       }
       html.party .flying-card.playing,
       html.float-on .flying-card.playing {
@@ -435,6 +443,9 @@
           0 0 24px var(--accent, #7dd3fc),
           0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
       }
+      html.party .content-frame::before{
+        background: rgba(10,10,10,0.85); /* a hair lighter so the RGB bands show through */
+  }
       /* Canvas overlay that draws the live waveform on the active card */
       .flying-card .wave,
       .service-card .wave {
@@ -479,9 +490,7 @@
         opacity: 0.28;
         display: none;
       }
-      html.party #grain {
-        display: block;
-      }
+      html.party #grain { display:block; opacity:.42; } /* stronger in party */
       /* Keep morph centered & viewport-fixed in party mode */
       html.party .morph-wrap {
         position: fixed !important;
@@ -491,17 +500,18 @@
         transform: translateY(-50%) !important;
         z-index: 7000 !important; /* below grain (8000) and lab (9000) */
       }
-      /* Hidden LAB panel that appears with Konami — useful controls */
-
+      
       /* Layer that holds drifting cards (fixed, overlays viewport) */
       #float-layer {
-        position: fixed; /* overlay the viewport so cards don’t inherit page scroll */
-        inset: 0; /* full-viewport */
+        position: fixed;
+        inset: 0;
         width: 100vw;
         height: 100vh;
-        z-index: 8500; /* above sections & morph, below Lab(9000)/grain(8000) */
-        pointer-events: none; /* cards re-enable pointer-events */
-        overflow: visible; /* allow drift outside edges */
+        z-index: 8500;
+        /* was: pointer-events: auto; */
+        pointer-events: none;           /* let scroll pass through the overlay */
+        /* was: touch-action: pan-y;   ← remove this line */
+        overflow: visible;
       }
 
       /* Float Mode (uses the actual six service cards) */
@@ -512,9 +522,11 @@
         backface-visibility: hidden;
         pointer-events: auto; /* clickable for audio */
         transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
         left: 0;
         top: 0; /* transform origin is the viewport’s top-left */
         user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
       }
       .flying-card .title-swap {
         position: absolute;
@@ -541,6 +553,49 @@
         height: 0 !important;
         margin: 0 !important;
         pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0,0,0,.38), 0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx,0px), var(--fy,0px), 0) rotate(var(--fa,0rad)) scale(.98);
+      }
+
+      a:focus-visible, button:focus-visible, .service-card:focus-visible, .flying-card:focus-visible {
+        outline: 2px dashed #b9b9ff;
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+
+      /* === Float launch visuals (size shrink + soft pulse) === */
+      /* Quick-change: service cards fly off-stage to the left when Party begins */
+      @keyframes flyOutLeft{
+        0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity:1; filter:blur(0); }
+        60%  { transform: translate(-26vw,-6vh) rotate(-4deg) scale(.94); opacity:.6; filter:blur(1px); }
+        100% { transform: translate(-42vw,-8vh) rotate(-8deg) scale(.88); opacity:0; filter:blur(2px); }
+      }
+      .services-section .service-card.vanish{
+        animation: flyOutLeft 380ms cubic-bezier(.22,1,.36,1) forwards;
+        will-change: transform, opacity, filter;
+      }
+      .flying-card {
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+          height 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+      }
+      .flying-card.launching {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+          0 0 0 0 rgba(125, 211, 252, 0);
+      }
+      .flying-card.launching.playing {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
       }
 
       /* =========================
@@ -650,7 +705,7 @@
         .morph-wrap {
           width: 100vw;
           height: 55vh;
-          opacity: 0.24;
+          opacity: var(--morph-opacity, 0.24);
           mix-blend-mode: screen;
         }
         .morph-wrap svg {
@@ -916,6 +971,7 @@
 
     <!-- Optional: your existing JS -->
     <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
 
     <!-- Vibe core -->
     <script>
@@ -1019,18 +1075,23 @@
             });
         })();
 
-        // === Float Mode: send the six service cards drifting and swap copy to track titles ===
+        /* === Float Mode (Matter.js orbital drift) — unique physics, free rotation, per-card colors === */
         (function () {
           var player = document.getElementById("player");
-
-          // Create / get the layer
           var layer = document.getElementById("float-layer");
           if (!layer) {
             layer = document.createElement("div");
             layer.id = "float-layer";
             document.body.appendChild(layer);
           }
+          layer.style.display = "block";
+layer.style.width = "100vw";
+layer.style.height = "100vh";
+layer.style.zIndex = "8500";   // keep this so float-layer sits above content
+// no pointerEvents, no touchAction here
 
+
+          // Titles ↔ tracks (1:1 with service cards on the page)
           var TITLES = [
             "Resting Place",
             "Deletions of Grandeur",
@@ -1039,7 +1100,6 @@
             "Sad News",
             "Spiritually Dead",
           ];
-
           var TRACKS = [
             "assets/resting-place.mp3",
             "assets/deletions-of-grandeur.mp3",
@@ -1048,41 +1108,56 @@
             "assets/sad-news.mp3",
             "assets/spiritually-dead.mp3",
           ];
+          // Darker party palette per card
+          var BASES = [
+            "#0b1f2a",
+            "#10231f",
+            "#1e1722",
+            "#231b10",
+            "#122018",
+            "#1b2130",
+          ];
 
-          // ------- Float physics tuning (natural, scroll‑activated) -------
-          // Cards stay put until you scroll; scrolling injects impulses.
-          // After ~10s without scrolling they coast to a graceful stop.
-          var PHYS = {
-            // initial speeds ~0 so nothing moves until first scroll
-            baseMin: 0.04, // px/s
-            baseMax: 0.18, // px/s
-            gravity: 0.0, // no constant fall; motion is from impulses
-            drag: 0.08, // baseline per‑second damping (0..1)
-            extraIdleDrag: 0.28, // extra drag added when fully idle
-            idleHaltMs: 10000, // ms with no scroll until max idle drag
+          // High-contrast accents (used for the playing card + morph stroke)
+          var ACCENTS = ["#7dd3fc","#a78bfa","#fb7185","#f59e0b","#34d399","#60a5fa"];
 
-            // scroll → velocity coupling
-            impulseScaleY: 0.16, // vertical impulse from scroll delta
-            impulseScaleX: 0.045, // horizontal impulse (slight sway)
-            impulseDecay: 0.965, // how quickly injected "wind" decays per frame
-
-            // subtle “liquid” wobble
-            wobbleAX: 2.5,
-            wobbleAY: 1.8,
-            wobbleFX: 0.0005,
-            wobbleFY: 0.00055,
-
-            // bounces at edges (all four); 1 = perfect, 0 = dead stop
-            bounceLoss: 0.66,
-          };
-
+          // Matter primitives
+          var Engine = window.Matter && Matter.Engine;
+          var Bodies = window.Matter && Matter.Bodies;
+          var Composite = window.Matter && Matter.Composite;
+          var Runner = window.Matter && Matter.Runner;
+          var Events = window.Matter && Matter.Events;
+          var Mouse = window.Matter && Matter.Mouse;
+          var MouseConstraint = window.Matter && Matter.MouseConstraint;
+          var engine = null,
+            runner = null;
+          var __idleT = 0; // seconds since float mode started (for independent idle drift)
+          var bodies = []; // {el, body, w, h}
+          var ticking = 0;
           var ACTIVE = false;
-          var raf = 0;
-          var last = 0; // ms
-          var nodes = []; // { el, x,y, vx,vy, w,h }
-          var windY = 0; // scroll-induced impulse
-          var prevScrollY = window.scrollY || 0;
-          var lastScrollAt = performance.now();
+
+          // --- Scroll-triggered turbulence (makes things jumble like pebbles) ---
+          var burstUntil = 0;
+          function jostle(durationMs, power) {
+            var now = performance.now();
+            burstUntil = Math.max(burstUntil, now + (durationMs || 220));
+            if (!power) power = 1;
+
+            function turbulenceFrame() {
+              var t = performance.now();
+              if (t >= burstUntil) return;
+              for (var i = 0; i < bodies.length; i++) {
+                var b = bodies[i].body;
+                // small random forces in both axes + a touch of spin
+                var fx = (Math.random() - 0.5) * 0.0025 * power;
+                var fy = (Math.random() - 0.5) * 0.0025 * power;
+                Matter.Body.applyForce(b, b.position, { x: fx, y: fy });
+                b.angularVelocity += (Math.random() - 0.5) * 0.06 * power;
+              }
+              requestAnimationFrame(turbulenceFrame);
+            }
+            requestAnimationFrame(turbulenceFrame);
+          }
 
           function ensureAnalyser() {
             try {
@@ -1103,278 +1178,562 @@
             if (!player) return;
             var same = player.src && player.src.endsWith(src);
             if (same && !player.paused) {
-              // toggle pause on same card
               player.pause();
               if (window.__stopWave) window.__stopWave();
-              // clear playing class
-              for (var i = 0; i < nodes.length; i++) {
-                nodes[i].el.classList.remove("playing");
-              }
+              bodies.forEach(function (b) {
+                b.el.classList.remove("playing");
+              });
               return;
             }
             if (!same) player.src = src;
-            // set accent color on the card (matches morph color)
-            var acc =
-              getComputedStyle(document.documentElement)
-                .getPropertyValue("--morph-stroke-color")
-                .trim() || "#7dd3fc";
+
+            // pick a stable accent color by the card's index (fallback cyan)
+            var idx = 0;
+            if (card) {
+              var label = (card.__bodyRef && card.__bodyRef.label) || "";
+              var m = /card-(\d+)/.exec(label);
+              if (m) idx = (+m[1]) % ACCENTS.length;
+            }
+            var acc = ACCENTS[idx] || "#7dd3fc";
+            // morph line follows the track’s accent
+            document.documentElement.style.setProperty("--morph-stroke-color", acc);
             if (card) card.style.setProperty("--accent", acc);
 
             var p = player.play();
             ensureAnalyser();
-            // clear previous playing state
-            for (var j = 0; j < nodes.length; j++) {
-              nodes[j].el.classList.remove("playing");
-            }
+            bodies.forEach(function (b) {
+              b.el.classList.remove("playing");
+            });
             if (card && window.__startWaveOn) window.__startWaveOn(card);
             if (p && typeof p.catch === "function") p.catch(function () {});
+            card && card.classList.add("playing");
           }
 
-          function captureCards() {
-            var cards = Array.prototype.slice.call(
+          function buildWorld() {
+            engine = Engine.create({ enableSleeping: false });
+            engine.gravity.y = 0; // we drive motion with gentle impulses + scroll
+
+            // Full-viewport bounds (thick static walls)
+            function makeWalls() {
+              var W = window.innerWidth,
+                H = window.innerHeight,
+                T = 120;
+              var walls = [
+                Bodies.rectangle(W / 2, -T / 2, W + T * 2, T, {
+                  isStatic: true,
+                  restitution: 0.95,
+                }),
+                Bodies.rectangle(W / 2, H + T / 2, W + T * 2, T, {
+                  isStatic: true,
+                  restitution: 0.95,
+                }),
+                Bodies.rectangle(-T / 2, H / 2, T, H + T * 2, {
+                  isStatic: true,
+                  restitution: 0.95,
+                }),
+                Bodies.rectangle(W + T / 2, H / 2, T, H + T * 2, {
+                  isStatic: true,
+                  restitution: 0.95,
+                }),
+              ];
+              walls.forEach(function (w) {
+                w.label = "wall";
+              });
+              walls.forEach(function (w) {
+                Composite.add(engine.world, w);
+              });
+            }
+            makeWalls();
+
+            // Build bodies out of the six service cards
+            var cards = [].slice.call(
               document.querySelectorAll(
                 "#services .services-grid .service-card"
               )
             );
+            if (!cards.length) return;
 
-            nodes = [];
-
-            // 1) Snapshot ALL positions before moving anything (viewport coords)
             var snaps = cards.map(function (card) {
               var r = card.getBoundingClientRect();
+              // document-space coordinates (robust against scroll state)
+              var docX = (r.left + window.scrollX) + r.width  / 2;
+              var docY = (r.top  + window.scrollY) + r.height / 2;
               return {
                 card: card,
-                x: r.left,
-                y: r.top,
+                docX: docX,
+                docY: docY,
                 w: r.width,
                 h: r.height,
               };
             });
 
-            // 2) If multiple cards resolve to the same coordinates (rare, but happens
-            //    when the browser reports fractional positions as the same number),
-            //    gently fan them out so they never spawn stacked.
-            var seen = new Map();
-            snaps.forEach(function (s) {
-              var key = Math.round(s.x) + "x" + Math.round(s.y);
-              var n = seen.get(key) || 0;
-              if (n > 0) {
-                // offset each subsequent card a little bit in a spiral
-                var ang = n * 0.9; // radians
-                var rad = 18 + n * 6; // px
-                s.x += Math.cos(ang) * rad;
-                s.y += Math.sin(ang) * rad;
-              }
-              seen.set(key, n + 1);
-            });
-
-            // 3) Move every card into the fixed overlay layer using the snapshots
             layer.style.display = "block";
             layer.style.width = "100vw";
             layer.style.height = "100vh";
 
-            snaps.forEach(function (snap, idx) {
-              var card = snap.card;
+            var isCoarse =
+              (window.matchMedia &&
+                window.matchMedia("(pointer: coarse)").matches) ||
+              "ontouchstart" in window;
 
-              // Move to overlay and preserve size/position (desktop) or adjust (mobile)
-              layer.appendChild(card);
-              card.classList.add("flying-card");
-              card.style.position = "absolute";
-              card.style.left = "0px";
-              card.style.top = "0px";
+            bodies = [];
+            var cx = innerWidth / 2,
+              cy = innerHeight / 2;
+            snaps.forEach(function (snap, i) {
+              var el = snap.card;
 
-              /* Desktop/tablet: preserve original size; Mobile: thumb-sized square centered on previous position */
-              var IS_COARSE =
-                (window.matchMedia &&
-                  window.matchMedia("(pointer: coarse)").matches) ||
-                "ontouchstart" in window;
+              // 5) Seed a randomized rotation angle variable if not already present
+              var initA = Math.random() * Math.PI * 2;
 
-              if (!IS_COARSE) {
-                // Desktop/tablet = preserve size & position
-                card.style.width = snap.w + "px";
-                card.style.height = snap.h + "px";
-                card.style.transform =
-                  "translate3d(" +
-                  snap.x.toFixed(2) +
-                  "px," +
-                  snap.y.toFixed(2) +
-                  "px,0)";
-              } else {
-                // Mobile = thumb-sized and re-center on same visual point
-                var TW = Math.max(
-                  88,
-                  Math.min(120, Math.round(innerWidth * 0.22))
-                ); // 88–120px
-                var TH = TW;
+              // Move into overlay and stylize
+              layer.appendChild(el);
+              el.classList.add("flying-card", "swap-on");
+              el.style.position = "absolute";
+              el.style.pointerEvents = "auto";
+              el.style.background = BASES[i % BASES.length];
+              el.style.color = "#fff";
 
-                // center of the old rect
-                var cx = snap.x + snap.w / 2;
-                var cy = snap.y + snap.h / 2;
+              // Stage visual continuity: start at the service card's on-page position
+              // and its original size, then shrink to the float size with a soft pulse.
+              var origW = Math.round(snap.w);
+              var origH = Math.round(snap.h);
+              el.style.width = origW + "px";
+              el.style.height = origH + "px";
+              el.style.transformOrigin = "center center";
 
-                // new top-left so the new square is centered at the same place
-                var nx = cx - TW / 2;
-                var ny = cy - TH / 2;
+              // Compute start position in viewport coords (center of original card)
+              var startX = 0,
+                startY = 0; // temp placeholders; real values set below
 
-                card.style.width = TW + "px";
-                card.style.height = TH + "px";
-                card.style.transform =
-                  "translate3d(" +
-                  nx.toFixed(2) +
-                  "px," +
-                  ny.toFixed(2) +
-                  "px,0)";
+              // Centered title only
+              var swap = el.querySelector(".title-swap");
+              if (!swap) {
+                swap = document.createElement("div");
+                swap.className = "title-swap";
+                el.appendChild(swap);
               }
-
-              // Title swap content (track names)
-              var t;
-              if (!card.querySelector(".title-swap")) {
-                t = document.createElement("div");
-                t.className = "title-swap";
-                t.textContent = TITLES[idx % TITLES.length];
-                card.appendChild(t);
-              } else {
-                t = card.querySelector(".title-swap");
-                t.textContent = TITLES[idx % TITLES.length];
-              }
-              // Copy h3 font size and line height to swap title
-              var h3 = card.querySelector("h3");
+              swap.textContent = TITLES[i % TITLES.length];
+              var h3 = el.querySelector("h3");
               if (h3) {
                 var fs = getComputedStyle(h3).fontSize;
                 var lh = getComputedStyle(h3).lineHeight;
-                t.style.fontSize = fs;
-                if (lh && lh !== "normal") t.style.lineHeight = lh;
+                swap.style.fontSize = fs;
+                if (lh && lh !== "normal") swap.style.lineHeight = lh;
               }
-              // Ensure swapped title is centered
-              t.style.textAlign = "center";
-
-              // Click → play track
-              (function (trackSrc, theCard) {
-                theCard.style.cursor = "pointer";
-                theCard.addEventListener("click", function (ev) {
-                  ev.stopPropagation();
-                  playTrackSrc(trackSrc, theCard);
-                });
-              })(TRACKS[idx % TRACKS.length], card);
-
-              // Hide normal copy immediately in float mode and show the track title
-              card.classList.add("swap-on");
-
-              // Near-zero initial velocity; motion comes from scroll impulses
-              var speed =
-                PHYS.baseMin + Math.random() * (PHYS.baseMax - PHYS.baseMin);
-              var ang = Math.random() * Math.PI * 2;
-              var vx = Math.cos(ang) * speed * 0.05;
-              var vy = Math.sin(ang) * speed * 0.05;
-
-              nodes.push({
-                el: card,
-                x: snap.x,
-                y: snap.y,
-                vx: vx,
-                vy: vy,
-                w: snap.w,
-                h: snap.h,
+              el.querySelectorAll("h3,p").forEach(function (n) {
+                n.style.display = "none";
               });
+
+              // 4) Click-and-drag to fling (while preserving tap-to-play)
+              (function (trackSrc, cardEl) {
+                cardEl.__track = trackSrc;
+                cardEl.addEventListener("click", function (ev) {
+                  ev.stopPropagation();
+                  if (
+                    window.__draggingBodies &&
+                    cardEl.__bodyRef &&
+                    window.__draggingBodies.has(cardEl.__bodyRef)
+                  ) {
+                    return; // ignore clicks when the body is being dragged
+                  }
+                  playTrackSrc(cardEl.__track, cardEl);
+                });
+              })(TRACKS[i % TRACKS.length], el);
+              el.style.touchAction = "none"; // better touch dragging
+
+              // Project document coords into the current viewport so we never all spawn from left
+              var viewX = snap.docX - window.scrollX;
+              var viewY = snap.docY - window.scrollY;
+
+              // If the Services section is off-screen, wrap into the viewport with a bit of jitter
+              var jitter = 16;
+              var startX = Math.max(40, Math.min(innerWidth  - 40, ((viewX % innerWidth)  + innerWidth) % innerWidth))  + (Math.random()*jitter - jitter/2);
+              var startY = Math.max(40, Math.min(innerHeight - 40, ((viewY % innerHeight) + innerHeight) % innerHeight)) + (Math.random()*jitter - jitter/2);
+
+              // Paint the card exactly over its old spot (transform-only),
+              // then we animate the shrink. Keep initial random rotation.
+              el.style.transform =
+                "translate3d(" +
+                (startX - origW / 2).toFixed(1) +
+                "px," +
+                (startY - origH / 2).toFixed(1) +
+                "px,0) rotate(" +
+                initA.toFixed(3) +
+                "rad)";
+              // Freeze the first paint so it doesn't flash at (0,0)
+              el.offsetHeight; // force layout
+
+              // Decide float size (mobile = thumb; desktop = 50%) and animate the shrink
+              var W = snap.w,
+                H = snap.h;
+              if (isCoarse) {
+                var TW = Math.max(
+                  88,
+                  Math.min(120, Math.round(innerWidth * 0.22))
+                );
+                W = H = TW;
+              } else {
+                W = Math.round(snap.w * 0.5);
+                H = Math.round(snap.h * 0.5);
+              }
+
+              // Smoothly shrink from original size to float size
+              el.classList.add("launching");
+              requestAnimationFrame(function () {
+                el.style.width = W + "px";
+                el.style.height = H + "px";
+                // remove the launch emphasis after the transition window
+                setTimeout(function () {
+                  el.classList.remove("launching");
+                }, 400);
+                setTimeout(function(){
+                  // Sync physics size to the final DOM size after the shrink
+                  try {
+                    Matter.Body.setVertices(body, Matter.Vertices.fromPath('0 0 ' + W + ' 0 ' + W + ' ' + H + ' 0 ' + H));
+                    Matter.Body.setInertia(body, (body.mass * Math.max(W, H) * Math.max(W, H)) / 12);
+                  } catch(_){}
+                }, 340);
+              });
+
+              // 3) Free rotation immediately (remove inertia: Infinity)
+              var body = Bodies.rectangle(startX, startY, W, H, {
+                restitution: 0.6,
+                frictionAir: 0.004 + Math.random() * 0.003,
+                friction: 0.001,
+                density: 0.0008,
+                // inertia: Infinity, // REMOVED
+                chamfer: { radius: 12 },
+                angle: initA,
+              });
+              body.__idle = {
+                // leaf-on-water: slower frequencies + stronger micro-forces
+                ax: 0.00035 + Math.random() * 0.00025, // x force amplitude
+                ay: 0.00035 + Math.random() * 0.00025, // y force amplitude
+                fx: 0.06 + Math.random() * 0.12,       // x frequency (very slow)
+                fy: 0.06 + Math.random() * 0.12,       // y frequency (very slow)
+                px: Math.random() * Math.PI * 2,       // x phase
+                py: Math.random() * Math.PI * 2,       // y phase
+                t0: Math.random() * 10.0               // per-card time offset so waves are de-synced
+              };
+              body.label = "card-" + i;
+              Composite.add(engine.world, body);
+              bodies.push({ el: el, body: body, w: W, h: H });
+              // 4) After pushing to bodies, add .__bodyRef for drag detection
+              el.__bodyRef = body;
+
+              // Softer randomized start so each card begins independently
+              var baseV = (isCoarse ? 1.2 : 0.9);
+              Matter.Body.setVelocity(body, {
+                x: (Math.random() - 0.5) * baseV,
+                y: (Math.random() - 0.5) * baseV
+              });
+              body.angularVelocity = (Math.random() - 0.5) * 2.2;
+            });
+            // Bind Matter's mouse to the document so scrolling isn't captured by the overlay
+var mouse = Mouse.create(document.body);
+mouse.pixelRatio = window.devicePixelRatio || 1;
+
+var mc = MouseConstraint.create(engine, {
+  mouse: mouse,
+  constraint: {
+    stiffness: 0.22,
+    damping: 0.14,
+    render: { visible: false }
+  }
+});
+Composite.add(engine.world, mc);
+
+// Allow normal page scrolling: do not block wheel/touch by default
+if (mc.mouse.element) {
+  // Defensive: ensure we never preventDefault wheel/touch implicitly
+  mc.mouse.element.style.touchAction = 'auto';
+}
+
+            // Track dragging bodies so clicks during a drag don't trigger play()
+            var dragging = new Set();
+            window.__draggingBodies = dragging;
+
+            Events.on(mc, "startdrag", function (e) {
+              if (e && e.body) dragging.add(e.body);
+            });
+            Events.on(mc, "enddrag", function (e) {
+              if (e && e.body) dragging.delete(e.body);
+            });
+
+            // Scroll impulse → push cards in scroll direction
+            var lastY = window.scrollY;
+            addEventListener(
+              "scroll",
+              function () {
+                var dy = window.scrollY - lastY;
+                lastY = window.scrollY;
+                if (!dy) return;
+
+                // Magnify effect based on scroll speed
+                var mag = Math.min(40, Math.abs(dy) * 0.6);
+                var signY = dy > 0 ? 1 : -1;
+
+                bodies.forEach(function (b) {
+                  var bx = b.body.position.x,
+                    by = b.body.position.y;
+
+                  // Stronger directional push + a bit of sideways randomness
+                  var fx = (Math.random() - 0.5) * 0.02 * mag * 1e-3;
+                  var fy = signY * 0.025 * mag * 1e-3;
+                  Matter.Body.applyForce(
+                    b.body,
+                    { x: bx, y: by },
+                    { x: fx, y: fy }
+                  );
+
+                  // Spin it a little
+                  b.body.angularVelocity +=
+                    (Math.random() - 0.5) * 0.06 * (mag / 12);
+                });
+
+                // Short turbulence burst so it feels “shaken”
+                jostle(260, Math.min(2.4, 0.6 + mag / 18));
+              },
+              { passive: true }
+            );
+
+            // Desktop wheel adds extra oomph (high-res delta)
+            addEventListener(
+              "wheel",
+              function (e) {
+                var dy = e.deltaY || 0;
+                if (!dy) return;
+                var mag = Math.min(60, Math.abs(dy) * 0.35);
+                var signY = dy > 0 ? 1 : -1;
+
+                bodies.forEach(function (b) {
+                  var fx = (Math.random() - 0.5) * 0.03 * mag * 1e-3;
+                  var fy = signY * 0.03 * mag * 1e-3;
+                  Matter.Body.applyForce(b.body, b.body.position, {
+                    x: fx,
+                    y: fy,
+                  });
+                  b.body.angularVelocity +=
+                    (Math.random() - 0.5) * 0.08 * (mag / 18);
+                });
+                jostle(300, Math.min(3, 0.8 + mag / 20));
+              },
+              { passive: true }
+            );
+
+            // Touch drag = jostle as you scroll with your finger
+            addEventListener(
+              "touchmove",
+              function (e) {
+                var touches = e.touches;
+                if (!touches || !touches[0]) return;
+                // approximate swipe speed using movement of the first touch
+                // (we don't have previous coords here, so just trigger a mild jostle)
+                jostle(240, 1.2);
+              },
+              { passive: true }
+            );
+
+            // Headless render: copy body transforms to DOM
+            function render() {
+              for (var i = 0; i < bodies.length; i++) {
+                var b = bodies[i];
+                var x = b.body.position.x - b.w / 2;
+                var y = b.body.position.y - b.h / 2;
+                var a = b.body.angle;
+                var t =
+                  "translate3d(" +
+                  x.toFixed(1) +
+                  "px," +
+                  y.toFixed(1) +
+                  "px,0) rotate(" +
+                  a.toFixed(3) +
+                  "rad)";
+                b.el.style.transform = t;
+                // keep them above content while floating
+                b.el.style.zIndex = "8600";
+              }
+              ticking = requestAnimationFrame(render);
+            }
+
+            // Resize walls on viewport resize
+            var onResize = function () {
+              // remove old walls
+              var comps = Composite.allBodies(engine.world).filter(function (
+                b
+              ) {
+                return b.label === "wall";
+              });
+              comps.forEach(function (w) {
+                Composite.remove(engine.world, w);
+              });
+              // add new walls
+              var W = innerWidth,
+                H = innerHeight,
+                T = 120;
+              var walls = [
+                Bodies.rectangle(W / 2, -T / 2, W + T * 2, T, {
+                  isStatic: true,
+                  restitution: 0.95,
+                }),
+                Bodies.rectangle(W / 2, H + T / 2, W + T * 2, T, {
+                  isStatic: true,
+                  restitution: 0.95,
+                }),
+                Bodies.rectangle(-T / 2, H / 2, T, H + T * 2, {
+                  isStatic: true,
+                  restitution: 0.95,
+                }),
+                Bodies.rectangle(W + T / 2, H / 2, T, H + T * 2, {
+                  isStatic: true,
+                  restitution: 0.95,
+                }),
+              ];
+              walls.forEach(function (w) {
+                w.label = "wall";
+                Composite.add(engine.world, w);
+              });
+            };
+            addEventListener("resize", onResize);
+
+            runner = Runner.create();
+            Runner.run(runner, engine);
+            render();
+
+            // Perpetual wander: each card has a heading vector that slowly
+            // drifts. We push along heading + tiny noise so motion feels
+            // one-directional and natural.
+            Events.on(engine, 'beforeUpdate', function(ev){
+              var dt = (ev.delta || 1000/60) / 1000; // seconds
+              __idleT += dt;
+              var TAU = Math.PI * 2;
+              for (var i = 0; i < bodies.length; i++){
+                var bd = bodies[i].body;
+                if (!bd.__wander){
+                  // heading angle, speed scalar, and a timer for small course changes
+                  bd.__wander = {
+                    ang: Math.random() * Math.PI * 2,
+                    speed: 0.00042 + Math.random() * 0.00038,
+                    turnTimer: 0.8 + Math.random() * 1.4
+                  };
+                }
+                var w = bd.__wander;
+                // occasionally perturb heading a little so paths diverge
+                w.turnTimer -= dt;
+                if (w.turnTimer <= 0){
+                  w.ang += (Math.random() - 0.5) * 0.6; // small course change
+                  w.speed = Math.max(0.00025, Math.min(0.0009, w.speed + (Math.random()-0.5)*0.00025));
+                  w.turnTimer = 0.8 + Math.random() * 1.6;
+                }
+                var fx = Math.cos(w.ang) * w.speed + (Math.random()-0.5)*0.00002;
+                var fy = Math.sin(w.ang) * w.speed + (Math.random()-0.5)*0.00002;
+                Matter.Body.applyForce(bd, bd.position, { x: fx, y: fy });
+                // Slight continuous spin, gentler than before
+                var targetSpin = 0.02 * (Math.random() > 0.5 ? 1 : -1);
+                if (Math.abs(bd.angularVelocity) < 0.06){
+                  bd.angularVelocity += targetSpin * dt;
+                }
+                // Independent idle drift (per-card seeds + per-card time offset)
+                if (bd.__idle){
+                  var s = bd.__idle;
+                  var localT = __idleT + (s.t0 || 0); // de-sync timelines per card
+
+                  // sinusoidal micro-forces with unique freq & phase per axis
+                  var fxIdle = Math.sin(TAU * s.fx * localT + s.px) * s.ax;
+                  var fyIdle = Math.sin(TAU * s.fy * localT + s.py) * s.ay;
+
+                  Matter.Body.applyForce(bd, bd.position, { x: fxIdle, y: fyIdle });
+
+                  // ambient vector field (very gentle, position + time dependent)
+                  var vfx = Math.sin((bd.position.y * 0.002) + __idleT * 0.15) * 0.00008;
+                  var vfy = Math.cos((bd.position.x * 0.002) - __idleT * 0.12) * 0.00008;
+                  Matter.Body.applyForce(bd, bd.position, { x: vfx, y: vfy });
+
+                  // tiny continuous orientation wander so cards gently rotate even at rest
+                  var rotNudge = Math.sin(TAU * (s.fx * 0.42) * localT + s.px * 0.37) * 0.00003;
+                  bd.torque += rotNudge;
+                }
+              }
+            });
+
+            // Cursor magnet: sticky, local attraction only when hovering a card
+            (function(){
+              var mx = 0, my = 0, hasMouse = false;
+              document.addEventListener('mousemove', function(e){ mx = e.clientX; my = e.clientY; hasMouse = true; }, {passive:true});
+
+              function metaForBody(bd){
+                for (var i=0;i<bodies.length;i++){
+                  if (bodies[i].body === bd) return bodies[i];
+                }
+                return null;
+              }
+
+              Events.on(engine, 'afterUpdate', function(){
+                if (!hasMouse || !bodies.length) return;
+
+                // find nearest card center
+                var nearest = null, bestD2 = Infinity;
+                for (var i=0;i<bodies.length;i++){
+                  var bd = bodies[i].body;
+                  var dx = mx - bd.position.x;
+                  var dy = my - bd.position.y;
+                  var d2 = dx*dx + dy*dy;
+                  if (d2 < bestD2){ bestD2 = d2; nearest = bd; }
+                }
+                if (!nearest) return;
+
+                var meta = metaForBody(nearest);
+                if (!meta) return;
+
+                // Only attract when cursor is essentially "hovering" the card:
+                // use a radius equal to ~the card size (half the diagonal).
+                var halfDiag = 0.5 * Math.sqrt(meta.w*meta.w + meta.h*meta.h);
+                var radius = Math.max(halfDiag * 0.9, 60); // sticky only when close
+                if (bestD2 > radius*radius) return;
+
+                // Small pull so it feels sticky, not grabby
+                var d = Math.sqrt(bestD2);
+                var pull = 0.000035 * (1 - (d / radius)); // weaker and very local
+                var fx = (mx - nearest.position.x) * pull;
+                var fy = (my - nearest.position.y) * pull;
+                Matter.Body.applyForce(nearest, nearest.position, {x: fx, y: fy});
+              });
+            })();
+
+            // Impacts add spin; also free inertia after first bounce for natural rotation
+            Events.on(engine, "collisionStart", function (evt) {
+              var pairs = evt.pairs || [];
+              for (var i = 0; i < pairs.length; i++) {
+                var a = pairs[i].bodyA,
+                  b = pairs[i].bodyB;
+
+                [a, b].forEach(function (body) {
+                  if (body.label && String(body.label).indexOf("card-") === 0) {
+                    if (body.inertia === Infinity) {
+                      // allow rotation after first hit
+                      Matter.Body.setInertia(
+                        body,
+                        (body.mass *
+                          Math.max(40, body.bounds.max.x - body.bounds.min.x) **
+                            2) /
+                          12
+                      );
+                    }
+                    body.angularVelocity += (Math.random() - 0.5) * 0.12; // much subtler spin-on-impact
+                  }
+                });
+              }
             });
           }
 
-          // Scroll injects impulses; remember last scroll time
-          window.addEventListener(
-            "scroll",
-            function () {
-              var sy = window.scrollY || 0;
-              var dy = sy - prevScrollY; // + when scrolling down
-              prevScrollY = sy;
-              lastScrollAt = performance.now();
-
-              // vertical push proportional to dy, small horizontal sway
-              for (var i = 0; i < nodes.length; i++) {
-                var n = nodes[i];
-                var sway =
-                  (Math.random() * 2 - 1) * Math.abs(dy) * PHYS.impulseScaleX;
-                n.vx += sway;
-                n.vy += dy * PHYS.impulseScaleY;
-              }
-            },
-            { passive: true }
-          );
-
-          function tick(now) {
-            now = now || performance.now();
-            var dt = Math.min(48, now - (last || now)) / 1000; // seconds, clamp 48ms
-            last = now;
-
-            var W =
-              window.innerWidth || document.documentElement.clientWidth || 1;
-            var H =
-              window.innerHeight || document.documentElement.clientHeight || 1;
-
-            // idle‑based extra drag ramps from 0 → extraIdleDrag over idleHaltMs
-            var idleT = Math.min(1, (now - lastScrollAt) / PHYS.idleHaltMs);
-            var totalDrag = PHYS.drag + PHYS.extraIdleDrag * idleT;
-
-            // frame‑rate independent damping
-            var damp = Math.max(0, Math.min(1, 1 - totalDrag * dt));
-
-            for (var i = 0; i < nodes.length; i++) {
-              var n = nodes[i];
-
-              // integrate velocities
-              n.vy += PHYS.gravity * dt;
-
-              n.vx *= damp;
-              n.vy *= damp;
-
-              n.x += n.vx * dt;
-              n.y += n.vy * dt;
-
-              // soft “liquid” wobble (reduced blending for more liquid motion)
-              var wobX =
-                Math.sin(now * PHYS.wobbleFX + i) * (PHYS.wobbleAX * 0.6);
-              var wobY =
-                Math.cos(now * PHYS.wobbleFY + i) * (PHYS.wobbleAY * 0.6);
-
-              // bounce off all four edges with energy loss
-              if (n.x < 0) {
-                n.x = 0;
-                n.vx = Math.abs(n.vx) * PHYS.bounceLoss;
-              }
-              if (n.x + n.w > W) {
-                n.x = W - n.w;
-                n.vx = -Math.abs(n.vx) * PHYS.bounceLoss;
-              }
-              if (n.y < 0) {
-                n.y = 0;
-                n.vy = Math.abs(n.vy) * PHYS.bounceLoss;
-              }
-              if (n.y + n.h > H) {
-                n.y = H - n.h;
-                n.vy = -Math.abs(n.vy) * PHYS.bounceLoss;
-              }
-
-              n.el.style.transform = `translate3d(${(n.x + wobX).toFixed(
-                2
-              )}px, ${(n.y + wobY).toFixed(2)}px, 0)`;
-            }
-
-            raf = requestAnimationFrame(tick);
-          }
-
           function start() {
-            if (window.__stopWave) window.__stopWave();
             if (ACTIVE) return;
             ACTIVE = true;
-            document.documentElement.classList.add("float-on"); // enable colorization in Float Mode
-            cancelAnimationFrame(raf);
-            last = 0;
-            captureCards();
-            lastScrollAt = performance.now();
-            raf = requestAnimationFrame(tick);
-            // Ensure float-layer is visible and full-viewport
-            layer.style.display = "block";
-            layer.style.width = "100vw";
-            layer.style.height = "100vh";
+            document.documentElement.classList.add("float-on");
+            buildWorld();
           }
+
+          // Expose to Party toggle
           window.__startFloatMode = start;
         })();
 
@@ -1691,51 +2050,86 @@
           })();
         })();
 
-        /* Film grain (only runs when html.party is active) */
-        (function () {
-          var cvs = document.getElementById("grain");
+        /* VHS tracking lines (only when html.party is active) */
+        (function(){
+          var cvs = document.getElementById('grain');
           if (!cvs) return;
-          var ctx = cvs.getContext("2d");
-          var COARSE =
-            (window.matchMedia &&
-              window.matchMedia("(pointer: coarse)").matches) ||
-            "ontouchstart" in window;
-          var grainAlpha = COARSE ? 28 : 45; // lighter grain on mobile/tablet
-          var skipEvery = COARSE ? 2 : 1; // render every other frame on mobile
-          var frameCount = 0;
-          function size() {
-            cvs.width = innerWidth;
-            cvs.height = innerHeight;
-          }
-          size();
-          addEventListener("resize", size);
-          var id;
-          function frame() {
-            // Only animate when party class present
-            if (!document.documentElement.classList.contains("party")) {
-              id = requestAnimationFrame(frame);
-              return;
-            }
-            var w = cvs.width,
-              h = cvs.height;
-            // throttle grain on mobile/tablet for perf
-            frameCount++;
-            if (frameCount % skipEvery !== 0) {
-              id = requestAnimationFrame(frame);
-              return;
-            }
+          var ctx = cvs.getContext('2d');
+          function size(){ cvs.width = innerWidth; cvs.height = innerHeight; }
+          size(); addEventListener('resize', size);
 
-            var img = ctx.createImageData(w, h);
-            var data = img.data;
-            for (var i = 0; i < data.length; i += 4) {
-              var n = (Math.random() * 255) | 0; // white noise
-              data[i] = data[i + 1] = data[i + 2] = n;
-              data[i + 3] = grainAlpha;
+          var t = 0, tearTimer = 0, tearY = 0;
+          var coarse = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || 'ontouchstart' in window;
+          var fps = coarse ? 30 : 48;
+          var last = performance.now();
+
+          function band(y, h, amp, rgbShift){
+  var w = cvs.width;
+  // optional RGB split
+  var channels = rgbShift ? [ [255,40,40,0], [40,255,40,1], [40,120,255,2] ] : [ [220,220,220,0] ];
+  channels.forEach(function(ch){
+    var r=ch[0], g=ch[1], b=ch[2], phase=ch[3];
+    var img = ctx.createImageData(w, h);
+    var data = img.data;
+    for (var x = 0; x < w; x++){
+      var shift = Math.floor((Math.sin((x*0.035) + t*0.6 + phase) * 0.5 + 0.5) * amp);
+      for (var yy = 0; yy < h; yy++){
+        var nx = (x + shift + w) % w;
+        var idx = (yy * w + nx) * 4;
+        data[idx]   = r;
+        data[idx+1] = g;
+        data[idx+2] = b;
+        data[idx+3] = 170; // semi-opaque
+      }
+    }
+    ctx.putImageData(img, 0, y);
+  });
+}
+
+          function frame(now){
+            if (!document.documentElement.classList.contains('party')){
+              requestAnimationFrame(frame); return;
             }
-            ctx.putImageData(img, 0, 0);
-            id = requestAnimationFrame(frame);
+            var dt = now - last;
+            if (dt < 1000/fps){ requestAnimationFrame(frame); return; }
+            last = now; t += dt*0.001;
+
+            ctx.clearRect(0,0,cvs.width,cvs.height);
+
+// Dark veil + subtle vertical chroma noise
+ctx.fillStyle = 'rgba(0,0,0,0.2)';
+ctx.fillRect(0,0,cvs.width,cvs.height);
+for (var vx = 0; vx < cvs.width; vx += 3){
+  var k = (Math.sin(vx*0.05 + t*3.0) * 0.5 + 0.5) * 18|0;
+  ctx.fillStyle = 'rgba(' + (k+10) + ',' + (k) + ',' + (k+24) + ',0.08)';
+  ctx.fillRect(vx, 0, 1, cvs.height);
+}
+
+// Heavy head-switching band near the bottom with RGB split
+var H = cvs.height;
+var bandH = Math.max(10, Math.floor(H * 0.04));
+var yBottom = Math.floor(H * (0.82 + 0.12*Math.sin(t*0.9)));
+band(yBottom, bandH, 22, true);
+
+// Two mid-frame jitter bands
+band(Math.floor(H * 0.30), 4, 14, false);
+band(Math.floor(H * 0.58), 3, 12, false);
+
+// Frequent tearing line that zips by
+tearTimer -= dt*0.001;
+if (tearTimer <= 0){
+  tearTimer = 0.6 + Math.random()*1.2;
+  tearY = Math.floor(H * Math.random());
+}
+band(Math.max(0, tearY - 3), 6, 28, true);
+
+            // a couple of faint mid-frame jitter bands
+            band(Math.floor(cvs.height * 0.33), 2, 10);
+            band(Math.floor(cvs.height * 0.62), 2, 8);
+
+            requestAnimationFrame(frame);
           }
-          frame();
+          requestAnimationFrame(frame);
         })();
 
         /* CONTINUOUS WAVE MORPH (centered, section-aware, audio-capable) */
