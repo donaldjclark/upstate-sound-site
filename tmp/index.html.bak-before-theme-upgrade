@@ -1,0 +1,5939 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      Upstate Sound &amp; Repair – Boutique audio service in Greenville, SC
+    </title>
+
+    <!-- Fonts + (optional) your external stylesheet -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=4" />
+    <!-- Inline favicon to avoid 404 /favicon.ico requests -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"%3E%3Crect width="64" height="64" rx="12" fill="%230a0a0a"/%3E%3Cpath d="M6 32c6-10 12 10 18 0s12-10 18 0 12 10 18 0" stroke="%237dd3fc" stroke-width="6" stroke-linecap="round" fill="none"/%3E%3C/svg%3E'
+    />
+    <link
+      rel="shortcut icon"
+      href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"%3E%3Crect width="64" height="64" rx="12" fill="%230a0a0a"/%3E%3Cpath d="M6 32c6-10 12 10 18 0s12-10 18 0 12 10 18 0" stroke="%237dd3fc" stroke-width="6" stroke-linecap="round" fill="none"/%3E%3C/svg%3E'
+    />
+
+    <style>
+      /* ---------- Page frame / background gutters ---------- */
+      :root {
+        --bg-x: 50%;
+        --bg-y: 50%;
+      }
+      html {
+        background-image: url("assets/background.png");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: var(--bg-x) var(--bg-y);
+      }
+      body {
+        margin: 0;
+        color: #e6e6e6;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        background: transparent;
+      }
+
+      :root {
+        /* Seafoam glow palette (matches background shapes) */
+        --glow-main: 47, 111, 100; /* #2F6F64 */
+        --glow-halo: 31, 85, 77; /* a darker teal for the halo */
+
+        /* runtime‑tunable vars */
+        --drift-scale: 1;
+        --morph-stroke-color: #7dd3fc; /* default cyan */
+        --morph-stroke-min: 18;
+        --morph-stroke-max: 28;
+        --wave-speed: 0.001; /* 50% faster than 0.0006 */
+        --wave-cycles: 4; /* number of undulations across the viewport */
+        --morph-opacity: 0.24; /* try 0.18 ~ 0.35 */
+      }
+
+      /* Content column creates a local stacking context:
+         ::before (0) = the dark column bg
+         .morph-wrap (1) = the wave
+         .section (2) = your content/cards
+      */
+      .content-frame {
+        position: relative;
+        max-width: 1100px;
+        margin: 0 auto;
+        background: transparent; /* bg moved to ::before so morph can sit above it */
+        min-height: 100dvh;
+        z-index: 2; /* creates local stacking context */
+        overflow: visible;
+      }
+      .content-frame::before {
+        content: "";
+        position: fixed; /* fixed so column bg doesn’t scroll */
+        left: 50vw;
+        top: 0;
+        transform: translateX(-50%);
+        width: min(1100px, 92vw);
+        height: 100dvh; /* dynamic viewport for iOS bars */
+        background: rgba(10, 10, 10, 0.92); /* translucent tint only; let single background show through */
+        z-index: 0;
+      }
+
+      /* iOS Safari: emulate background-attachment: fixed via a fixed body::before layer.
+         Mobile Safari ignores/bugs fixed backgrounds on html/body, which causes the
+         hero/header to visually slip. This layer pins the image to the viewport. */
+      @supports (-webkit-touch-callout: none) {
+        html { background: transparent !important; }
+        body::before {
+          content: "";
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          pointer-events: none;
+          background-image: url("assets/background.png");
+          background-repeat: no-repeat;
+          background-size: cover;
+          background-position: var(--bg-x) var(--bg-y);
+          /* stabilize compositing */
+          transform: translateZ(0);
+          will-change: transform;
+        }
+      }
+
+      /* Landscape tablets can crop differently; nudge the image up a bit for alignment */
+      @media (orientation: landscape) and (min-width: 900px) and (max-height: 900px) {
+        :root { --bg-y: 46%; }
+      }
+
+      /* ===== MORPH: fixed, full-bleed; inside .content-frame stacking context (above sections so it’s never hidden) ===== */
+      .morph-wrap {
+        position: fixed;
+        left: 0 !important;
+        right: 0 !important;
+        top: 50vh;
+        transform: translateY(-50%);
+        width: 100vw !important;
+        height: 70vh;
+        display: block;
+        z-index: 60; /* above sections so it’s never hidden */
+        pointer-events: none;
+        opacity: 0.24; /* visible but not overpowering */
+        mix-blend-mode: screen; /* additive light so it doesn’t block text */
+      }
+      .morph-wrap svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        display: block;
+      }
+
+      /* Make the morph path obey the CSS var color */
+      .morph-wrap svg path[data-blend] {
+        stroke: var(--morph-stroke-color, #2f6f64) !important;
+      }
+
+      /* Sections / cards: sections have a lower z-index than the morph now */
+      .section {
+        position: relative;
+        z-index: 20;
+        padding: 64px 24px;
+      }
+      .section.alt {
+        background: #111;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 16px;
+        font-family: "Montserrat", system-ui, sans-serif;
+        color: #f4f4f5;
+      }
+      p {
+        color: #c9c9ce;
+        line-height: 1.6;
+      }
+
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: var(--base, #0a0a0a);
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: none; /* keep their individual dark base colors visible */
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      html.party .content-frame::before {
+        background: rgba(
+          10,
+          10,
+          10,
+          0.85
+        ); /* a hair lighter so the RGB bands show through */
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* During launch shrink, disable input */
+      .flying-card.no-drag {
+        pointer-events: none !important;
+      }
+      /* Wave should never steal input */
+      .flying-card .wave {
+        pointer-events: none !important;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      /* Brief hold flash when a drag begins */
+      html.party .flying-card.held,
+      html.float-on .flying-card.held {
+        /* Dark inner ring to contrast the bright overlay, plus a subtle accent rim */
+        outline: none;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55),
+          /* deeper drop */ inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+          /* dark inner ring */ inset 0 0 12px rgba(0, 0, 0, 0.5),
+          /* inner dark glow */ 0 0 16px
+            color-mix(in srgb, var(--accent, #7dd3fc) 40%, transparent); /* faint accent */
+        transition: box-shadow 160ms ease-out;
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+        opacity: 0.42;
+      } /* stronger in party */
+      /* Symmetric gutter tint in party mode (both left and right) */
+      html.party::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6500; /* above content column bg, below morph (7000) and grain (8000) */
+        background: linear-gradient(
+          to right,
+          rgba(10, 10, 10, 0.38),
+          rgba(10, 10, 10, 0) 22%,
+          rgba(10, 10, 10, 0) 78%,
+          rgba(10, 10, 10, 0.38)
+        );
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500;
+        pointer-events: none; /* default: no capture */
+        display: none; /* hidden until active */
+        overflow: visible;
+      }
+      html.float-on #float-layer,
+      html.party #float-layer {
+        display: block;
+        pointer-events: none; /* overlay never blocks scroll */
+        touch-action: manipulation; /* preserve native scrolling */
+      }
+
+      /* Ensure PIXI overlay never steals input */
+      #pixi-overlay {
+        pointer-events: none !important;
+      }
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Redundant combo rule to be absolutely safe */
+      #pixi-overlay,
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Root card handles clicks; children do not */
+      .flying-card {
+        pointer-events: auto !important;
+      }
+      .flying-card * {
+        pointer-events: none !important;
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
+      }
+      /* Ensure the root card is always the single click/drag target and never selects text */
+      .flying-card {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Only the root card handles input so the whole card is reliably clickable */
+      .flying-card * {
+        pointer-events: none;
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38),
+          0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0)
+          rotate(var(--fa, 0rad)) scale(0.98);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      .service-card:focus-visible,
+      .flying-card:focus-visible {
+        outline: 2px dashed #b9b9ff;
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+
+      /* === Float launch visuals (size shrink + soft pulse) === */
+      /* Quick-change: service cards fly off-stage to the left when Party begins */
+      @keyframes flyOutLeft {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+          opacity: 1;
+          filter: blur(0);
+        }
+        60% {
+          transform: translate(-26vw, -6vh) rotate(-4deg) scale(0.94);
+          opacity: 0.6;
+          filter: blur(1px);
+        }
+        100% {
+          transform: translate(-42vw, -8vh) rotate(-8deg) scale(0.88);
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      .services-section .service-card.vanish {
+        animation: flyOutLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        will-change: transform, opacity, filter;
+      }
+      .flying-card {
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+          height 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+      }
+      .flying-card.launching {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+          0 0 0 0 rgba(125, 211, 252, 0);
+      }
+      .flying-card.launching.playing {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+
+      /* =========================
+         RESPONSIVE LAYOUT LAYER
+         ========================= */
+
+      /* Tablet (821px–1099px): 2 columns */
+      @media (max-width: 1099px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* =========================
+         MOBILE FIX PACK (≤ 820px)
+         ========================= */
+      @media (max-width: 820px) {
+        :root {
+          --morph-stroke-min: 16;
+          --morph-stroke-max: 28;
+        }
+        :root {
+          --drift-scale: 0.75;
+        }
+        /* Column “paper”: fill more of the screen but keep gutter image visible */
+        .content-frame::before {
+          width: min(100vw, 96vw);
+          background: rgba(10, 10, 10, 0.95);
+        }
+
+        /* Sections: tighter padding for readability */
+        .section {
+          padding: 40px 18px;
+        }
+
+        /* Hero: logo + tagline scale and glow for contrast */
+        #hero h1.tape {
+          font-size: clamp(22px, 7vw, 36px);
+          line-height: 1.08;
+          text-shadow: 0 0 4px rgba(var(--glow-main), 0.6),
+            0 0 10px rgba(var(--glow-halo), 0.44),
+            0 0 18px rgba(var(--glow-main), 0.3);
+        }
+
+        /* Nav: real mobile menu (button toggles .open) */
+        #nav {
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+        }
+        #nav-toggle {
+          display: inline-block;
+          font-size: 22px;
+          background: transparent;
+          color: #b9b9ff;
+          border: 0;
+        }
+        /* collapse links by default */
+        #nav .glitch {
+          display: none;
+          padding: 12px 0;
+        }
+        #nav .glitch + .glitch {
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* show when nav is opened */
+        #nav.open .glitch {
+          display: block;
+        }
+
+        /* Services: single column, bigger touch targets */
+        .services-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .service-card {
+          padding: 18px 16px;
+          border-radius: 10px;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+        .service-card h3 {
+          font-size: clamp(18px, 5.2vw, 22px);
+        }
+        .service-card p {
+          font-size: clamp(14px, 4.2vw, 16px);
+          line-height: 1.55;
+        }
+
+        /* Sticky “Services” title: less jumpy */
+        .services-sticky {
+          top: 0;
+          padding: 10px 16px;
+          margin: -10px -16px 12px;
+          background: linear-gradient(#0a0a0acc, #0a0a0acc);
+          backdrop-filter: blur(4px);
+        }
+
+        /* Past Work spacing */
+        .work-section li {
+          margin: 10px 0;
+        }
+
+        /* Morph: a bit smaller/taller for clarity on phones */
+        .morph-wrap {
+          width: 100vw;
+          height: 55vh;
+          opacity: 0.24;
+          mix-blend-mode: screen;
+        }
+        .morph-wrap svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Footer: breathing room */
+        .footer {
+          padding: 28px 16px;
+          font-size: 14px;
+        }
+
+        /* Disable keyboard-only hints: Konami is long‑press / double‑tap on mobile */
+        .services-sticky {
+          position: sticky;
+        } /* keep */
+        #grain {
+          opacity: 0.22;
+        } /* slightly softer on phone */
+
+        /* Thumb-sized floating song cards (mobile only) */
+        html.float-on .flying-card,
+        html.party .flying-card {
+          width: clamp(88px, 22vw, 120px) !important;
+          height: clamp(88px, 22vw, 120px) !important;
+          padding: 10px !important;
+          border-radius: 12px !important;
+        }
+
+        html.float-on .flying-card .title-swap,
+        html.party .flying-card .title-swap {
+          font-size: clamp(10px, 3.4vw, 13px) !important;
+          line-height: 1.15 !important;
+          left: 6px;
+          right: 6px;
+        }
+
+        html.float-on .flying-card .wave,
+        html.party .flying-card .wave {
+          opacity: 0.9;
+        }
+      }
+
+      /* Ultra-small devices (≤ 380px) */
+      @media (max-width: 380px) {
+        .section {
+          padding: 32px 14px;
+        }
+        .services-sticky {
+          margin: -10px -14px 10px;
+          padding: 10px 14px;
+        }
+      }
+
+      /* --- Dark/Light Theme Variables & Animated Transition --- */
+      :root {
+        --accent: #7dd3fc;
+        --morph-stroke-color: var(--accent);
+      }
+      html.light {
+        --accent: #2f6f64;
+        --morph-stroke-color: var(--accent);
+      }
+      html.dark {
+        --accent: #7dd3fc;
+        --morph-stroke-color: var(--accent);
+      }
+
+      /* Animated transitions for theme changes */
+      html,
+      body,
+      .content-frame::before,
+      .morph-wrap,
+      .section,
+      .paper,
+      .service-card,
+      .footer,
+      #theme-toggle svg,
+      .morph-wrap svg path[data-blend] {
+        transition:
+          background 0.6s cubic-bezier(.77,0,.18,1),
+          color 0.6s cubic-bezier(.77,0,.18,1),
+          filter 0.6s cubic-bezier(.77,0,.18,1),
+          box-shadow 0.6s cubic-bezier(.77,0,.18,1),
+          stroke 0.6s cubic-bezier(.77,0,.18,1),
+          opacity 0.6s cubic-bezier(.77,0,.18,1);
+      }
+
+      /* Theme toggle SVG morph animation */
+      #theme-toggle.sun #sun { opacity: 1; }
+      #theme-toggle.sun #moon { opacity: 0; }
+      #theme-toggle.moon #sun { opacity: 0; }
+      #theme-toggle.moon #moon { opacity: 1; }
+      #theme-toggle svg { transition: transform 0.5s cubic-bezier(.77,0,.18,1); }
+      #theme-toggle.sun svg { transform: rotate(0deg) scale(1.1); }
+      #theme-toggle.moon svg { transform: rotate(-30deg) scale(0.95); }
+
+      /* Morph wave stroke color */
+      .morph-wrap svg path[data-blend] {
+        stroke: var(--morph-stroke-color, #7dd3fc) !important;
+      }
+
+      /* Background filter for dark mode */
+      html.dark .content-frame::before {
+        background: rgba(10, 10, 10, 0.92);
+        filter: brightness(0.85) blur(1.5px);
+      }
+      html.light .content-frame::before {
+        background: rgba(244, 242, 235, 0.92);
+        filter: none;
+      }
+
+      /* Micro-interaction: Ripple effect on theme toggle */
+      #theme-toggle {
+        position: relative;
+        overflow: hidden;
+      }
+      #theme-toggle.ripple::after {
+        content: "";
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 0; height: 0;
+        background: rgba(125,211,252,0.25);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: ripple 0.5s cubic-bezier(.77,0,.18,1);
+        pointer-events: none;
+      }
+      @keyframes ripple {
+        0% { width: 0; height: 0; opacity: 0.7; }
+        80% { width: 48px; height: 48px; opacity: 0.3; }
+        100% { width: 64px; height: 64px; opacity: 0; }
+      }
+
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: var(--base, #0a0a0a);
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: none; /* keep their individual dark base colors visible */
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      html.party .content-frame::before {
+        background: rgba(
+          10,
+          10,
+          10,
+          0.85
+        ); /* a hair lighter so the RGB bands show through */
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* During launch shrink, disable input */
+      .flying-card.no-drag {
+        pointer-events: none !important;
+      }
+      /* Wave should never steal input */
+      .flying-card .wave {
+        pointer-events: none !important;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      /* Brief hold flash when a drag begins */
+      html.party .flying-card.held,
+      html.float-on .flying-card.held {
+        /* Dark inner ring to contrast the bright overlay, plus a subtle accent rim */
+        outline: none;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55),
+          /* deeper drop */ inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+          /* dark inner ring */ inset 0 0 12px rgba(0, 0, 0, 0.5),
+          /* inner dark glow */ 0 0 16px
+            color-mix(in srgb, var(--accent, #7dd3fc) 40%, transparent); /* faint accent */
+        transition: box-shadow 160ms ease-out;
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+        opacity: 0.42;
+      } /* stronger in party */
+      /* Symmetric gutter tint in party mode (both left and right) */
+      html.party::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6500; /* above content column bg, below morph (7000) and grain (8000) */
+        background: linear-gradient(
+          to right,
+          rgba(10, 10, 10, 0.38),
+          rgba(10, 10, 10, 0) 22%,
+          rgba(10, 10, 10, 0) 78%,
+          rgba(10, 10, 10, 0.38)
+        );
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500;
+        pointer-events: none; /* default: no capture */
+        display: none; /* hidden until active */
+        overflow: visible;
+      }
+      html.float-on #float-layer,
+      html.party #float-layer {
+        display: block;
+        pointer-events: none; /* overlay never blocks scroll */
+        touch-action: manipulation; /* preserve native scrolling */
+      }
+
+      /* Ensure PIXI overlay never steals input */
+      #pixi-overlay {
+        pointer-events: none !important;
+      }
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Redundant combo rule to be absolutely safe */
+      #pixi-overlay,
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Root card handles clicks; children do not */
+      .flying-card {
+        pointer-events: auto !important;
+      }
+      .flying-card * {
+        pointer-events: none !important;
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
+      }
+      /* Ensure the root card is always the single click/drag target and never selects text */
+      .flying-card {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Only the root card handles input so the whole card is reliably clickable */
+      .flying-card * {
+        pointer-events: none;
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38),
+          0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0)
+          rotate(var(--fa, 0rad)) scale(0.98);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      .service-card:focus-visible,
+      .flying-card:focus-visible {
+        outline: 2px dashed #b9b9ff;
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+
+      /* === Float launch visuals (size shrink + soft pulse) === */
+      /* Quick-change: service cards fly off-stage to the left when Party begins */
+      @keyframes flyOutLeft {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+          opacity: 1;
+          filter: blur(0);
+        }
+        60% {
+          transform: translate(-26vw, -6vh) rotate(-4deg) scale(0.94);
+          opacity: 0.6;
+          filter: blur(1px);
+        }
+        100% {
+          transform: translate(-42vw, -8vh) rotate(-8deg) scale(0.88);
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      .services-section .service-card.vanish {
+        animation: flyOutLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        will-change: transform, opacity, filter;
+      }
+      .flying-card {
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+          height 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+      }
+      .flying-card.launching {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+          0 0 0 0 rgba(125, 211, 252, 0);
+      }
+      .flying-card.launching.playing {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+
+      /* =========================
+         RESPONSIVE LAYOUT LAYER
+         ========================= */
+
+      /* Tablet (821px–1099px): 2 columns */
+      @media (max-width: 1099px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* =========================
+         MOBILE FIX PACK (≤ 820px)
+         ========================= */
+      @media (max-width: 820px) {
+        :root {
+          --morph-stroke-min: 16;
+          --morph-stroke-max: 28;
+        }
+        :root {
+          --drift-scale: 0.75;
+        }
+        /* Column “paper”: fill more of the screen but keep gutter image visible */
+        .content-frame::before {
+          width: min(100vw, 96vw);
+          background: rgba(10, 10, 10, 0.95);
+        }
+
+        /* Sections: tighter padding for readability */
+        .section {
+          padding: 40px 18px;
+        }
+
+        /* Hero: logo + tagline scale and glow for contrast */
+        #hero h1.tape {
+          font-size: clamp(22px, 7vw, 36px);
+          line-height: 1.08;
+          text-shadow: 0 0 4px rgba(var(--glow-main), 0.6),
+            0 0 10px rgba(var(--glow-halo), 0.44),
+            0 0 18px rgba(var(--glow-main), 0.3);
+        }
+
+        /* Nav: real mobile menu (button toggles .open) */
+        #nav {
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+        }
+        #nav-toggle {
+          display: inline-block;
+          font-size: 22px;
+          background: transparent;
+          color: #b9b9ff;
+          border: 0;
+        }
+        /* collapse links by default */
+        #nav .glitch {
+          display: none;
+          padding: 12px 0;
+        }
+        #nav .glitch + .glitch {
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* show when nav is opened */
+        #nav.open .glitch {
+          display: block;
+        }
+
+        /* Services: single column, bigger touch targets */
+        .services-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .service-card {
+          padding: 18px 16px;
+          border-radius: 10px;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+        .service-card h3 {
+          font-size: clamp(18px, 5.2vw, 22px);
+        }
+        .service-card p {
+          font-size: clamp(14px, 4.2vw, 16px);
+          line-height: 1.55;
+        }
+
+        /* Sticky “Services” title: less jumpy */
+        .services-sticky {
+          top: 0;
+          padding: 10px 16px;
+          margin: -10px -16px 12px;
+          background: linear-gradient(#0a0a0acc, #0a0a0acc);
+          backdrop-filter: blur(4px);
+        }
+
+        /* Past Work spacing */
+        .work-section li {
+          margin: 10px 0;
+        }
+
+        /* Morph: a bit smaller/taller for clarity on phones */
+        .morph-wrap {
+          width: 100vw;
+          height: 55vh;
+          opacity: 0.24;
+          mix-blend-mode: screen;
+        }
+        .morph-wrap svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Footer: breathing room */
+        .footer {
+          padding: 28px 16px;
+          font-size: 14px;
+        }
+
+        /* Disable keyboard-only hints: Konami is long‑press / double‑tap on mobile */
+        .services-sticky {
+          position: sticky;
+        } /* keep */
+        #grain {
+          opacity: 0.22;
+        } /* slightly softer on phone */
+
+        /* Thumb-sized floating song cards (mobile only) */
+        html.float-on .flying-card,
+        html.party .flying-card {
+          width: clamp(88px, 22vw, 120px) !important;
+          height: clamp(88px, 22vw, 120px) !important;
+          padding: 10px !important;
+          border-radius: 12px !important;
+        }
+
+        html.float-on .flying-card .title-swap,
+        html.party .flying-card .title-swap {
+          font-size: clamp(10px, 3.4vw, 13px) !important;
+          line-height: 1.15 !important;
+          left: 6px;
+          right: 6px;
+        }
+
+        html.float-on .flying-card .wave,
+        html.party .flying-card .wave {
+          opacity: 0.9;
+        }
+      }
+
+      /* Ultra-small devices (≤ 380px) */
+      @media (max-width: 380px) {
+        .section {
+          padding: 32px 14px;
+        }
+        .services-sticky {
+          margin: -10px -14px 10px;
+          padding: 10px 14px;
+        }
+      }
+
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: var(--base, #0a0a0a);
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: none; /* keep their individual dark base colors visible */
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      html.party .content-frame::before {
+        background: rgba(
+          10,
+          10,
+          10,
+          0.85
+        ); /* a hair lighter so the RGB bands show through */
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* During launch shrink, disable input */
+      .flying-card.no-drag {
+        pointer-events: none !important;
+      }
+      /* Wave should never steal input */
+      .flying-card .wave {
+        pointer-events: none !important;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      /* Brief hold flash when a drag begins */
+      html.party .flying-card.held,
+      html.float-on .flying-card.held {
+        /* Dark inner ring to contrast the bright overlay, plus a subtle accent rim */
+        outline: none;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55),
+          /* deeper drop */ inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+          /* dark inner ring */ inset 0 0 12px rgba(0, 0, 0, 0.5),
+          /* inner dark glow */ 0 0 16px
+            color-mix(in srgb, var(--accent, #7dd3fc) 40%, transparent); /* faint accent */
+        transition: box-shadow 160ms ease-out;
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+        opacity: 0.42;
+      } /* stronger in party */
+      /* Symmetric gutter tint in party mode (both left and right) */
+      html.party::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6500; /* above content column bg, below morph (7000) and grain (8000) */
+        background: linear-gradient(
+          to right,
+          rgba(10, 10, 10, 0.38),
+          rgba(10, 10, 10, 0) 22%,
+          rgba(10, 10, 10, 0) 78%,
+          rgba(10, 10, 10, 0.38)
+        );
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500;
+        pointer-events: none; /* default: no capture */
+        display: none; /* hidden until active */
+        overflow: visible;
+      }
+      html.float-on #float-layer,
+      html.party #float-layer {
+        display: block;
+        pointer-events: none; /* overlay never blocks scroll */
+        touch-action: manipulation; /* preserve native scrolling */
+      }
+
+      /* Ensure PIXI overlay never steals input */
+      #pixi-overlay {
+        pointer-events: none !important;
+      }
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Redundant combo rule to be absolutely safe */
+      #pixi-overlay,
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Root card handles clicks; children do not */
+      .flying-card {
+        pointer-events: auto !important;
+      }
+      .flying-card * {
+        pointer-events: none !important;
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
+      }
+      /* Ensure the root card is always the single click/drag target and never selects text */
+      .flying-card {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Only the root card handles input so the whole card is reliably clickable */
+      .flying-card * {
+        pointer-events: none;
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38),
+          0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0)
+          rotate(var(--fa, 0rad)) scale(0.98);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      .service-card:focus-visible,
+      .flying-card:focus-visible {
+        outline: 2px dashed #b9b9ff;
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+
+      /* === Float launch visuals (size shrink + soft pulse) === */
+      /* Quick-change: service cards fly off-stage to the left when Party begins */
+      @keyframes flyOutLeft {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+          opacity: 1;
+          filter: blur(0);
+        }
+        60% {
+          transform: translate(-26vw, -6vh) rotate(-4deg) scale(0.94);
+          opacity: 0.6;
+          filter: blur(1px);
+        }
+        100% {
+          transform: translate(-42vw, -8vh) rotate(-8deg) scale(0.88);
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      .services-section .service-card.vanish {
+        animation: flyOutLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        will-change: transform, opacity, filter;
+      }
+      .flying-card {
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+          height 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+      }
+      .flying-card.launching {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+          0 0 0 0 rgba(125, 211, 252, 0);
+      }
+      .flying-card.launching.playing {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+
+      /* =========================
+         RESPONSIVE LAYOUT LAYER
+         ========================= */
+
+      /* Tablet (821px–1099px): 2 columns */
+      @media (max-width: 1099px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* =========================
+         MOBILE FIX PACK (≤ 820px)
+         ========================= */
+      @media (max-width: 820px) {
+        :root {
+          --morph-stroke-min: 16;
+          --morph-stroke-max: 28;
+        }
+        :root {
+          --drift-scale: 0.75;
+        }
+        /* Column “paper”: fill more of the screen but keep gutter image visible */
+        .content-frame::before {
+          width: min(100vw, 96vw);
+          background: rgba(10, 10, 10, 0.95);
+        }
+
+        /* Sections: tighter padding for readability */
+        .section {
+          padding: 40px 18px;
+        }
+
+        /* Hero: logo + tagline scale and glow for contrast */
+        #hero h1.tape {
+          font-size: clamp(22px, 7vw, 36px);
+          line-height: 1.08;
+          text-shadow: 0 0 4px rgba(var(--glow-main), 0.6),
+            0 0 10px rgba(var(--glow-halo), 0.44),
+            0 0 18px rgba(var(--glow-main), 0.3);
+        }
+
+        /* Nav: real mobile menu (button toggles .open) */
+        #nav {
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+        }
+        #nav-toggle {
+          display: inline-block;
+          font-size: 22px;
+          background: transparent;
+          color: #b9b9ff;
+          border: 0;
+        }
+        /* collapse links by default */
+        #nav .glitch {
+          display: none;
+          padding: 12px 0;
+        }
+        #nav .glitch + .glitch {
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* show when nav is opened */
+        #nav.open .glitch {
+          display: block;
+        }
+
+        /* Services: single column, bigger touch targets */
+        .services-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .service-card {
+          padding: 18px 16px;
+          border-radius: 10px;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+        .service-card h3 {
+          font-size: clamp(18px, 5.2vw, 22px);
+        }
+        .service-card p {
+          font-size: clamp(14px, 4.2vw, 16px);
+          line-height: 1.55;
+        }
+
+        /* Sticky “Services” title: less jumpy */
+        .services-sticky {
+          top: 0;
+          padding: 10px 16px;
+          margin: -10px -16px 12px;
+          background: linear-gradient(#0a0a0acc, #0a0a0acc);
+          backdrop-filter: blur(4px);
+        }
+
+        /* Past Work spacing */
+        .work-section li {
+          margin: 10px 0;
+        }
+
+        /* Morph: a bit smaller/taller for clarity on phones */
+        .morph-wrap {
+          width: 100vw;
+          height: 55vh;
+          opacity: 0.24;
+          mix-blend-mode: screen;
+        }
+        .morph-wrap svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Footer: breathing room */
+        .footer {
+          padding: 28px 16px;
+          font-size: 14px;
+        }
+
+        /* Disable keyboard-only hints: Konami is long‑press / double‑tap on mobile */
+        .services-sticky {
+          position: sticky;
+        } /* keep */
+        #grain {
+          opacity: 0.22;
+        } /* slightly softer on phone */
+
+        /* Thumb-sized floating song cards (mobile only) */
+        html.float-on .flying-card,
+        html.party .flying-card {
+          width: clamp(88px, 22vw, 120px) !important;
+          height: clamp(88px, 22vw, 120px) !important;
+          padding: 10px !important;
+          border-radius: 12px !important;
+        }
+
+        html.float-on .flying-card .title-swap,
+        html.party .flying-card .title-swap {
+          font-size: clamp(10px, 3.4vw, 13px) !important;
+          line-height: 1.15 !important;
+          left: 6px;
+          right: 6px;
+        }
+
+        html.float-on .flying-card .wave,
+        html.party .flying-card .wave {
+          opacity: 0.9;
+        }
+      }
+
+      /* Ultra-small devices (≤ 380px) */
+      @media (max-width: 380px) {
+        .section {
+          padding: 32px 14px;
+        }
+        .services-sticky {
+          margin: -10px -14px 10px;
+          padding: 10px 14px;
+        }
+      }
+
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: var(--base, #0a0a0a);
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: none; /* keep their individual dark base colors visible */
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      html.party .content-frame::before {
+        background: rgba(
+          10,
+          10,
+          10,
+          0.85
+        ); /* a hair lighter so the RGB bands show through */
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* During launch shrink, disable input */
+      .flying-card.no-drag {
+        pointer-events: none !important;
+      }
+      /* Wave should never steal input */
+      .flying-card .wave {
+        pointer-events: none !important;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      /* Brief hold flash when a drag begins */
+      html.party .flying-card.held,
+      html.float-on .flying-card.held {
+        /* Dark inner ring to contrast the bright overlay, plus a subtle accent rim */
+        outline: none;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55),
+          /* deeper drop */ inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+          /* dark inner ring */ inset 0 0 12px rgba(0, 0, 0, 0.5),
+          /* inner dark glow */ 0 0 16px
+            color-mix(in srgb, var(--accent, #7dd3fc) 40%, transparent); /* faint accent */
+        transition: box-shadow 160ms ease-out;
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+        opacity: 0.42;
+      } /* stronger in party */
+      /* Symmetric gutter tint in party mode (both left and right) */
+      html.party::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6500; /* above content column bg, below morph (7000) and grain (8000) */
+        background: linear-gradient(
+          to right,
+          rgba(10, 10, 10, 0.38),
+          rgba(10, 10, 10, 0) 22%,
+          rgba(10, 10, 10, 0) 78%,
+          rgba(10, 10, 10, 0.38)
+        );
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500;
+        pointer-events: none; /* default: no capture */
+        display: none; /* hidden until active */
+        overflow: visible;
+      }
+      html.float-on #float-layer,
+      html.party #float-layer {
+        display: block;
+        pointer-events: none; /* overlay never blocks scroll */
+        touch-action: manipulation; /* preserve native scrolling */
+      }
+
+      /* Ensure PIXI overlay never steals input */
+      #pixi-overlay {
+        pointer-events: none !important;
+      }
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Redundant combo rule to be absolutely safe */
+      #pixi-overlay,
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Root card handles clicks; children do not */
+      .flying-card {
+        pointer-events: auto !important;
+      }
+      .flying-card * {
+        pointer-events: none !important;
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
+      }
+      /* Ensure the root card is always the single click/drag target and never selects text */
+      .flying-card {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Only the root card handles input so the whole card is reliably clickable */
+      .flying-card * {
+        pointer-events: none;
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38),
+          0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0)
+          rotate(var(--fa, 0rad)) scale(0.98);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      .service-card:focus-visible,
+      .flying-card:focus-visible {
+        outline: 2px dashed #b9b9ff;
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+
+      /* === Float launch visuals (size shrink + soft pulse) === */
+      /* Quick-change: service cards fly off-stage to the left when Party begins */
+      @keyframes flyOutLeft {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+          opacity: 1;
+          filter: blur(0);
+        }
+        60% {
+          transform: translate(-26vw, -6vh) rotate(-4deg) scale(0.94);
+          opacity: 0.6;
+          filter: blur(1px);
+        }
+        100% {
+          transform: translate(-42vw, -8vh) rotate(-8deg) scale(0.88);
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      .services-section .service-card.vanish {
+        animation: flyOutLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        will-change: transform, opacity, filter;
+      }
+      .flying-card {
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+          height 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+      }
+      .flying-card.launching {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+          0 0 0 0 rgba(125, 211, 252, 0);
+      }
+      .flying-card.launching.playing {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+
+      /* =========================
+         RESPONSIVE LAYOUT LAYER
+         ========================= */
+
+      /* Tablet (821px–1099px): 2 columns */
+      @media (max-width: 1099px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* =========================
+         MOBILE FIX PACK (≤ 820px)
+         ========================= */
+      @media (max-width: 820px) {
+        :root {
+          --morph-stroke-min: 16;
+          --morph-stroke-max: 28;
+        }
+        :root {
+          --drift-scale: 0.75;
+        }
+        /* Column “paper”: fill more of the screen but keep gutter image visible */
+        .content-frame::before {
+          width: min(100vw, 96vw);
+          background: rgba(10, 10, 10, 0.95);
+        }
+
+        /* Sections: tighter padding for readability */
+        .section {
+          padding: 40px 18px;
+        }
+
+        /* Hero: logo + tagline scale and glow for contrast */
+        #hero h1.tape {
+          font-size: clamp(22px, 7vw, 36px);
+          line-height: 1.08;
+          text-shadow: 0 0 4px rgba(var(--glow-main), 0.6),
+            0 0 10px rgba(var(--glow-halo), 0.44),
+            0 0 18px rgba(var(--glow-main), 0.3);
+        }
+
+        /* Nav: real mobile menu (button toggles .open) */
+        #nav {
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+        }
+        #nav-toggle {
+          display: inline-block;
+          font-size: 22px;
+          background: transparent;
+          color: #b9b9ff;
+          border: 0;
+        }
+        /* collapse links by default */
+        #nav .glitch {
+          display: none;
+          padding: 12px 0;
+        }
+        #nav .glitch + .glitch {
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* show when nav is opened */
+        #nav.open .glitch {
+          display: block;
+        }
+
+        /* Services: single column, bigger touch targets */
+        .services-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .service-card {
+          padding: 18px 16px;
+          border-radius: 10px;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+        .service-card h3 {
+          font-size: clamp(18px, 5.2vw, 22px);
+        }
+        .service-card p {
+          font-size: clamp(14px, 4.2vw, 16px);
+          line-height: 1.55;
+        }
+
+        /* Sticky “Services” title: less jumpy */
+        .services-sticky {
+          top: 0;
+          padding: 10px 16px;
+          margin: -10px -16px 12px;
+          background: linear-gradient(#0a0a0acc, #0a0a0acc);
+          backdrop-filter: blur(4px);
+        }
+
+        /* Past Work spacing */
+        .work-section li {
+          margin: 10px 0;
+        }
+
+        /* Morph: a bit smaller/taller for clarity on phones */
+        .morph-wrap {
+          width: 100vw;
+          height: 55vh;
+          opacity: 0.24;
+          mix-blend-mode: screen;
+        }
+        .morph-wrap svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Footer: breathing room */
+        .footer {
+          padding: 28px 16px;
+          font-size: 14px;
+        }
+
+        /* Disable keyboard-only hints: Konami is long‑press / double‑tap on mobile */
+        .services-sticky {
+          position: sticky;
+        } /* keep */
+        #grain {
+          opacity: 0.22;
+        } /* slightly softer on phone */
+
+        /* Thumb-sized floating song cards (mobile only) */
+        html.float-on .flying-card,
+        html.party .flying-card {
+          width: clamp(88px, 22vw, 120px) !important;
+          height: clamp(88px, 22vw, 120px) !important;
+          padding: 10px !important;
+          border-radius: 12px !important;
+        }
+
+        html.float-on .flying-card .title-swap,
+        html.party .flying-card .title-swap {
+          font-size: clamp(10px, 3.4vw, 13px) !important;
+          line-height: 1.15 !important;
+          left: 6px;
+          right: 6px;
+        }
+
+        html.float-on .flying-card .wave,
+        html.party .flying-card .wave {
+          opacity: 0.9;
+        }
+      }
+
+      /* Ultra-small devices (≤ 380px) */
+      @media (max-width: 380px) {
+        .section {
+          padding: 32px 14px;
+        }
+        .services-sticky {
+          margin: -10px -14px 10px;
+          padding: 10px 14px;
+        }
+      }
+
+      /* --- Dark/Light Theme Variables & Animated Transition --- */
+      :root {
+        --accent: #7dd3fc;
+        --morph-stroke-color: var(--accent);
+      }
+      html.light {
+        --accent: #2f6f64;
+        --morph-stroke-color: var(--accent);
+      }
+      html.dark {
+        --accent: #7dd3fc;
+        --morph-stroke-color: var(--accent);
+      }
+
+      /* Animated transitions for theme changes */
+      html,
+      body,
+      .content-frame::before,
+      .morph-wrap,
+      .section,
+      .paper,
+      .service-card,
+      .footer,
+      #theme-toggle svg,
+      .morph-wrap svg path[data-blend] {
+        transition:
+          background 0.6s cubic-bezier(.77,0,.18,1),
+          color 0.6s cubic-bezier(.77,0,.18,1),
+          filter 0.6s cubic-bezier(.77,0,.18,1),
+          box-shadow 0.6s cubic-bezier(.77,0,.18,1),
+          stroke 0.6s cubic-bezier(.77,0,.18,1),
+          opacity 0.6s cubic-bezier(.77,0,.18,1);
+      }
+
+      /* Theme toggle SVG morph animation */
+      #theme-toggle.sun #sun { opacity: 1; }
+      #theme-toggle.sun #moon { opacity: 0; }
+      #theme-toggle.moon #sun { opacity: 0; }
+      #theme-toggle.moon #moon { opacity: 1; }
+      #theme-toggle svg { transition: transform 0.5s cubic-bezier(.77,0,.18,1); }
+      #theme-toggle.sun svg { transform: rotate(0deg) scale(1.1); }
+      #theme-toggle.moon svg { transform: rotate(-30deg) scale(0.95); }
+
+      /* Morph wave stroke color */
+      .morph-wrap svg path[data-blend] {
+        stroke: var(--morph-stroke-color, #7dd3fc) !important;
+      }
+
+      /* Background filter for dark mode */
+      html.dark .content-frame::before {
+        background: rgba(10, 10, 10, 0.92);
+        filter: brightness(0.85) blur(1.5px);
+      }
+      html.light .content-frame::before {
+        background: rgba(244, 242, 235, 0.92);
+        filter: none;
+      }
+
+      /* Micro-interaction: Ripple effect on theme toggle */
+      #theme-toggle {
+        position: relative;
+        overflow: hidden;
+      }
+      #theme-toggle.ripple::after {
+        content: "";
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 0; height: 0;
+        background: rgba(125,211,252,0.25);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        animation: ripple 0.5s cubic-bezier(.77,0,.18,1);
+        pointer-events: none;
+      }
+      @keyframes ripple {
+        0% { width: 0; height: 0; opacity: 0.7; }
+        80% { width: 48px; height: 48px; opacity: 0.3; }
+        100% { width: 64px; height: 64px; opacity: 0; }
+      }
+
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: var(--base, #0a0a0a);
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: none; /* keep their individual dark base colors visible */
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      html.party .content-frame::before {
+        background: rgba(
+          10,
+          10,
+          10,
+          0.85
+        ); /* a hair lighter so the RGB bands show through */
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* During launch shrink, disable input */
+      .flying-card.no-drag {
+        pointer-events: none !important;
+      }
+      /* Wave should never steal input */
+      .flying-card .wave {
+        pointer-events: none !important;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      /* Brief hold flash when a drag begins */
+      html.party .flying-card.held,
+      html.float-on .flying-card.held {
+        /* Dark inner ring to contrast the bright overlay, plus a subtle accent rim */
+        outline: none;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55),
+          /* deeper drop */ inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+          /* dark inner ring */ inset 0 0 12px rgba(0, 0, 0, 0.5),
+          /* inner dark glow */ 0 0 16px
+            color-mix(in srgb, var(--accent, #7dd3fc) 40%, transparent); /* faint accent */
+        transition: box-shadow 160ms ease-out;
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+        opacity: 0.42;
+      } /* stronger in party */
+      /* Symmetric gutter tint in party mode (both left and right) */
+      html.party::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6500; /* above content column bg, below morph (7000) and grain (8000) */
+        background: linear-gradient(
+          to right,
+          rgba(10, 10, 10, 0.38),
+          rgba(10, 10, 10, 0) 22%,
+          rgba(10, 10, 10, 0) 78%,
+          rgba(10, 10, 10, 0.38)
+        );
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500;
+        pointer-events: none; /* default: no capture */
+        display: none; /* hidden until active */
+        overflow: visible;
+      }
+      html.float-on #float-layer,
+      html.party #float-layer {
+        display: block;
+        pointer-events: none; /* overlay never blocks scroll */
+        touch-action: manipulation; /* preserve native scrolling */
+      }
+
+      /* Ensure PIXI overlay never steals input */
+      #pixi-overlay {
+        pointer-events: none !important;
+      }
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Redundant combo rule to be absolutely safe */
+      #pixi-overlay,
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Root card handles clicks; children do not */
+      .flying-card {
+        pointer-events: auto !important;
+      }
+      .flying-card * {
+        pointer-events: none !important;
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
+      }
+      /* Ensure the root card is always the single click/drag target and never selects text */
+      .flying-card {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Only the root card handles input so the whole card is reliably clickable */
+      .flying-card * {
+        pointer-events: none;
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38),
+          0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0)
+          rotate(var(--fa, 0rad)) scale(0.98);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      .service-card:focus-visible,
+      .flying-card:focus-visible {
+        outline: 2px dashed #b9b9ff;
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+
+      /* === Float launch visuals (size shrink + soft pulse) === */
+      /* Quick-change: service cards fly off-stage to the left when Party begins */
+      @keyframes flyOutLeft {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+          opacity: 1;
+          filter: blur(0);
+        }
+        60% {
+          transform: translate(-26vw, -6vh) rotate(-4deg) scale(0.94);
+          opacity: 0.6;
+          filter: blur(1px);
+        }
+        100% {
+          transform: translate(-42vw, -8vh) rotate(-8deg) scale(0.88);
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      .services-section .service-card.vanish {
+        animation: flyOutLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        will-change: transform, opacity, filter;
+      }
+      .flying-card {
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+          height 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+      }
+      .flying-card.launching {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+          0 0 0 0 rgba(125, 211, 252, 0);
+      }
+      .flying-card.launching.playing {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+
+      /* =========================
+         RESPONSIVE LAYOUT LAYER
+         ========================= */
+
+      /* Tablet (821px–1099px): 2 columns */
+      @media (max-width: 1099px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* =========================
+         MOBILE FIX PACK (≤ 820px)
+         ========================= */
+      @media (max-width: 820px) {
+        :root {
+          --morph-stroke-min: 16;
+          --morph-stroke-max: 28;
+        }
+        :root {
+          --drift-scale: 0.75;
+        }
+        /* Column “paper”: fill more of the screen but keep gutter image visible */
+        .content-frame::before {
+          width: min(100vw, 96vw);
+          background: rgba(10, 10, 10, 0.95);
+        }
+
+        /* Sections: tighter padding for readability */
+        .section {
+          padding: 40px 18px;
+        }
+
+        /* Hero: logo + tagline scale and glow for contrast */
+        #hero h1.tape {
+          font-size: clamp(22px, 7vw, 36px);
+          line-height: 1.08;
+          text-shadow: 0 0 4px rgba(var(--glow-main), 0.6),
+            0 0 10px rgba(var(--glow-halo), 0.44),
+            0 0 18px rgba(var(--glow-main), 0.3);
+        }
+
+        /* Nav: real mobile menu (button toggles .open) */
+        #nav {
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+        }
+        #nav-toggle {
+          display: inline-block;
+          font-size: 22px;
+          background: transparent;
+          color: #b9b9ff;
+          border: 0;
+        }
+        /* collapse links by default */
+        #nav .glitch {
+          display: none;
+          padding: 12px 0;
+        }
+        #nav .glitch + .glitch {
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* show when nav is opened */
+        #nav.open .glitch {
+          display: block;
+        }
+
+        /* Services: single column, bigger touch targets */
+        .services-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .service-card {
+          padding: 18px 16px;
+          border-radius: 10px;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+        .service-card h3 {
+          font-size: clamp(18px, 5.2vw, 22px);
+        }
+        .service-card p {
+          font-size: clamp(14px, 4.2vw, 16px);
+          line-height: 1.55;
+        }
+
+        /* Sticky “Services” title: less jumpy */
+        .services-sticky {
+          top: 0;
+          padding: 10px 16px;
+          margin: -10px -16px 12px;
+          background: linear-gradient(#0a0a0acc, #0a0a0acc);
+          backdrop-filter: blur(4px);
+        }
+
+        /* Past Work spacing */
+        .work-section li {
+          margin: 10px 0;
+        }
+
+        /* Morph: a bit smaller/taller for clarity on phones */
+        .morph-wrap {
+          width: 100vw;
+          height: 55vh;
+          opacity: 0.24;
+          mix-blend-mode: screen;
+        }
+        .morph-wrap svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Footer: breathing room */
+        .footer {
+          padding: 28px 16px;
+          font-size: 14px;
+        }
+
+        /* Disable keyboard-only hints: Konami is long‑press / double‑tap on mobile */
+        .services-sticky {
+          position: sticky;
+        } /* keep */
+        #grain {
+          opacity: 0.22;
+        } /* slightly softer on phone */
+
+        /* Thumb-sized floating song cards (mobile only) */
+        html.float-on .flying-card,
+        html.party .flying-card {
+          width: clamp(88px, 22vw, 120px) !important;
+          height: clamp(88px, 22vw, 120px) !important;
+          padding: 10px !important;
+          border-radius: 12px !important;
+        }
+
+        html.float-on .flying-card .title-swap,
+
+        html.party .flying-card .title-swap {
+          font-size: clamp(10px, 3.4vw, 13px) !important;
+          line-height: 1.15 !important;
+          left: 6px;
+          right: 6px;
+        }
+
+        html.float-on .flying-card .wave,
+        html.party .flying-card .wave {
+          opacity: 0.9;
+        }
+      }
+
+      /* Ultra-small devices (≤ 380px) */
+      @media (max-width: 380px) {
+        .section {
+          padding: 32px 14px;
+        }
+        .services-sticky {
+          margin: -10px -14px 10px;
+          padding: 10px 14px;
+        }
+      }
+
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: var(--base, #0a0a0a);
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: none; /* keep their individual dark base colors visible */
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      html.party .content-frame::before {
+        background: rgba(
+          10,
+          10,
+          10,
+          0.85
+        ); /* a hair lighter so the RGB bands show through */
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* During launch shrink, disable input */
+      .flying-card.no-drag {
+        pointer-events: none !important;
+      }
+      /* Wave should never steal input */
+      .flying-card .wave {
+        pointer-events: none !important;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      /* Brief hold flash when a drag begins */
+      html.party .flying-card.held,
+      html.float-on .flying-card.held {
+        /* Dark inner ring to contrast the bright overlay, plus a subtle accent rim */
+        outline: none;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55),
+          /* deeper drop */ inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+          /* dark inner ring */ inset 0 0 12px rgba(0, 0, 0, 0.5),
+          /* inner dark glow */ 0 0 16px
+            color-mix(in srgb, var(--accent, #7dd3fc) 40%, transparent); /* faint accent */
+        transition: box-shadow 160ms ease-out;
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+        opacity: 0.42;
+      } /* stronger in party */
+      /* Symmetric gutter tint in party mode (both left and right) */
+      html.party::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6500; /* above content column bg, below morph (7000) and grain (8000) */
+        background: linear-gradient(
+          to right,
+          rgba(10, 10, 10, 0.38),
+          rgba(10, 10, 10, 0) 22%,
+          rgba(10, 10, 10, 0) 78%,
+          rgba(10, 10, 10, 0.38)
+        );
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500;
+        pointer-events: none; /* default: no capture */
+        display: none; /* hidden until active */
+        overflow: visible;
+      }
+      html.float-on #float-layer,
+      html.party #float-layer {
+        display: block;
+        pointer-events: none; /* overlay never blocks scroll */
+        touch-action: manipulation; /* preserve native scrolling */
+      }
+
+      /* Ensure PIXI overlay never steals input */
+      #pixi-overlay {
+        pointer-events: none !important;
+      }
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Redundant combo rule to be absolutely safe */
+      #pixi-overlay,
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Root card handles clicks; children do not */
+      .flying-card {
+        pointer-events: auto !important;
+      }
+      .flying-card * {
+        pointer-events: none !important;
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
+      }
+      /* Ensure the root card is always the single click/drag target and never selects text */
+      .flying-card {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Only the root card handles input so the whole card is reliably clickable */
+      .flying-card * {
+        pointer-events: none;
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38),
+          0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0)
+          rotate(var(--fa, 0rad)) scale(0.98);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      .service-card:focus-visible,
+      .flying-card:focus-visible {
+        outline: 2px dashed #b9b9ff;
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+
+      /* === Float launch visuals (size shrink + soft pulse) === */
+      /* Quick-change: service cards fly off-stage to the left when Party begins */
+      @keyframes flyOutLeft {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+          opacity: 1;
+          filter: blur(0);
+        }
+        60% {
+          transform: translate(-26vw, -6vh) rotate(-4deg) scale(0.94);
+          opacity: 0.6;
+          filter: blur(1px);
+        }
+        100% {
+          transform: translate(-42vw, -8vh) rotate(-8deg) scale(0.88);
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      .services-section .service-card.vanish {
+        animation: flyOutLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        will-change: transform, opacity, filter;
+      }
+      .flying-card {
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+          height 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+      }
+      .flying-card.launching {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+          0 0 0 0 rgba(125, 211, 252, 0);
+      }
+      .flying-card.launching.playing {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+
+      /* =========================
+         RESPONSIVE LAYOUT LAYER
+         ========================= */
+
+      /* Tablet (821px–1099px): 2 columns */
+      @media (max-width: 1099px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* =========================
+         MOBILE FIX PACK (≤ 820px)
+         ========================= */
+      @media (max-width: 820px) {
+        :root {
+          --morph-stroke-min: 16;
+          --morph-stroke-max: 28;
+        }
+        :root {
+          --drift-scale: 0.75;
+        }
+        /* Column “paper”: fill more of the screen but keep gutter image visible */
+        .content-frame::before {
+          width: min(100vw, 96vw);
+          background: rgba(10, 10, 10, 0.95);
+        }
+
+        /* Sections: tighter padding for readability */
+        .section {
+          padding: 40px 18px;
+        }
+
+        /* Hero: logo + tagline scale and glow for contrast */
+        #hero h1.tape {
+          font-size: clamp(22px, 7vw, 36px);
+          line-height: 1.08;
+          text-shadow: 0 0 4px rgba(var(--glow-main), 0.6),
+            0 0 10px rgba(var(--glow-halo), 0.44),
+            0 0 18px rgba(var(--glow-main), 0.3);
+        }
+
+        /* Nav: real mobile menu (button toggles .open) */
+        #nav {
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+        }
+        #nav-toggle {
+          display: inline-block;
+          font-size: 22px;
+          background: transparent;
+          color: #b9b9ff;
+          border: 0;
+        }
+        /* collapse links by default */
+        #nav .glitch {
+          display: none;
+          padding: 12px 0;
+        }
+        #nav .glitch + .glitch {
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* show when nav is opened */
+        #nav.open .glitch {
+          display: block;
+        }
+
+        /* Services: single column, bigger touch targets */
+        .services-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .service-card {
+          padding: 18px 16px;
+          border-radius: 10px;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+        .service-card h3 {
+          font-size: clamp(18px, 5.2vw, 22px);
+        }
+        .service-card p {
+          font-size: clamp(14px, 4.2vw, 16px);
+          line-height: 1.55;
+        }
+
+        /* Sticky “Services” title: less jumpy */
+        .services-sticky {
+          top: 0;
+          padding: 10px 16px;
+          margin: -10px -16px 12px;
+          background: linear-gradient(#0a0a0acc, #0a0a0acc);
+          backdrop-filter: blur(4px);
+        }
+
+        /* Past Work spacing */
+        .work-section li {
+          margin: 10px 0;
+        }
+
+        /* Morph: a bit smaller/taller for clarity on phones */
+        .morph-wrap {
+          width: 100vw;
+          height: 55vh;
+          opacity: 0.24;
+          mix-blend-mode: screen;
+        }
+        .morph-wrap svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Footer: breathing room */
+        .footer {
+          padding: 28px 16px;
+          font-size: 14px;
+        }
+
+        /* Disable keyboard-only hints: Konami is long‑press / double‑tap on mobile */
+        .services-sticky {
+          position: sticky;
+        } /* keep */
+        #grain {
+          opacity: 0.22;
+        } /* slightly softer on phone */
+
+        /* Thumb-sized floating song cards (mobile only) */
+        html.float-on .flying-card,
+        html.party .flying-card {
+          width: clamp(88px, 22vw, 120px) !important;
+          height: clamp(88px, 22vw, 120px) !important;
+          padding: 10px !important;
+          border-radius: 12px !important;
+        }
+
+        html.float-on .flying-card .title-swap,
+        html.party .flying-card .title-swap {
+          font-size: clamp(10px, 3.4vw, 13px) !important;
+          line-height: 1.15 !important;
+          left: 6px;
+          right: 6px;
+        }
+
+        html.float-on .flying-card .wave,
+        html.party .flying-card .wave {
+          opacity: 0.9;
+        }
+      }
+
+      /* Ultra-small devices (≤ 380px) */
+      @media (max-width: 380px) {
+        .section {
+          padding: 32px 14px;
+        }
+        .services-sticky {
+          margin: -10px -14px 10px;
+          padding: 10px 14px;
+        }
+      }
+
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: var(--base, #0a0a0a);
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: none; /* keep their individual dark base colors visible */
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      html.party .content-frame::before {
+        background: rgba(
+          10,
+          10,
+          10,
+          0.85
+        ); /* a hair lighter so the RGB bands show through */
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* During launch shrink, disable input */
+      .flying-card.no-drag {
+        pointer-events: none !important;
+      }
+      /* Wave should never steal input */
+      .flying-card .wave {
+        pointer-events: none !important;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      /* Brief hold flash when a drag begins */
+      html.party .flying-card.held,
+      html.float-on .flying-card.held {
+        /* Dark inner ring to contrast the bright overlay, plus a subtle accent rim */
+        outline: none;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55),
+          /* deeper drop */ inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+          /* dark inner ring */ inset 0 0 12px rgba(0, 0, 0, 0.5),
+          /* inner dark glow */ 0 0 16px
+            color-mix(in srgb, var(--accent, #7dd3fc) 40%, transparent); /* faint accent */
+        transition: box-shadow 160ms ease-out;
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+        opacity: 0.42;
+      } /* stronger in party */
+      /* Symmetric gutter tint in party mode (both left and right) */
+      html.party::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6500; /* above content column bg, below morph (7000) and grain (8000) */
+        background: linear-gradient(
+          to right,
+          rgba(10, 10, 10, 0.38),
+          rgba(10, 10, 10, 0) 22%,
+          rgba(10, 10, 10, 0) 78%,
+          rgba(10, 10, 10, 0.38)
+        );
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500;
+        pointer-events: none; /* default: no capture */
+        display: none; /* hidden until active */
+        overflow: visible;
+      }
+      html.float-on #float-layer,
+      html.party #float-layer {
+        display: block;
+        pointer-events: none; /* overlay never blocks scroll */
+        touch-action: manipulation; /* preserve native scrolling */
+      }
+
+      /* Ensure PIXI overlay never steals input */
+      #pixi-overlay {
+        pointer-events: none !important;
+      }
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Redundant combo rule to be absolutely safe */
+      #pixi-overlay,
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Root card handles clicks; children do not */
+      .flying-card {
+        pointer-events: auto !important;
+      }
+      .flying-card * {
+        pointer-events: none !important;
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
+      }
+      /* Ensure the root card is always the single click/drag target and never selects text */
+      .flying-card {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Only the root card handles input so the whole card is reliably clickable */
+      .flying-card * {
+        pointer-events: none;
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38),
+          0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0)
+          rotate(var(--fa, 0rad)) scale(0.98);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      .service-card:focus-visible,
+      .flying-card:focus-visible {
+        outline: 2px dashed #b9b9ff;
+        outline-offset: 3px;
+        border-radius: 10px;
+      }
+
+      /* === Float launch visuals (size shrink + soft pulse) === */
+      /* Quick-change: service cards fly off-stage to the left when Party begins */
+      @keyframes flyOutLeft {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+          opacity: 1;
+          filter: blur(0);
+        }
+        60% {
+          transform: translate(-26vw, -6vh) rotate(-4deg) scale(0.94);
+          opacity: 0.6;
+          filter: blur(1px);
+        }
+        100% {
+          transform: translate(-42vw, -8vh) rotate(-8deg) scale(0.88);
+          opacity: 0;
+          filter: blur(2px);
+        }
+      }
+      .services-section .service-card.vanish {
+        animation: flyOutLeft 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        will-change: transform, opacity, filter;
+      }
+      .flying-card {
+        transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+          height 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms ease;
+      }
+      .flying-card.launching {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35),
+          0 0 0 0 rgba(125, 211, 252, 0);
+      }
+      .flying-card.launching.playing {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+
+      /* =========================
+         RESPONSIVE LAYOUT LAYER
+         ========================= */
+
+      /* Tablet (821px–1099px): 2 columns */
+      @media (max-width: 1099px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* =========================
+         MOBILE FIX PACK (≤ 820px)
+         ========================= */
+      @media (max-width: 820px) {
+        :root {
+          --morph-stroke-min: 16;
+          --morph-stroke-max: 28;
+        }
+        :root {
+          --drift-scale: 0.75;
+        }
+        /* Column “paper”: fill more of the screen but keep gutter image visible */
+        .content-frame::before {
+          width: min(100vw, 96vw);
+          background: rgba(10, 10, 10, 0.95);
+        }
+
+        /* Sections: tighter padding for readability */
+        .section {
+          padding: 40px 18px;
+        }
+
+        /* Hero: logo + tagline scale and glow for contrast */
+        #hero h1.tape {
+          font-size: clamp(22px, 7vw, 36px);
+          line-height: 1.08;
+          text-shadow: 0 0 4px rgba(var(--glow-main), 0.6),
+            0 0 10px rgba(var(--glow-halo), 0.44),
+            0 0 18px rgba(var(--glow-main), 0.3);
+        }
+
+        /* Nav: real mobile menu (button toggles .open) */
+        #nav {
+          align-items: center;
+          justify-content: space-between;
+          gap: 0;
+        }
+        #nav-toggle {
+          display: inline-block;
+          font-size: 22px;
+          background: transparent;
+          color: #b9b9ff;
+          border: 0;
+        }
+        /* collapse links by default */
+        #nav .glitch {
+          display: none;
+          padding: 12px 0;
+        }
+        #nav .glitch + .glitch {
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        /* show when nav is opened */
+        #nav.open .glitch {
+          display: block;
+        }
+
+        /* Services: single column, bigger touch targets */
+        .services-grid {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .service-card {
+          padding: 18px 16px;
+          border-radius: 10px;
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+        }
+        .service-card h3 {
+          font-size: clamp(18px, 5.2vw, 22px);
+        }
+        .service-card p {
+          font-size: clamp(14px, 4.2vw, 16px);
+          line-height: 1.55;
+        }
+
+        /* Sticky “Services” title: less jumpy */
+        .services-sticky {
+          top: 0;
+          padding: 10px 16px;
+          margin: -10px -16px 12px;
+          background: linear-gradient(#0a0a0acc, #0a0a0acc);
+          backdrop-filter: blur(4px);
+        }
+
+        /* Past Work spacing */
+        .work-section li {
+          margin: 10px 0;
+        }
+
+        /* Morph: a bit smaller/taller for clarity on phones */
+        .morph-wrap {
+          width: 100vw;
+          height: 55vh;
+          opacity: 0.24;
+          mix-blend-mode: screen;
+        }
+        .morph-wrap svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Footer: breathing room */
+        .footer {
+          padding: 28px 16px;
+          font-size: 14px;
+        }
+
+        /* Disable keyboard-only hints: Konami is long‑press / double‑tap on mobile */
+        .services-sticky {
+          position: sticky;
+        } /* keep */
+        #grain {
+          opacity: 0.22;
+        } /* slightly softer on phone */
+
+        /* Thumb-sized floating song cards (mobile only) */
+        html.float-on .flying-card,
+        html.party .flying-card {
+          width: clamp(88px, 22vw, 120px) !important;
+          height: clamp(88px, 22vw, 120px) !important;
+          padding: 10px !important;
+          border-radius: 12px !important;
+        }
+
+        html.float-on .flying-card .title-swap,
+        html.party .flying-card .title-swap {
+          font-size: clamp(10px, 3.4vw, 13px) !important;
+          line-height: 1.15 !important;
+          left: 6px;
+          right: 6px;
+        }
+
+        html.float-on .flying-card .wave,
+        html.party .flying-card .wave {
+          opacity: 0.9;
+        }
+      }
+
+      /* Ultra-small devices (≤ 380px) */
+      @media (max-width: 380px) {
+        .section {
+          padding: 32px 14px;
+        }
+        .services-sticky {
+          margin: -10px -14px 10px;
+          padding: 10px 14px;
+        }
+      }
+
+      /* ---------- Header / Hero ---------- */
+      #hero {
+        position: relative;
+        padding: 80px 24px 48px;
+        text-align: center;
+      }
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(250, 249, 246, 0) 0%,
+          rgba(10, 10, 10, 0.08) 45%,
+          rgba(10, 10, 10, 0.6) 100%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+      .logo {
+        display: block;
+        margin: 0 auto 24px;
+        height: auto;
+      }
+
+      /* Size inline SVG placed inside .logo container */
+      .logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 24px;
+      }
+
+      /* Tagline “tape wobble” + glow for contrast */
+      .tape {
+        display: inline-block;
+        animation: tapeWobble 1.2s ease-in-out infinite;
+        transform-origin: 50% 50%;
+      }
+      @keyframes tapeWobble {
+        0% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+        25% {
+          transform: translateY(-1px) rotate(0.22deg) skewX(-0.1deg);
+        }
+        50% {
+          transform: translateY(0.6px) rotate(-0.14deg) skewX(0.06deg);
+        }
+        75% {
+          transform: translateY(-0.8px) rotate(0.18deg) skewX(-0.06deg);
+        }
+        100% {
+          transform: translateY(0) rotate(-0.18deg) skewX(0.12deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .tape {
+          animation: none;
+        }
+      }
+
+      /* Tagline glow (seafoam-only) */
+      #hero h1.tape {
+        text-shadow: 0 0 3px rgba(var(--glow-main), 0.55),
+          0 0 8px rgba(var(--glow-halo), 0.4),
+          0 0 16px rgba(var(--glow-main), 0.22);
+      }
+
+      .logo {
+        isolation: isolate;
+      } /* prevent blending weirdness with backdrop */
+      .logo svg,
+      .logo svg * {
+        /* Subtle seafoam glow to match tagline */
+        filter: drop-shadow(0 0 2px rgba(var(--glow-main), 0.42))
+          drop-shadow(0 0 5px rgba(var(--glow-halo), 0.32))
+          drop-shadow(0 0 10px rgba(var(--glow-main), 0.18));
+        transition: filter 120ms ease-out;
+      }
+
+      /* Nav (desktop/tablet default) */
+      #nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      #nav a {
+        color: #b9b9ff;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      #nav-toggle {
+        display: none;
+      }
+
+      /* Glitch links */
+      a.glitch {
+        position: relative;
+        display: inline-block;
+        text-decoration: none;
+      }
+      a.glitch::before,
+      a.glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        mix-blend-mode: screen;
+      }
+      a.glitch::before {
+        color: #22d3ee;
+      }
+      a.glitch::after {
+        color: #a78bfa;
+      }
+      @keyframes glitchX {
+        0% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(1px, -1px);
+        }
+        40% {
+          transform: translate(-1px, 1px);
+        }
+        60% {
+          transform: translate(2px, 0);
+        }
+        80% {
+          transform: translate(-2px, 1px);
+        }
+        100% {
+          transform: translate(0, 0);
+        }
+      }
+      a.glitch:hover::before,
+      a.glitch:hover::after {
+        opacity: 0.7;
+        animation: glitchX 0.18s steps(2, end) infinite;
+      }
+
+      /* Services grid (base = desktop 3 cols) */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+      }
+      .service-card {
+        background: #f4f2eb;
+        color: #142;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .service-card:hover {
+          outline: 1px solid rgba(255, 255, 255, 0.08);
+          transform: translateY(-1px);
+          transition: transform 120ms ease-out, outline-color 120ms ease-out;
+        }
+      }
+      .service-card h3 {
+        color: #0b2340;
+      }
+      .service-card p {
+        color: #213;
+      }
+
+      /* Sticky Services title */
+      .services-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: linear-gradient(#0a0a0acc, #0a0a0acc);
+        backdrop-filter: blur(4px);
+        padding: 10px 24px;
+        margin: -10px -24px 16px;
+      }
+
+      /* Past work */
+      .work-section ul {
+        padding-left: 20px;
+      }
+      .work-section li {
+        margin: 12px 0;
+      }
+
+      /* Paper panel for About */
+      .paper {
+        background: #f4f2eb;
+        color: #111;
+        border-radius: 12px;
+        padding: 24px clamp(16px, 2vw, 28px);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+      }
+      .paper h2 {
+        color: #111;
+      }
+      .paper p {
+        color: #222;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 32px 24px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      /* Reveal + drift (CSS vars written by JS) */
+      [data-animate] {
+        opacity: 1;
+        --revealY: 0px;
+        --dy: 0px;
+        --dx: 0px;
+        transform: translate3d(var(--dx), calc(var(--revealY)+var(--dy)), 0);
+      }
+      .js [data-animate] {
+        opacity: 0;
+        --revealY: 24px;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform, opacity;
+      }
+      .reveal {
+        opacity: 1 !important;
+        --revealY: 0px;
+      }
+
+      /* Progress bar */
+      #scroll-progress {
+        position: fixed;
+        inset: 0 auto auto 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+        z-index: 9999;
+      }
+
+      /* ====== PARTY MODE VISUALS (revived) ====== */
+      @keyframes hueRoll {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(360deg);
+        }
+      }
+      @keyframes slowTilt {
+        0% {
+          transform: rotate(0.02deg);
+        }
+        50% {
+          transform: rotate(-0.02deg);
+        }
+        100% {
+          transform: rotate(0.02deg);
+        }
+      }
+      @keyframes glowPulse {
+        0% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+        50% {
+          text-shadow: 0 0 12px rgba(var(--glow-halo), 0.75),
+            0 0 26px rgba(var(--glow-main), 0.48);
+        }
+        100% {
+          text-shadow: 0 0 6px rgba(var(--glow-halo), 0.45),
+            0 0 16px rgba(var(--glow-main), 0.28);
+        }
+      }
+      /* Richer/faster hue cycle for cards in party (Konami) mode */
+      @keyframes hueSpinRich {
+        from {
+          filter: hue-rotate(0deg) saturate(1) contrast(1.05) brightness(1);
+        }
+        50% {
+          filter: hue-rotate(180deg) saturate(1.7) contrast(1.12)
+            brightness(1.06);
+        }
+        to {
+          filter: hue-rotate(360deg) saturate(1) contrast(1.05) brightness(1);
+        }
+      }
+      /* Apply to normal grid cards and floating cards; also colorize during Float Mode */
+      /* Float/Party color model: all cards go black; only the playing one glows */
+      html.party .flying-card,
+      html.float-on .flying-card {
+        background: var(--base, #0a0a0a);
+        color: #fff;
+        filter: none;
+        animation: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+      }
+      html.party .flying-card .title-swap,
+      html.float-on .flying-card .title-swap {
+        color: #fff;
+      }
+      html.party .flying-card:not(.playing),
+      html.float-on .flying-card:not(.playing) {
+        filter: none; /* keep their individual dark base colors visible */
+      }
+      html.party .flying-card.playing,
+      html.float-on .flying-card.playing {
+        outline: 2px solid var(--accent, #7dd3fc);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3),
+          0 0 24px var(--accent, #7dd3fc),
+          0 0 56px color-mix(in srgb, var(--accent, #7dd3fc) 55%, transparent);
+      }
+      html.party .content-frame::before {
+        background: rgba(
+          10,
+          10,
+          10,
+          0.85
+        ); /* a hair lighter so the RGB bands show through */
+      }
+      /* Canvas overlay that draws the live waveform on the active card */
+      .flying-card .wave,
+      .service-card .wave {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.85;
+        mix-blend-mode: screen;
+      }
+      /* During launch shrink, disable input */
+      .flying-card.no-drag {
+        pointer-events: none !important;
+      }
+      /* Wave should never steal input */
+      .flying-card .wave {
+        pointer-events: none !important;
+      }
+      /* Extra emphasis for the currently playing card */
+      .flying-card.playing,
+      .service-card.playing {
+        box-shadow: inset 0 0 0 2px rgba(var(--glow-main), 0.55),
+          0 10px 24px rgba(0, 0, 0, 0.28), 0 0 16px rgba(var(--glow-main), 0.32),
+          0 0 28px rgba(var(--glow-halo), 0.26);
+      }
+      /* Brief hold flash when a drag begins */
+      html.party .flying-card.held,
+      html.float-on .flying-card.held {
+        /* Dark inner ring to contrast the bright overlay, plus a subtle accent rim */
+        outline: none;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55),
+          /* deeper drop */ inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+          /* dark inner ring */ inset 0 0 12px rgba(0, 0, 0, 0.5),
+          /* inner dark glow */ 0 0 16px
+            color-mix(in srgb, var(--accent, #7dd3fc) 40%, transparent); /* faint accent */
+        transition: box-shadow 160ms ease-out;
+      }
+      html.party .content-frame {
+        animation: hueRoll 14s linear infinite;
+      }
+      html.party .section {
+        animation: slowTilt 7s ease-in-out infinite;
+      }
+      html.party a,
+      html.party h1,
+      html.party h2,
+      html.party h3,
+      html.party .reveal {
+        animation: glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Keep the wobble AND add the glow for the tagline */
+      html.party #tagline {
+        animation: tapeWobble 1.2s ease-in-out infinite,
+          glowPulse 1.8s ease-in-out infinite;
+      }
+      /* Film grain canvas shown only in party-mode */
+      #grain {
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        pointer-events: none;
+        opacity: 0.28;
+        display: none;
+      }
+      html.party #grain {
+        display: block;
+        opacity: 0.42;
+      } /* stronger in party */
+      /* Symmetric gutter tint in party mode (both left and right) */
+      html.party::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 6500; /* above content column bg, below morph (7000) and grain (8000) */
+        background: linear-gradient(
+          to right,
+          rgba(10, 10, 10, 0.38),
+          rgba(10, 10, 10, 0) 22%,
+          rgba(10, 10, 10, 0) 78%,
+          rgba(10, 10, 10, 0.38)
+        );
+      }
+      /* Keep morph centered & viewport-fixed in party mode */
+      html.party .morph-wrap {
+        position: fixed !important;
+        top: 50vh !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(-50%) !important;
+        z-index: 7000 !important; /* below grain (8000) and lab (9000) */
+      }
+
+      /* Layer that holds drifting cards (fixed, overlays viewport) */
+      #float-layer {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8500;
+        pointer-events: none; /* default: no capture */
+        display: none; /* hidden until active */
+        overflow: visible;
+      }
+      html.float-on #float-layer,
+      html.party #float-layer {
+        display: block;
+        pointer-events: none; /* overlay never blocks scroll */
+        touch-action: manipulation; /* preserve native scrolling */
+      }
+
+      /* Ensure PIXI overlay never steals input */
+      #pixi-overlay {
+        pointer-events: none !important;
+      }
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Redundant combo rule to be absolutely safe */
+      #pixi-overlay,
+      canvas.pixi-overlay {
+        pointer-events: none !important;
+      }
+      /* Root card handles clicks; children do not */
+      .flying-card {
+        pointer-events: auto !important;
+      }
+      .flying-card * {
+        pointer-events: none !important;
+      }
+
+      /* Float Mode (uses the actual six service cards) */
+      .flying-card {
+        position: absolute; /* inside #float-layer */
+        z-index: 1;
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        pointer-events: auto; /* clickable for audio */
+        transform: translate3d(0, 0, 0);
+        transform-origin: center center; /* ensures rotations spin around center */
+        left: 0;
+        top: 0; /* transform origin is the viewport’s top-left */
+        user-select: none; /* avoid text selection while drifting */
+        /* ensure the first paint uses the on-card transform we set from JS */
+      }
+      /* Ensure the root card is always the single click/drag target and never selects text */
+      .flying-card {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Only the root card handles input so the whole card is reliably clickable */
+      .flying-card * {
+        pointer-events: none;
+      }
+      .flying-card .title-swap {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 700;
+        color: #0b2340;
+        text-align: center;
+        line-height: 1.2;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* prevent accidental selection while floating */
+      }
+      .flying-card.swap-on .title-swap {
+        opacity: 1;
+      }
+      .flying-card.swap-on h3,
+      .flying-card.swap-on p {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important;
+      }
+
+      /* --- Hover/press lift for floating cards + accessible focus --- */
+      html.float-on .flying-card:hover,
+      html.party .flying-card:hover {
+        z-index: 8700;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.38),
+          0 0 18px var(--accent, #7dd3fc);
+      }
+
+      html.float-on .flying-card:active,
+      html.party .flying-card:active {
+        transform: translate3d(var(--fx, 0px), var(--fy, 0px), 0)
+          rotate(var(--fa, 0rad)) scale(0.98);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+     
